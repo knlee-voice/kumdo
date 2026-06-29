@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<!--
+  ============================================================
+  제39회 국제오픈 한국사회인검도대회 — 행사 운영 대시보드
+  ============================================================
+  기반    : game-ai-growth-framework.html 구조 템플릿
+  특징    : 스마트폰 세로형 / 흰색 배경 / 상단 TAB 네비게이션
+  페이즈  : 대회준비 / 환영만찬(7/10) / 개인전(7/11) / 단체전(7/12)
+  의존성  : 외부 라이브러리 없음 — 순수 HTML/CSS/JS 단일 파일
+  ============================================================
+-->
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>제39회 국제오픈 한국사회인검도대회 — 행사 운영 가이드</title>
+  <style>
+    /* ──────────────────────────────────────────────
+       리셋 & 박스 모델
+    ────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ──────────────────────────────────────────────
+       디자인 토큰 (흰색 배경 기조)
+       --c1~c4 : 4개 페이즈 대표 색상
+       --c1bg~c4bg : 각 대표색의 연한 틴트 (배경용)
+    ────────────────────────────────────────────── */
+    :root {
+      /* 페이지 구조 */
+      --bg:        #ffffff;
+      --surface:   #f8f8f6;
+      --surface2:  #f0efeb;
+      --border:    rgba(0,0,0,.07);
+      --border-md: rgba(0,0,0,.13);
+      --text:      #1a1a18;
+      --text2:     #5a5a56;
+      --text3:     #9a9a96;
+      --shadow:    0 1px 4px rgba(0,0,0,.06), 0 4px 20px rgba(0,0,0,.04);
+      --rad:       14px;
+      --rad-sm:    8px;
+      --rad-xs:    5px;
+
+      /* Phase 1 — 대회준비 : 네이비 계열 (공식·절도) */
+      --c1:    #1B3F7A;
+      --c1bg:  rgba(27,63,122,.08);
+      --c1mid: rgba(27,63,122,.18);
+
+      /* Phase 2 — 환영만찬 : 골드 계열 (축제·환대) */
+      --c2:    #A0720A;
+      --c2bg:  rgba(160,114,10,.08);
+      --c2mid: rgba(160,114,10,.18);
+
+      /* Phase 3 — 개인전 : 딥레드 계열 (경쟁·집중) */
+      --c3:    #9B2020;
+      --c3bg:  rgba(155,32,32,.08);
+      --c3mid: rgba(155,32,32,.18);
+
+      /* Phase 4 — 단체전 : 포레스트그린 계열 (조화·협력) */
+      --c4:    #1A5E38;
+      --c4bg:  rgba(26,94,56,.08);
+      --c4mid: rgba(26,94,56,.18);
+
+      /* 동적 주입용 (JS가 현재 탭에 따라 교체) */
+      --pc:    var(--c1);
+      --pbg:   var(--c1bg);
+      --pmid:  var(--c1mid);
+    }
+
+    /* ──────────────────────────────────────────────
+       기본 타이포그래피
+    ────────────────────────────────────────────── */
+    html { background: var(--bg); scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont,
+                   'Apple SD Gothic Neo', 'Noto Sans KR',
+                   'Malgun Gothic', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      max-width: 480px;   /* 스마트폰 최적 너비 */
+      margin: 0 auto;
+      min-height: 100vh;
+    }
+
+    /* ──────────────────────────────────────────────
+       최상단 헤더 배너
+       검도 대회 공식 느낌 — 진한 네이비 배경
+    ────────────────────────────────────────────── */
+    .site-header {
+      background: #0f2447;
+      padding: 18px 20px 14px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+    }
+    .site-header-eyebrow {
+      font-size: 10px;
+      font-weight: 500;
+      color: rgba(255,255,255,.5);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .site-header-title {
+      font-size: clamp(17px, 4.5vw, 22px);
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -.02em;
+      line-height: 1.2;
+    }
+    .site-header-title em {
+      /* 강조 텍스트: 골드 */
+      font-style: normal;
+      color: #F0C040;
+    }
+    .site-header-sub {
+      margin-top: 5px;
+      font-size: 11px;
+      color: rgba(255,255,255,.55);
+      letter-spacing: .04em;
+    }
+
+    /* ──────────────────────────────────────────────
+       TAB 네비게이션 바
+       헤더 바로 아래 고정, 4개 탭 균등 분할
+    ────────────────────────────────────────────── */
+    .tab-bar {
+      display: flex;
+      background: #ffffff;
+      border-bottom: 1.5px solid var(--border);
+      position: sticky;
+      top: 82px;   /* 헤더 높이 이후 고정 */
+      z-index: 100;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tab-bar::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      flex: 1;
+      min-width: 72px;
+      padding: 10px 6px 8px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text3);
+      text-align: center;
+      line-height: 1.3;
+      border-bottom: 2.5px solid transparent;
+      transition: color .18s, border-color .18s;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .tab-btn .tab-icon { font-size: 18px; display: block; margin-bottom: 2px; }
+    .tab-btn .tab-date {
+      font-size: 10px;
+      font-weight: 400;
+      display: block;
+      margin-top: 1px;
+      opacity: .7;
+    }
+
+    /* 활성 탭: JS가 data-phase 에 맞는 색상 변수를 인라인으로 주입 */
+    .tab-btn.active {
+      color: var(--tc, #1B3F7A);
+      border-bottom-color: var(--tc, #1B3F7A);
+      font-weight: 700;
+    }
+
+    /* ──────────────────────────────────────────────
+       메인 콘텐츠 스크롤 영역
+    ────────────────────────────────────────────── */
+    .main { padding: 16px 14px 60px; }
+
+    /* ──────────────────────────────────────────────
+       페이즈 히어로 카드 (탭 선택 시 최상단)
+    ────────────────────────────────────────────── */
+    .phase-hero {
+      border-radius: var(--rad);
+      background: var(--pbg);
+      border: 1.5px solid var(--pc);
+      padding: 16px 18px 14px;
+      margin-bottom: 14px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .phase-hero-icon {
+      font-size: 32px;
+      flex-shrink: 0;
+      line-height: 1;
+      margin-top: 2px;
+    }
+    .phase-hero-meta { flex: 1; }
+    .phase-hero-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--pc);
+      background: var(--pmid);
+      border-radius: 999px;
+      padding: 2px 9px;
+      margin-bottom: 5px;
+    }
+    .phase-hero-name {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -.02em;
+      line-height: 1.2;
+    }
+    .phase-hero-name .phase-en {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--text3);
+      letter-spacing: 0;
+    }
+    .phase-hero-desc {
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.6;
+      margin-top: 4px;
+    }
+
+    /* ──────────────────────────────────────────────
+       KPI 칩 그리드 (핵심 정보 요약)
+    ────────────────────────────────────────────── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .kpi-chip {
+      background: var(--surface);
+      border: 0.5px solid var(--border-md);
+      border-radius: var(--rad-sm);
+      padding: 11px 13px;
+    }
+    .kpi-chip.wide {
+      /* 2칸 차지: 항목이 홀수일 때 마지막 칩을 넓게 */
+      grid-column: span 2;
+    }
+    .kpi-label {
+      font-size: 10px;
+      color: var(--text3);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 4px;
+    }
+    .kpi-val {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.35;
+    }
+
+    /* ──────────────────────────────────────────────
+       섹션 공통 구조
+    ────────────────────────────────────────────── */
+    .section {
+      background: var(--surface);
+      border-radius: var(--rad);
+      border: 0.5px solid var(--border);
+      overflow: hidden;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 15px;
+      border-bottom: 0.5px solid var(--border);
+      background: #fff;
+    }
+    .section-header-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--rad-xs);
+      background: var(--pbg);
+      border: 1px solid var(--pc);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .section-count {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--text3);
+    }
+    .section-body { padding: 12px 15px; }
+
+    /* ──────────────────────────────────────────────
+       체크리스트 아이템
+       상태: done(완료) / check(점검) / progress(진행) / todo(예정)
+    ────────────────────────────────────────────── */
+    .checklist { display: flex; flex-direction: column; gap: 7px; }
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      padding: 9px 11px;
+      border-radius: var(--rad-sm);
+      background: #fff;
+      border: 0.5px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+      transition: background .15s, border-color .15s;
+    }
+    .check-item:active { background: var(--surface2); }
+    .check-item.done   { background: rgba(26,94,56,.05); border-color: rgba(26,94,56,.2); }
+    .check-item.check  { background: rgba(160,114,10,.05); border-color: rgba(160,114,10,.2); }
+    .check-item.progress { background: rgba(27,63,122,.05); border-color: rgba(27,63,122,.2); }
+
+    /* 상태 아이콘 뱃지 */
+    .check-badge {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 1px;
+    }
+    .done    .check-badge { background: #1A5E38; color: #fff; }
+    .check   .check-badge { background: #A0720A; color: #fff; }
+    .progress .check-badge { background: #1B3F7A; color: #fff; }
+    .todo    .check-badge { background: var(--surface2); color: var(--text3); border: 1px solid var(--border-md); }
+
+    .check-text { flex: 1; font-size: 13px; color: var(--text); line-height: 1.45; }
+    .check-text .check-sub {
+      display: block;
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 2px;
+      line-height: 1.4;
+    }
+    .check-status-label {
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 999px;
+      align-self: flex-start;
+      margin-top: 3px;
+    }
+    .done     .check-status-label { background: rgba(26,94,56,.1);  color: #1A5E38; }
+    .check    .check-status-label { background: rgba(160,114,10,.1); color: #A0720A; }
+    .progress .check-status-label { background: rgba(27,63,122,.1);  color: #1B3F7A; }
+    .todo     .check-status-label { background: var(--surface2); color: var(--text3); }
+
+    /* ──────────────────────────────────────────────
+       식순 타임라인 (환영만찬용)
+    ────────────────────────────────────────────── */
+    .timeline { display: flex; flex-direction: column; position: relative; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 10px;
+      bottom: 10px;
+      width: 1.5px;
+      background: var(--border-md);
+    }
+    .tl-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 8px 0;
+      position: relative;
+    }
+    .tl-dot {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--pbg);
+      border: 2px solid var(--pc);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+      z-index: 1;
+      background: #fff;
+    }
+    .tl-dot.current {
+      background: var(--pc);
+      border-color: var(--pc);
+    }
+    .tl-body { flex: 1; padding-top: 5px; }
+    .tl-title { font-size: 14px; font-weight: 700; color: var(--text); }
+    .tl-sub   { font-size: 12px; color: var(--text2); margin-top: 2px; line-height: 1.4; }
+    .tl-time  {
+      font-size: 11px; font-weight: 600;
+      color: var(--pc);
+      background: var(--pbg);
+      padding: 2px 8px; border-radius: 999px;
+      margin-left: auto; flex-shrink: 0;
+      align-self: center;
+    }
+    .tl-row { display: flex; align-items: flex-start; gap: 8px; width: 100%; }
+
+    /* ──────────────────────────────────────────────
+       경기 일정 카드 (개인전/단체전 종목)
+    ────────────────────────────────────────────── */
+    .match-list { display: flex; flex-direction: column; gap: 8px; }
+    .match-card {
+      background: #fff;
+      border: 0.5px solid var(--border);
+      border-radius: var(--rad-sm);
+      padding: 11px 13px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .match-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--pc);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .match-info { flex: 1; }
+    .match-title { font-size: 13px; font-weight: 700; color: var(--text); }
+    .match-sub   { font-size: 11px; color: var(--text2); margin-top: 2px; }
+    .match-time  {
+      font-size: 11px; font-weight: 600; color: var(--pc);
+      background: var(--pbg); padding: 2px 8px; border-radius: 999px;
+    }
+
+    /* ──────────────────────────────────────────────
+       공통 도구 스택 테이블
+    ────────────────────────────────────────────── */
+    .tools-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 12px;
+    }
+    .tools-table thead tr {
+      background: var(--surface2);
+    }
+    .tools-table th {
+      padding: 8px 10px;
+      text-align: left;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      border-bottom: 0.5px solid var(--border-md);
+    }
+    .tools-table td {
+      padding: 9px 10px;
+      color: var(--text);
+      border-bottom: 0.5px solid var(--border);
+      vertical-align: middle;
+    }
+    .tools-table tr:last-child td { border-bottom: none; }
+    .tools-table td:first-child { color: var(--text2); font-weight: 500; }
+
+    /* ──────────────────────────────────────────────
+       진행 상태 범례 (하단 고정)
+    ────────────────────────────────────────────── */
+    .legend {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 10px 14px;
+      background: var(--surface);
+      border-top: 0.5px solid var(--border);
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      z-index: 50;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--text2);
+    }
+    .legend-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+    }
+
+    /* ──────────────────────────────────────────────
+       페이즈 패널 전환 (JS로 show/hide)
+    ────────────────────────────────────────────── */
+    .phase-panel { display: none; }
+    .phase-panel.active { display: block; }
+
+    /* ──────────────────────────────────────────────
+       애니메이션 — 패널 전환 시 fade-in
+    ────────────────────────────────────────────── */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0);   }
+    }
+    .phase-panel.active { animation: fadeIn .22s ease; }
+
+    /* ──────────────────────────────────────────────
+       반응형 — 360px 이하 초소형 기기 보정
+    ────────────────────────────────────────────── */
+    @media (max-width: 360px) {
+      .tab-btn { font-size: 11px; padding: 8px 4px 6px; }
+      .tab-btn .tab-icon { font-size: 16px; }
+      .phase-hero-name { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ════════════════════════════════════════════
+       최상단 헤더 배너
+  ════════════════════════════════════════════ -->
+  <header class="site-header">
+    <div class="site-header-eyebrow">행사 운영 대시보드 · 2026</div>
+    <div class="site-header-title">
+      제39회 국제오픈<br><em>한국사회인검도대회</em>
+    </div>
+    <div class="site-header-sub">2026. 7. 10(금) — 7. 12(일) · 가평군 한석봉체육관</div>
+    <div class="site-header-sub" style="margin-top:2px;">주최 : 한국사회인검도연맹</div>
+  </header>
+
+  <!-- ════════════════════════════════════════════
+       TAB 네비게이션 바
+       data-phase : 패널 ID 연결
+       style --tc  : 탭 활성 색상 (JS가 읽음)
+  ════════════════════════════════════════════ -->
+  <nav class="tab-bar" id="tabBar" aria-label="행사 단계 선택">
+    <button class="tab-btn active" data-phase="p1" style="--tc:#1B3F7A">
+      <span class="tab-icon">📋</span>
+      대회준비
+      <span class="tab-date">D-Day</span>
+    </button>
+    <button class="tab-btn" data-phase="p2" style="--tc:#A0720A">
+      <span class="tab-icon">🥂</span>
+      환영만찬
+      <span class="tab-date">7 / 10</span>
+    </button>
+    <button class="tab-btn" data-phase="p3" style="--tc:#9B2020">
+      <span class="tab-icon">⚔️</span>
+      개인전
+      <span class="tab-date">7 / 11</span>
+    </button>
+    <button class="tab-btn" data-phase="p4" style="--tc:#1A5E38">
+      <span class="tab-icon">🏆</span>
+      단체전
+      <span class="tab-date">7 / 12</span>
+    </button>
+  </nav>
+
+  <!-- ════════════════════════════════════════════
+       메인 콘텐츠
+  ════════════════════════════════════════════ -->
+  <main class="main">
+
+    <!-- ──────────────────────────────────────────
+         Phase 1 — 대회 준비
+    ────────────────────────────────────────── -->
+    <section class="phase-panel active" id="p1">
+
+      <!-- 히어로 카드 -->
+      <div class="phase-hero">
+        <div class="phase-hero-icon">📋</div>
+        <div class="phase-hero-meta">
+          <span class="phase-hero-badge">Preparation</span>
+          <div class="phase-hero-name">대회 준비 <span class="phase-en">Pre-Event</span></div>
+          <p class="phase-hero-desc">대회 운영에 필요한 모든 준비 항목을 점검합니다. 안내 책자부터 스태프 배치까지 빠짐없이 확인하세요.</p>
+        </div>
+      </div>
+
+      <!-- KPI 요약 -->
+      <div class="kpi-grid">
+        <div class="kpi-chip">
+          <div class="kpi-label">대회 기간</div>
+          <div class="kpi-val">7/10 — 7/12</div>
+        </div>
+        <div class="kpi-chip">
+          <div class="kpi-label">주요 장소</div>
+          <div class="kpi-val">한석봉체육관</div>
+        </div>
+        <div class="kpi-chip">
+          <div class="kpi-label">준비 항목</div>
+          <div class="kpi-val">3개 카테고리</div>
+        </div>
+        <div class="kpi-chip">
+          <div class="kpi-label">점검 기준</div>
+          <div class="kpi-val">D-2 최종 확인</div>
+        </div>
+      </div>
+
+      <!-- 섹션 1: 인쇄물·홍보 -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-header-icon">📄</div>
+          <span class="section-title">인쇄물 · 홍보물</span>
+          <span class="section-count">3건</span>
+        </div>
+        <div class="section-body">
+          <div class="checklist">
+            <div class="check-item done">
+              <div class="check-badge">✓</div>
+              <div class="check-text">
+                안내 책자 제작
+                <span class="check-sub">기능성 / 안전성 / 성능 / 비용 4축 기준 검토 완료</span>
+              </div>
+              <span class="check-status-label">완료</span>
+            </div>
+            <div class="check-item done">
+              <div class="check-badge">✓</div>
+              <div class="check-text">
+                포스터 제작
+                <span class="check-sub">대회장 내외 부착용 공식 포스터</span>
+              </div>
+              <span class="check-status-label">완료</span>
+            </div>
+            <div class="check-item todo">
+              <div class="check-badge">○</div>
+              <div class="check-text">
+                현수막 · 배너 현장 반입 확인
+                <span class="check-sub">대회장 입구 / 경기장 내부 / 시상대 구역</span>
+              </div>
+              <span class="check-status-label">예정</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 섹션 2: 명단 · 대진표 -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-header-icon">📝</div>
+          <span class="section-title">명단 · 심판 · 대진표</span>
+          <span class="section-count">3건</span>
+        </div>
+        <div class="section-body">
+          <div class="checklist">
+            <div class="check-item check">
+              <div class="check-badge">!</div>
+              <div class="check-text">
+                최종 선수 명단 확정
+                <span class="check-sub">참가 팀별 명단 취합 및 등록 마감 확인</span>
+              </div>
+              <span class="check-status-label">점검</span>
+            </div>
+            <div class="check-item check">
+              <div class="check-badge">!</div>
+              <div class="check-text">
+                심판 명단 확정
+                <span class="check-sub">주심 · 부심 · 기록원 배정 완료 여부</span>
+              </div>
+              <span class="check-status-label">점검</span>
+            </div>
+            <div class="check-item check">
+              <div class="check-badge">!</div>
+              <div class="check-text">
+                대진표 확정 및 배포
+                <span class="check-sub">개인전 / 단체전 별도 대진표 선수단 배포</span>
+              </div>
+              <span class="check-status-label">점검</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 섹션 3: 스태프 배치 -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-header-icon">👥</div>
+          <span class="section-title">스태프 배치</span>
+          <span class="section-count">4건</span>
+        </div>
+        <div class="section-body">
+          <div class="checklist">
+            <div class="check-item progress">
+              <div class="check-badge">→</div>
+              <div class="check-text">
+                스태프 역할 배정
+                <span class="check-sub">안내 / 경기 운영 / 의전 / 시상 구역별 배정</span>
+              </div>
+              <span class="check-status-label">진행</span>
+            </div>
+            <div class="check-item progress">
+              <div class="check-badge">→</div>
+              <div class="check-text">
+                스태프 사전 교육
+                <span class="check-sub">운영 동선 숙지, 비상 대응 절차 안내</span>
+              </div>
+              <span class="check-status-label">진행</span>
+            </div>
+            <div class="check-item todo">
+              <div class="check-badge">○</div>
+              <div class="check-text">
+                스태프 연락망 최종 공유
+                <span class="check-sub">단체 채팅방 개설 및 비상연락처 배포</span>
+              </div>
+              <span class="check-status-label">예정</span>
+            </div>
+            <div class="check-item todo">
+              <div class="check-badge">○</div>
+              <div class="check-text">
+                스태프 유니폼 / 물품 지급
+                <span class="check-sub">조끼, 명찰, 운영 물품 키트</span>
+              </div>
+              <span class="check-status-label">예정</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 섹션 4: 전환 기준 -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-header-icon">✅</div>
+          <span class="section-title">행사 시작 전환 기준</span>
+        </div>
+        <div class="section-body">
+          <div class="checklist">
+            <div class="check-item done">
+              <div class="check-badge">✓</div>
+              <div class="check-text">안내 책자 · 포스터 인쇄 완료</div>
+              <span class="check-status-label">완료</span>
+            </div>
+            <div class="check-item check">
+              <div class="check-badge">!</div>
+              <div class="check-text">최종 명단 · 심판 · 대진표 확정</div>
+              <span class="check-status-label">점검</span>
+            </div>
+            <div class="check-item progress">
+              <div class="check-badge">→</div>
+              <div class="check-text">스태프 전원 사전 교육 완료</div>
+              <span class="check-status-label">진행</span>
+            </div>
+            <div class="check-item todo">
+              <div class="check-badge">○</div>
+              <div class="check-text">현장 장비 · 물품 반입 확인</div>
+              <span class="check-status-label">예정</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section><!-- /p1 -->
+
+    <!-- ──────────────────────────────────────────
+         Phase 2 — 환영만찬 (7/10)
+    ────────────────────────────────────────── -->
+    <section class="phase-panel" id="p2">
+
+      <div class="phase-hero">
+        <div class="phase-hero-icon">🥂</div>
+        <div class="phase-hero-meta">
+          <span class="phase-hero-badge">7월 10일 (금)</span>
+          <div class="phase-hero-name">환영 만찬 <span class="phase-en">Welcome Dinner</span></div>
+          <p class="phase-hero-desc">각국 대표단과 함께하는 공식 환영 만찬. 대회 전날 친선 교류의 장입니다.</p>
+        </div>
+      </div>
+
+      <!-- KPI -->
+      <div class="kpi-grid">
+        <div class="kpi-chip">
+          <div class="kpi-label">일시</div>
+          <div class="kpi-val">7월 10일 (금)</div>
+        </div>
+        <div class="kpi-chip">
+          <div class="kpi-label">시간</div>
+          <div class="kpi-val">18:00 — 20:00</div>
+        </div>
+        <div class="kpi-chip wide">
+          <div class="kpi-label">장소</div>
+          <div class="kpi-val">가평군 한석봉체육관</div>
+        </div>
+      </div>
+
+      <!-- 식순 타임라인 -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-header-icon">📌</div>
+          <span class="section-title">공식 식순</span>
+          <span class="section-count">5 순서</span>
+        </div>
+        <div class="section-body">
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-dot">🎬</div>
+              <div class="tl-body">
+                <div class="tl-row">
+                  <div>
+                    <div class="tl-title">오프닝</div>
+                    <div class="tl-sub">사회자 개회 선언, 대회 하이라이트 영상</div>
+                  </div>
+                  <span class="tl-time">18:00</span>
+                </div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot current">🎙</div>
+              <div class="tl-body">
+                <div class="tl-row">
+                  <div>
+                    <div class="tl-title">회장 인사말</div>
+                    <div class="tl-sub">한국사회인검도연맹 회장 공식 환영사</div>
+                  </div>
+                  <span class="tl-time">18:10</span>
+                </div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot">🌍</div>
+              <div class="tl-body">
+                <div class="tl-row">
+                  <div>
+                    <div class="tl-title">각국 대표 인사말</div>
+                    <div class="tl-sub">참가 국가별 대표 순차 인사 (국기 입장)</div>
+                  </div>
+                  <span class="tl-time">18:25</span>
+                </div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot">🎭</div>
+              <div class="tl-body">
+                <div class="tl-row">
+                  <div>
+                    <div class="tl-title">축하 공연</div>
+                    <div class="tl-sub">전통 공연 및 친선 퍼포먼스</div>
+                  </div>
+                  <span class="tl-time">19:00</span>
+                </div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot">🏁</div>
+              <div class="tl-body">
+                <div class="tl-row">
+                  <div>
+                    <div class="tl-title">마무리 · 네트워킹</div>
+                    <div class="tl-sub">자유 교류 및 기념 촬영</div>
+                  </div>
+                  <span class="tl-time">19:40</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 준비 체크리스트 -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-header-icon">✅</div>
+          <span class="section-title">만찬 준비 체크리스트</span>
+        </div>
+        <div class="section-body">
+          <div class="checklist">
+            <div class="check-item todo">
+              <div class="check-badge">○</div>
+              <div class="check-text">좌석 배치도 최종 확인<span class="check-sub">국가별 / VIP 구역 분리 배치</span></div>
+              <span class="check-status-label">예정</span>
+            </div>
+            <div class="check-item todo">
+              <div class="check-badge">○</div>
+              <div class="check-text">영상 / 음향 장비 리허설<span class="check-sub">하이라이트 영상 재생 테스트, 마이크 확인</span></div>
+              <span class="check-status-label">예정</span>
+            </div>
+            <div class="check-item todo">
+              <div class="check-badge">○</div>
+              <div class="check-text">통역 인력 배치<span class="check-sub">참가국 언어별 통역사 사전 배정</span></div>
+              <span class="check-status-label">예정</span>
+            </div>
+            <div class="check-item todo">
+              <div class="check-badge">○</div>
+              <div class="check-text">식사 메뉴 확정 및 케이터링 확인<span class="check-sub">채식 / 할랄 옵션 별도 준비 여부</span></div>
+              <span class="check-status-label">예정</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section><!-- /p2 -->
+
+    <!-- ──────────────────────────────────────────
+         Phase 3 — 개인전 (7/11)
+    ────────────────────────────────────────── -->
+    <section class="phase-panel" id="p3">
+
+      <div class="phase-hero">
+        <div class="phase-hero-icon">⚔️</div>
+        <div class="phase-hero-meta">
+          <span class="phase-hero-badge">7월 11일 (토) · 대회 1일차</span>
+          <div class="phase-hero-name">개인전 <span class="phase-en">Individual Match</span></div>
+          <p class="phase-hero-desc">대회 1일차. 공식 안내방송 스크립트 운용과 함께 개인전 경기 및 시상을 진행합니다.</p>
+        </div>
+      </div>
+
+      <!-- KPI -->
+      <div class="kpi-grid">
+        <div class="kpi-chip">
+          <div class="kpi-label">일자</div>
+          <div class="kpi-val">7월 11일 (토)</div>
+        </div>
+        <div class="kpi-chip">
+          <div class="kpi-label">형식</div>
+          <div class="kpi-val">개인전 토너먼트</div>
+        </div>
+        <div class="kpi-chip">
+          <div class="kpi-label">안내방송</div>
+          <div class="kpi-val">통합 스크립트</div>
+        </div>
+        <div class="kpi-chip">
+          <div class="kpi-label">마무리</div>
+          <div class="kpi-val">개인전 시상식</div>
+        </div>
+      </div>
+
+      <!-- 일과 순서 -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-header-icon">📅</div>
+          <span class="section-title">1일차 운영 순서</span>
+          <span class="section-count">3단계</span>
+        </div>
+        <div class="section-body">
+          <div class="match-list">
+            <div class="match-card">
+              <div class="match-num">1</div>
+              <div class="match-info">
+                <div class="match-title">공식 안내방송 — 통합 스크립트 운용</div>
+                <div class="match-sub">선수 입장 안내 · 경기 규칙 공지 · 비상 안내</div>
+              </div>
+              <span class="match-time">09:00~</span>
+            </div>
+            <div class="match-card">
+              <div class="match-num">2</div>
+              <div class="match-info">
+                <div class="match-title">개인전 본경기</div>
+                <div class="match-sub">부별 토너먼트 · 심판 판정 · 기록 관리</div>
+              </div>
+              <span class="match-time">10:00~</span>
+            </div>
+            <div class="match-card">
+              <div class="match-num">3</div>
+              <div class="match-info">
+                <div class="match-title">개인전 시상식</div>
+                <div class="match-sub">금 · 은 · 동메달 시상 · 기념 촬영</div>
+              </div>
+              <span class="match-time">17:00~</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 준비 체크리스트 -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-header-icon">✅</div>
+          <span class="section-title">개인전 준비 체크리스트</span>
+        </div>
+        <div class="section-body">
+          <div class="checklist">
+            <div class="check-item todo">
+              <div class="check-badge">○</div>
+              <div class="check-text">공식 안내방송 통합 스크립트 최종 검토<span class="check-sub">한국어 / 영어 이중 방송 확인</span></div>
+              <span class="check-status-label">예정</span>
+            </div>
+            <div class="check-item todo">
+              <div class="check-badge">○</div>
+              <div class="check-text">경기장 세팅 확인<span class="check-sub">죽도·호구 검사 구역, 심판 자리, 기록석</span></div>
+              <span class="check-status-label">예정</span>
+            </div>
+            <div class="check-item todo">
+              <div class="check-badge">○</div>
+              <div class="check-text">개인전 대진표 최종 게시<span class="check-sub">전광판 / 인쇄물 동시 게시</span></div>
+              <span class="check-status-label">예정</span>
+            </div>
+            <div class="check-item todo">
+              <div class="check-badge">○</div>
+              <div class="check-text">시상 물품 준비<span class="check-sub">메달, 트로피, 상장, 부상</span></div>
+              <span class="check-status-label">예정</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section><!-- /p3 -->
+
+    <!-- ──────────────────────────────────────────
+         Phase 4 — 단체전 (7/12)
+    ────────────────────────────────────────── -->
+    <section class="phase-panel" id="p4">
+
+      <div class="phase-hero">
+        <div class="phase-hero-icon">🏆</div>
+        <div class="phase-hero-meta">
+          <span class="phase-hero-badge">7월 12일 (일) · 대회 2일차</span>
+          <div class="phase-hero-name">단체전 <span class="phase-en">Team Match</span></div>
+          <p class="phase-hero-desc">대회 2일차. 개회식 — 단체전 본경기 — 폐회식 순으로 진행되는 대회 마지막 날입니다.</p>
+        </div>
+      </div>
+
+      <!-- KPI -->
+      <div class="kpi-grid">
+        <div class="kpi-chip">
+          <div class="kpi-label">일자</div>
+          <div class="kpi-val">7월 12일 (일)</div>
+        </div>
+        <div class="kpi-chip">
+          <div class="kpi-label">형식</div>
+          <div class="kpi-val">단체전 토너먼트</div>
+        </div>
+        <div class="kpi-chip">
+          <div class="kpi-label">개회식</div>
+          <div class="kpi-val">대회 2일차 오전</div>
+        </div>
+        <div class="kpi-chip">
+          <div class="kpi-label">마무리</div>
+          <div class="kpi-val">폐회식 · 시상</div>
+        </div>
+      </div>
+
+      <!-- 일과 순서 -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-header-icon">📅</div>
+          <span class="section-title">2일차 운영 순서</span>
+          <span class="section-count">5단계</span>
+        </div>
+        <div class="section-body">
+          <div class="match-list">
+            <div class="match-card">
+              <div class="match-num">1</div>
+              <div class="match-info">
+                <div class="match-title">개회식</div>
+                <div class="match-sub">국기 게양 · 대회장 선언 · 선수단 입장</div>
+              </div>
+              <span class="match-time">09:00~</span>
+            </div>
+            <div class="match-card">
+              <div class="match-num">2</div>
+              <div class="match-info">
+                <div class="match-title">공식 안내방송 — 통합 스크립트 운용</div>
+                <div class="match-sub">단체전 규칙 안내 · 경기 순서 공지</div>
+              </div>
+              <span class="match-time">09:40~</span>
+            </div>
+            <div class="match-card">
+              <div class="match-num">3</div>
+              <div class="match-info">
+                <div class="match-title">단체전 본경기</div>
+                <div class="match-sub">팀별 토너먼트 · 5인조 대전 방식</div>
+              </div>
+              <span class="match-time">10:00~</span>
+            </div>
+            <div class="match-card">
+              <div class="match-num">4</div>
+              <div class="match-info">
+                <div class="match-title">단체전 시상식</div>
+                <div class="match-sub">우승 · 준우승 · 3위 팀 시상</div>
+              </div>
+              <span class="match-time">16:00~</span>
+            </div>
+            <div class="match-card">
+              <div class="match-num">5</div>
+              <div class="match-info">
+                <div class="match-title">폐회식</div>
+                <div class="match-sub">총평 · 폐회 선언 · 기념 촬영 · 해산</div>
+              </div>
+              <span class="match-time">17:00~</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 준비 체크리스트 -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-header-icon">✅</div>
+          <span class="section-title">단체전 · 폐회식 준비 체크리스트</span>
+        </div>
+        <div class="section-body">
+          <div class="checklist">
+            <div class="check-item todo">
+              <div class="check-badge">○</div>
+              <div class="check-text">개회식 순서 리허설<span class="check-sub">국기 게양 · 선수단 입장 동선 확인</span></div>
+              <span class="check-status-label">예정</span>
+            </div>
+            <div class="check-item todo">
+              <div class="check-badge">○</div>
+              <div class="check-text">공식 안내방송 통합 스크립트 최종 검토<span class="check-sub">단체전 규칙 · 대진 안내 버전 별도 준비</span></div>
+              <span class="check-status-label">예정</span>
+            </div>
+            <div class="check-item todo">
+              <div class="check-badge">○</div>
+              <div class="check-text">단체전 대진표 게시<span class="check-sub">조 편성표 포함, 경기장별 동시 진행 확인</span></div>
+              <span class="check-status-label">예정</span>
+            </div>
+            <div class="check-item todo">
+              <div class="check-badge">○</div>
+              <div class="check-text">폐회식 시상 물품 준비<span class="check-sub">우승기, 단체 트로피, 상장, 기념품</span></div>
+              <span class="check-status-label">예정</span>
+            </div>
+            <div class="check-item todo">
+              <div class="check-badge">○</div>
+              <div class="check-text">전체 정산 · 장비 철수 계획 확인<span class="check-sub">렌탈 장비 반납, 스태프 해산 시간</span></div>
+              <span class="check-status-label">예정</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section><!-- /p4 -->
+
+    <!-- ──────────────────────────────────────────
+         공통 도구 스택 (모든 페이즈 공통 표시)
+    ────────────────────────────────────────── -->
+    <div class="section" style="margin-top:4px;">
+      <div class="section-header">
+        <div class="section-header-icon" style="background:var(--surface2);border-color:var(--border-md);">🛠</div>
+        <span class="section-title">공통 운영 도구 스택</span>
+      </div>
+      <div class="section-body" style="padding:0;">
+        <table class="tools-table">
+          <thead>
+            <tr>
+              <th>카테고리</th>
+              <th>도구 · 방식</th>
+              <th>비고</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>안내방송</td>
+              <td>통합 스크립트 문서</td>
+              <td>한/영 이중 방송</td>
+            </tr>
+            <tr>
+              <td>기록 관리</td>
+              <td>경기 기록지 + 전산 입력</td>
+              <td>이중 기록 원칙</td>
+            </tr>
+            <tr>
+              <td>선수 명단</td>
+              <td>공식 등록 시스템</td>
+              <td>인쇄본 별도 비치</td>
+            </tr>
+            <tr>
+              <td>스태프 연락</td>
+              <td>단체 채팅방 (모바일)</td>
+              <td>채널별 분리 운영</td>
+            </tr>
+            <tr>
+              <td>영상 · 중계</td>
+              <td>현장 카메라 + 스트리밍</td>
+              <td>유튜브 / 공식 채널</td>
+            </tr>
+            <tr>
+              <td>비상 대응</td>
+              <td>의무팀 + 운영 런북</td>
+              <td>P0~P3 등급 대응</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main><!-- /main -->
+
+  <!-- ════════════════════════════════════════════
+       하단 고정 범례 (상태 색상 안내)
+  ════════════════════════════════════════════ -->
+  <div class="legend" aria-label="상태 범례">
+    <div class="legend-item">
+      <span class="legend-dot" style="background:#1A5E38;"></span>완료
+    </div>
+    <div class="legend-item">
+      <span class="legend-dot" style="background:#A0720A;"></span>점검
+    </div>
+    <div class="legend-item">
+      <span class="legend-dot" style="background:#1B3F7A;"></span>진행
+    </div>
+    <div class="legend-item">
+      <span class="legend-dot" style="background:#c8c7c0;"></span>예정
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════
+       JavaScript — TAB 전환 로직
+       ============================================
+       구조:
+         1. PHASES_META — 탭 색상 토큰 매핑
+         2. initTabs()  — 탭 클릭 이벤트 등록
+         3. switchTab() — 활성 탭 · 패널 · CSS 변수 전환
+         4. 초기화      — switchTab('p1') 최초 실행
+  ════════════════════════════════════════════ -->
+  <script>
+    /**
+     * 각 페이즈 ID → CSS 변수 매핑
+     * --pc  : 대표 색상 (HEX)
+     * --pbg : 배경 틴트 (rgba)
+     * --pmid: 중간 틴트 (뱃지 배경용)
+     */
+    const PHASES_META = {
+      p1: { pc: '#1B3F7A', pbg: 'rgba(27,63,122,.08)',   pmid: 'rgba(27,63,122,.18)'   },
+      p2: { pc: '#A0720A', pbg: 'rgba(160,114,10,.08)',  pmid: 'rgba(160,114,10,.18)'  },
+      p3: { pc: '#9B2020', pbg: 'rgba(155,32,32,.08)',   pmid: 'rgba(155,32,32,.18)'   },
+      p4: { pc: '#1A5E38', pbg: 'rgba(26,94,56,.08)',    pmid: 'rgba(26,94,56,.18)'    },
+    };
+
+    /**
+     * switchTab — 탭 전환 메인 함수
+     * @param {string} phaseId - 'p1' | 'p2' | 'p3' | 'p4'
+     *
+     * 처리 순서:
+     *   1) 모든 .tab-btn 에서 .active 제거 → 선택된 탭에만 추가
+     *   2) 모든 .phase-panel 숨김 → 해당 패널만 표시
+     *   3) :root CSS 변수 갱신 (--pc, --pbg, --pmid)
+     *      → 히어로 카드, 섹션 헤더 아이콘, 체크 상태, 타임라인 색이
+     *        모두 현재 탭 색상으로 자동 연동됨
+     */
+    function switchTab(phaseId) {
+      /* 1. 탭 버튼 active 토글 */
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.phase === phaseId);
+      });
+
+      /* 2. 패널 표시/숨김 */
+      document.querySelectorAll('.phase-panel').forEach(panel => {
+        panel.classList.toggle('active', panel.id === phaseId);
+      });
+
+      /* 3. CSS 변수 주입 */
+      const meta = PHASES_META[phaseId];
+      const root = document.documentElement.style;
+      root.setProperty('--pc',   meta.pc);
+      root.setProperty('--pbg',  meta.pbg);
+      root.setProperty('--pmid', meta.pmid);
+
+      /* 4. 탭 전환 시 스크롤 상단 이동 (모바일 UX) */
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /**
+     * initTabs — 탭 클릭 이벤트 일괄 등록
+     * DOMContentLoaded 후 실행.
+     */
+    function initTabs() {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.phase));
+      });
+      /* 초기 상태: p1(대회준비) 활성 */
+      switchTab('p1');
+    }
+
+    /* DOM 준비 후 초기화 */
+    document.addEventListener('DOMContentLoaded', initTabs);
+  </script>
+
+</body>
+</html>
