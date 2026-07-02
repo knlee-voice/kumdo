@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>본국검법 本國劍法 · 연무 시뮬레이터</title>
+<style>
+  :root{
+    --bg-top:#15110C; --bg-bot:#0A0805;
+    --ink:#EDE6D6; --ink-dim:#A39684;
+    --steel:#9FB4C8; --steel-deep:#5C7088;
+    --gold:#C8A24B; --gold-soft:#E6C77E; --gold-deep:#8B6914;
+    --crimson:#C24A3A; --crimson-deep:#7A2418;
+    --jade:#5BA88E;
+    --line:#2E2620; --panel:#1B1610; --panel-2:#120E09;
+    --floor:#2A2118; --floor-line:#4A3A28;
+    --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+    --kr:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+    --serif:"Nanum Myeongjo","Noto Serif KR","Apple SD Gothic Neo",serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:var(--kr);
+    background:
+      radial-gradient(1100px 520px at 50% -8%, rgba(200,162,75,.10), transparent 60%),
+      linear-gradient(168deg,var(--bg-top),var(--bg-bot) 72%);
+    color:var(--ink);
+    min-height:100vh;display:flex;flex-direction:column;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1144px;width:100%;margin:0 auto;padding:18px 18px 34px;display:flex;flex-direction:column;gap:11px}
+
+  /* Header */
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .title-block{display:flex;flex-direction:column;gap:4px}
+  .eyebrow{font-family:var(--mono);font-size:14px;letter-spacing:.34em;color:var(--gold);text-transform:uppercase}
+  h1{font-family:var(--serif);font-size:30px;font-weight:800;letter-spacing:.01em;line-height:1.05;display:flex;align-items:baseline;gap:11px}
+  h1 .hanja{color:var(--gold-soft);font-weight:700}
+  h1 .light{font-size:18px;font-weight:400;color:var(--ink-dim);font-family:var(--kr);letter-spacing:0}
+  .legend{display:flex;gap:14px;align-items:center;font-size:15px;color:var(--ink-dim)}
+  .legend .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle;background:var(--steel)}
+
+
+  /* info bar */
+  .info-bar{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    padding:9px 15px;
+    border:1px solid var(--line);border-radius:9px;
+    background:var(--panel-2);
+  }
+  .ib-total{
+    font-family:var(--mono);font-size:15px;color:var(--ink-dim);
+    letter-spacing:.04em;white-space:nowrap;
+  }
+  .ib-stages{display:flex;gap:6px;margin-left:2px;}
+  .ib-stage{
+    font-family:var(--serif);font-size:15px;font-weight:700;
+    padding:4px 13px;border-radius:6px;
+    border:1.5px solid var(--line);
+    color:var(--ink-dim);background:transparent;
+    transition:all .18s;cursor:default;
+    white-space:nowrap;letter-spacing:.06em;
+  }
+  .ib-stage.active{
+    background:transparent;color:var(--gold);
+    border-color:var(--gold);
+    box-shadow:0 0 8px rgba(200,162,75,.25);
+  }
+  .ib-stage .ib-cnt{
+    font-family:var(--mono);font-size:11px;font-weight:400;
+    opacity:.7;margin-left:5px;letter-spacing:.02em;
+  }
+  .ib-stage.active .ib-cnt{opacity:.75;color:var(--gold-soft);}
+
+  /* 방향 토글 (좌측 NPC ↔ 우측 NPC 전환) */
+  .dir-toggle{
+    display:flex;gap:4px;margin-left:auto;
+    background:rgba(0,0,0,.25);border:1px solid var(--line);
+    border-radius:8px;padding:3px;
+  }
+  .dir-btn{
+    font-family:var(--mono);font-size:14px;font-weight:700;
+    padding:6px 14px;border-radius:6px;border:none;
+    background:transparent;color:var(--ink-dim);
+    cursor:pointer;transition:all .18s;letter-spacing:.03em;
+    white-space:nowrap;
+  }
+  .dir-btn:hover{color:var(--ink);}
+  .dir-btn.active{
+    background:var(--steel-deep);color:#fff;
+    box-shadow:none;
+  }
+
+  /* 단락 구간 배지 (16px) */
+  .stage-badge{
+    display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--serif);font-size:16px;font-weight:800;letter-spacing:.12em;
+    color:var(--gold-soft);
+    background:rgba(200,162,75,.12);
+    border:1px solid rgba(200,162,75,.35);
+    border-radius:7px;padding:3px 14px 4px;
+    margin-bottom:4px;
+    text-shadow:0 0 18px rgba(200,162,75,.5);
+  }
+  .stage-badge .sb-hanja{font-size:15px;color:var(--gold);opacity:.8;font-weight:600}
+  .stage-badge .sb-ord{font-family:var(--mono);font-size:13px;color:var(--gold-deep);letter-spacing:.08em;margin-left:2px}
+
+  /* stage canvas */
+  .stage-wrap{position:relative;border:1px solid var(--line);border-radius:13px;overflow:hidden;
+    background:radial-gradient(900px 400px at 50% 120%, rgba(91,168,142,.06), transparent 60%), #0d0a06}
+  canvas{display:block;width:100%;height:auto}
+
+  /* ── 大 표어 오버레이 (시그니처) ── */
+  .slogan{
+    position:absolute;left:0;right:0;top:14px;
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+    pointer-events:none;text-align:center;
+  }
+  .slogan .ord{
+    font-family:var(--mono);font-size:14px;letter-spacing:.3em;color:var(--gold);
+    opacity:.85;margin-bottom:3px;
+  }
+  .slogan .hanja{
+    font-family:var(--serif);font-weight:800;
+    font-size:clamp(30px,6.5vw,68px);line-height:.96;letter-spacing:.06em;
+    color:#fff;
+    text-shadow:0 0 1px #C8A24B, 0 2px 18px rgba(200,162,75,.55), 0 0 42px rgba(200,162,75,.28);
+  }
+  .slogan .nm{
+    font-family:var(--serif);font-weight:700;font-size:clamp(20px,3.5vw,28px);
+    color:var(--gold-soft);letter-spacing:.16em;margin-top:1px;
+  }
+  .slogan .sub{
+    font-family:var(--kr);font-size:clamp(14px,2.2vw,17px);color:var(--ink-dim);
+    letter-spacing:.04em;margin-top:5px;font-weight:500;
+  }
+  .slogan.flash .hanja{animation:strike-flash .62s cubic-bezier(.2,.8,.2,1)}
+  .slogan.flash .ord, .slogan.flash .nm{animation:rise .5s ease}
+  @keyframes strike-flash{
+    0%{transform:scale(1.16);filter:brightness(1.7);text-shadow:0 0 6px #fff,0 0 60px rgba(200,162,75,.9)}
+    100%{transform:scale(1);filter:brightness(1)}
+  }
+  @keyframes rise{0%{opacity:0;transform:translateY(7px)}100%{opacity:1;transform:translateY(0)}}
+
+  .badge-step{
+    position:absolute;bottom:11px;left:13px;
+    display:flex;align-items:center;gap:8px;
+    background:rgba(10,8,5,.7);border:1px solid var(--line);
+    border-radius:6px;padding:5px 12px;backdrop-filter:blur(4px);
+  }
+  .badge-step .bs-num{
+    font-family:var(--mono);font-size:15px;color:var(--gold);letter-spacing:.05em;
+    white-space:nowrap;
+  }
+  .badge-step .bs-name{
+    font-family:var(--serif);font-size:14px;font-weight:700;
+    color:var(--gold-soft);letter-spacing:.06em;white-space:nowrap;
+    padding:3px 10px;border-radius:5px;
+    border:1.5px solid var(--gold-deep);
+    background:rgba(200,162,75,.12);
+    box-shadow:0 0 8px rgba(200,162,75,.25);
+  }
+  .badge-turn{
+    position:absolute;bottom:11px;right:13px;font-family:var(--kr);font-size:15px;font-weight:700;
+    color:var(--jade);background:rgba(91,168,142,.12);border:1px solid rgba(91,168,142,.4);
+    border-radius:6px;padding:4px 11px;letter-spacing:.04em;backdrop-filter:blur(4px);
+    opacity:0;transition:opacity .2s;
+  }
+  .badge-turn.on{opacity:1}
+
+
+  /* controls */
+  .controls{display:flex;flex-direction:column;gap:6px}
+  .scrub-row{display:flex;align-items:center;gap:12px}
+  .scrub{flex:1;position:relative;height:30px;display:flex;align-items:center;cursor:pointer}
+  .scrub-track{position:absolute;left:0;right:0;height:4px;background:var(--line);border-radius:3px}
+  .scrub-fill{position:absolute;left:0;height:4px;background:linear-gradient(90deg,var(--steel-deep),var(--gold));border-radius:3px;width:0%}
+  .scrub-ticks{position:absolute;left:0;right:0;display:flex;justify-content:space-between;pointer-events:none}
+  .tick{width:2px;height:11px;background:var(--line);border-radius:2px}
+  .tick.done{background:var(--gold)}
+  .stepcount{font-family:var(--mono);font-size:17px;color:var(--ink-dim);white-space:nowrap;min-width:62px;text-align:right}
+  .stepcount b{color:var(--gold)}
+
+  .btn-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+  button.ctrl{font-family:var(--mono);background:var(--panel);color:var(--ink);
+    border:1px solid var(--line);border-radius:8px;padding:9px 8px;cursor:pointer;
+    font-size:14px;transition:all .14s;display:flex;align-items:center;gap:4px}
+  button.ctrl:hover{border-color:var(--gold);color:var(--gold)}
+  button.ctrl.play{background:var(--gold);color:#1a1408;border-color:var(--gold);font-weight:700;min-width:104px;justify-content:center}
+  button.ctrl.play:hover{background:var(--gold-soft)}
+  button.ctrl:focus-visible{outline:2px solid var(--gold-soft);outline-offset:2px}
+  .speed{display:flex;margin-left:auto;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .speed button{font-family:var(--mono);background:var(--panel);color:var(--ink-dim);border:none;padding:9px 11px;cursor:pointer;font-size:14px;transition:all .14s}
+  .speed button:hover{color:var(--ink)}
+  .speed button.active{background:var(--steel-deep);color:#fff}
+  .hint{font-family:var(--mono);font-size:14px;color:var(--ink-dim);letter-spacing:.03em;text-align:center;opacity:.7}
+  .hint b{color:var(--gold-soft)}
+
+  /* 동작 목록 패널 */
+
+
+
+  @media (max-width:680px){
+    h1{font-size:22px}
+    .title-block .light{display:block;font-size:13px;margin-top:2px}
+    .info-bar{padding:8px 10px;gap:8px}
+    .ib-total{font-size:13px}
+    .ib-stage{font-size:13px;padding:3px 9px}
+    .dir-toggle{margin-left:0;order:10}
+    .dir-btn{font-size:13px;padding:7px 12px}
+    .btn-row{gap:3px}
+    button.ctrl{padding:8px 7px;font-size:13px}
+    button.ctrl.play{min-width:76px}
+    .speed button{padding:8px 8px;font-size:13px}
+    .hint{display:none}
+  }
+  @media (max-width:420px){
+    h1{font-size:18px}
+    .title-block .light{font-size:11px}
+    .ib-stages{order:10;width:100%;justify-content:space-between}
+    .ib-total{width:100%}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="title-block">
+      <h1>본국검법 <span class="hanja">本國劍法</span> <span class="light">/ 연무 시뮬레이터</span></h1>
+    </div>
+
+  </header>
+
+  <div class="info-bar" id="info">
+    <div class="ib-stages">
+      <span class="ib-stage" id="ibStage0">초장<span class="ib-cnt">8</span></span>
+      <span class="ib-stage" id="ibStage1">중장<span class="ib-cnt">14</span></span>
+      <span class="ib-stage" id="ibStage2">종장<span class="ib-cnt">13</span></span>
+    </div>
+    <div class="dir-toggle" id="dirToggle">
+      <button class="dir-btn active" id="btnDirRight" data-dir="right">→ 방향</button>
+      <button class="dir-btn" id="btnDirLeft" data-dir="left">← 방향</button>
+    </div>
+  </div>
+
+  <div class="stage-wrap">
+    <canvas id="stage"></canvas>
+    <div class="slogan" id="slogan">
+      <div class="ord" id="slOrd">제 1 세</div>
+      <div class="hanja" id="slHanja">發劍勢</div>
+      <div class="nm" id="slName">발검세</div>
+      <div class="sub" id="slSub">칼을 뽑아 적을 맞이하다</div>
+    </div>
+    <div class="badge-step" id="badgeStep">
+      <span class="bs-num" id="bsNum">勢 1 / 35</span>
+      <span class="bs-name" id="bsName">발검</span>
+    </div>
+    <div class="badge-turn" id="badgeTurn">↺ 좌회전</div>
+
+  </div>
+
+  <div class="controls">
+    <div class="scrub-row">
+      <div class="scrub" id="scrub">
+        <div class="scrub-track"></div>
+        <div class="scrub-fill" id="scrubFill"></div>
+        <div class="scrub-ticks" id="scrubTicks"></div>
+      </div>
+      <div class="stepcount"><b id="curStep">1</b> / <span id="totStep">8</span></div>
+    </div>
+    <div class="btn-row">
+      <button class="ctrl" id="btnFirst" title="처음으로">⏮</button>
+      <button class="ctrl" id="btnPrev" title="이전 세 (←)">◀</button>
+      <button class="ctrl play" id="btnPlay" title="재생/정지 (Space)">▶ 재생</button>
+      <button class="ctrl" id="btnNext" title="다음 세 (→)">▶</button>
+      <button class="ctrl" id="btnLast" title="마지막으로">⏭</button>
+      <div class="speed" id="speed">
+        <button data-s="0.5">0.5×</button>
+        <button data-s="1" class="active">1×</button>
+        <button data-s="1.5">1.5×</button>
+      </div>
+    </div>
+    <div class="hint"><b>Space</b> 재생/정지 · <b>← →</b> 세 이동 · 총 <b>33세</b> 연속 재생</div>
+  </div>
+
+
+</div>
+
+<script>
+/* ============================================================
+   본국검법 데이터 — build.js 가 kata/*.md 에서 생성
+   ============================================================ */
+const STAGES = [{"name":"초장","hanjaName":"初章","locked":false,"steps":[{"order":1,"name":"지검대적","hanja":"持劍對賊","slogan":"왼발을 앞으로 당기면서 양 발을 평행하게 하여 칼을 왼쪽으로 듦","posture":"좌어깨","action":"ready","facing":1,"x":0.46,"foot":"RL","lean":0,"crouch":0,"lift":null,"turn":null,"stance":null,"kneel":0,"duration":1500,"kiai":null,"target":null,"desc":"발을 어깨너비로 벌려 자연스럽게 선다. 칼을 왼쪽 어깨에 매듯이 하되 코등이가 자신의 어깨 높이에 위치하고 약간 뒤로 45도 눕혀지게 한다. 칼날은 앞을 향하고, 오른 주먹은 왼쪽 어깨 중앙에 오도록 한다. 왼 팔꿈치는 몸에 붙여 뒤로 빠지지 않게 하고 시선은 정면에 둔다.","footwork":"두 발을 어깨너비로 나란히 벌려 선다.","swordpath":"칼을 왼쪽 어깨에 얹되 코등이를 어깨 높이, 뒤로 45도 눕힌다."},{"order":2,"name":"우내략","hanja":"右內掠","slogan":"오른발을 들고 오른쪽으로 돌면서","posture":"상단","action":"sweep","facing":1,"x":0.5,"foot":"R","lean":3,"crouch":0,"lift":null,"turn":"우","stance":0.5,"kneel":0,"duration":1400,"kiai":null,"target":null,"desc":"칼을 오른쪽 아래로 향하여 몸 가까이 스쳐(칼날 흐름이 수직에서 우로 약 15도 면을 통과), 왼발을 축으로 오른발을 바닥에 스치듯 들어 오른쪽으로 180도 돌면서 칼을 머리 위로 바로 든다. 칼날을 정면으로 향하여 바로 들며 칼끝이 처지지 않게 한다. 들은 칼의 각도는 수평 위 30~60도. 오른발이 앞에 나온 우상단자세로 완료된다.","footwork":"왼발을 축으로 오른쪽 180도 돌며 오른발이 앞으로 나온다.","swordpath":"칼을 안으로 스쳐 오른쪽 아래에서 머리 위 상단으로 크게 든다."},{"order":3,"name":"진전격적","hanja":"進前擊賊","slogan":"오른발을 앞으로 일보 내면서 정면 머리를 치되 배꼽까지 내려벤다","posture":"중단","action":"strike","facing":1,"x":0.58,"foot":"R","lean":8,"crouch":0,"lift":null,"turn":null,"stance":0.8,"kneel":0,"duration":1600,"kiai":"얏","target":"men","desc":"우내략과 곧바로 이어지는 동작. 들었던 칼로 오른발을 앞으로 일보 내면서 정면 머리를 치되 배꼽까지 내려벤다. 왼발은 중단자세 발 자세가 되도록 재빠르게 따라 붙인다. 오른팔에 힘을 빼고 왼손으로 칼끝이 원을 그리듯 큰 동작으로 벤다. 완료 후 오른 주먹이 하복부 높이, 칼은 거의 수평이 된다.","footwork":"오른발을 앞으로 일보 내딛고 왼발이 바로 따라 붙는다.","swordpath":"상단에서 수직으로 배꼽까지 크게 내려벤다. 완료 시 칼이 수평."},{"order":4,"name":"금계독립","hanja":"金鷄獨立","slogan":"왼쪽으로 돌면서 왼다리 들고 팔상세","posture":"우어깨","action":"oneleg","facing":-1,"x":0.52,"foot":"R","lean":2,"crouch":0,"lift":"L","turn":"좌후","stance":0.2,"kneel":0,"duration":1800,"kiai":null,"target":null,"desc":"진전격적에서 머리 위로 팔을 뻗어 칼을 높이 들었다가 오른 어깨 쪽으로 내린다. 오른발을 축으로 왼쪽으로 180도 돌아 왼 무릎을 직각으로 들어 외다리로 선다. 칼날은 앞을 향하고 코등이는 입 높이, 수직에서 30도 뒤로 눕힌다. 왼발 끝은 힘을 빼고 자연스럽게 아래로 향한다.","footwork":"오른발을 축으로 왼쪽 180도 돌며 왼 무릎을 직각으로 든다.","swordpath":"머리 위로 높이 들었다가 오른 어깨로 내린다. 코등이가 입 높이."},{"order":5,"name":"후일격","hanja":"後一擊","slogan":"뒤로 돌며 배꼽까지 내려베다","posture":"중단","action":"strike","facing":-1,"x":0.44,"foot":"R","lean":8,"crouch":0,"lift":null,"turn":null,"stance":0.75,"kneel":0,"duration":1600,"kiai":"얏","target":"men","desc":"금계독립세의 들었던 왼발을 앞으로 내디디면서 오른쪽 어깨의 칼을 머리 위로 들었다가 오른발을 앞으로 일보 내면서 머리를 친다. 진전격적과 같이 배꼽까지 내려벤다. 완료된 자세는 진전격적과 같으며 방향만 후면(북향)이다.","footwork":"왼발을 앞으로 내딛고, 이어 오른발을 일보 크게 내딛으며 벤다.","swordpath":"오른 어깨에서 상단으로 들었다가 배꼽까지 수직으로 내려벤다."},{"order":6,"name":"금계독립","hanja":"金鷄獨立","slogan":"후일격에 이어 다시 외다리로 서서 균형을 잡다","posture":"우어깨","action":"oneleg","facing":1,"x":0.48,"foot":"R","lean":2,"crouch":0,"lift":"L","turn":"좌후","stance":0.2,"kneel":0,"duration":1600,"kiai":null,"target":null,"desc":"후일격의 내려친 칼을 머리 위로 높이 들었다가 오른 어깨 쪽으로 내리면서, 오른발을 축으로 왼쪽으로 180도 돌아 왼 무릎을 직각으로 들어올려 외다리로 선다. 처음 금계독립과 같은 자세이나 방향이 전환되어 다시 전면을 향한다.","footwork":"오른발을 축으로 왼쪽 180도 돌아 왼 무릎을 직각으로 든다.","swordpath":"머리 위로 들었다가 오른 어깨로 내린다."},{"order":7,"name":"진전격적","hanja":"進前擊賊","slogan":"왼발을 내리고 오른발 나가면서 정면 머리치기","posture":"중단","action":"strike","facing":1,"x":0.56,"foot":"R","lean":8,"crouch":0,"lift":null,"turn":null,"stance":0.8,"kneel":0,"duration":1600,"kiai":"얏","target":"men","desc":"금계독립세에서 들었던 왼발을 앞으로 내디디면서 오른쪽 어깨의 칼을 머리 위로 들었다가 오른발을 앞으로 일보 내면서 머리를 친다. 처음 진전격적과 같이 배꼽까지 크게 내려벤다.","footwork":"왼발을 앞으로 내딛고 오른발을 크게 내딛으며 벤다.","swordpath":"상단에서 수직으로 배꼽까지 크게 내려벤다."},{"order":8,"name":"일자","hanja":"一刺","slogan":"칼을 밑에서(왼쪽부터) 감아 올려서 왼발을 내디디면서 찌른 후 왼발을 다시 거두어 들임","posture":"중단","action":"thrust","facing":1,"x":0.46,"foot":"L","lean":10,"crouch":0,"lift":null,"turn":null,"stance":0.8,"kneel":0,"duration":1700,"kiai":"얏","target":"thrust","desc":"진전격적의 머리 친 자세에서 칼을 좌우로 감아 왼발이 앞으로 나가면서 상대의 명치를 찌른다. 칼날을 왼쪽으로 틀면서 찌르며, 뒤의 오른 무릎과 허리는 똑바로 펴고 앞의 왼 무릎은 굽힌다. 칼등이 왼쪽 아래로, 칼날이 위로 향하게 비틀어 찌른다.","footwork":"왼발을 앞으로 내디디며 명치를 찌른다.","swordpath":"칼을 좌우로 크게 감아 돌린 후 비틀어 명치를 찌른다."},{"order":9,"name":"맹호은림","hanja":"猛虎隱林","slogan":"칼을 코등이가 목 근처 높이가 되도록 든 후(발은 다 땅에 붙이고), 오른쪽으로 오른발을 옮기면서 돌고, 왼발은 앞으로 옮기고 오른쪽으로 한번 더 돌고, 왼쪽으로 돌고 오른발을 앞으로 냄","posture":"맹호","action":"ready","facing":-1,"x":0.44,"foot":"RL","lean":0,"crouch":0,"lift":null,"turn":null,"stance":null,"kneel":0,"duration":2000,"kiai":null,"target":null,"desc":"찌른 칼을 돌려 뽑아 중단으로 가져가면서 앞으로 나갔던 왼발을 오른발 뒤로 당겨 중단 발 자세를 취한다. 팔꿈치를 그대로 두고 양손을 들어올려 칼을 세운다. 코등이가 자신의 턱 높이, 칼끝은 20~30도 뒤로 젖히고, 칼날은 앞을 향하여 칼 뒤에 몸을 숨긴다는 느낌으로 취한다. 이어 우회1·우회2·좌회로 주변 적들을 경계한다.","footwork":"왼발을 오른발 뒤로 당겨 어깨너비로 선다.","swordpath":"중단에서 칼을 세워 코등이가 턱 높이, 칼날을 앞으로 향한다."},{"order":10,"name":"안자","hanja":"雁字","slogan":"중단세 취하고 왼발을 내면서 찌름","posture":"안자","action":"thrust","facing":-1,"x":0.38,"foot":"L","lean":10,"crouch":0,"lift":null,"turn":null,"stance":0.85,"kneel":0,"duration":1600,"kiai":"얏","target":"thrust","desc":"얼굴 중심의 칼을 천천히 중단으로 내리고, 칼을 좌우로 감아 왼발이 앞으로 나가면서 칼날을 우측으로 틀면서 상대의 목을 찌른다. 찌르는 방법은 일자와 동일하나 목 높이를 겨냥하므로 칼과 팔이 거의 수평이다. 뒤의 오른다리와 허리는 펴고 왼 무릎은 굽힌다.","footwork":"왼발을 앞으로 내디디며 찌른다. 뒤의 오른 무릎과 허리를 편다.","swordpath":"좌우로 감아 돌린 후 칼날을 위로 향하게 비틀어 목을 수평으로 찌른다."},{"order":11,"name":"직부송서","hanja":"直符送書","slogan":"칼을 뺀 후 허리에 끼고 돌고 왼발을 내면서 다시 찌름","posture":"안자","action":"thrust","facing":1,"x":0.44,"foot":"L","lean":10,"crouch":0,"lift":null,"turn":"우","stance":0.8,"kneel":0,"duration":1600,"kiai":"얏","target":"thrust","desc":"안자의 찌른 칼에서 앞의 왼발을 몸쪽으로 당기면서 칼을 뽑아 왼 허리에 가져가고(칼등은 동향, 칼끝은 우측), 양발을 축으로 오른쪽으로 180도 돌아 남향한다. 이어서 뒤의 왼발이 앞으로 나가면서 명치 높이를 비틀어 찌른다. 칼을 뽑고 돌아 찌르는 동작이 빠르고 신속하게 한 동작이 되도록 한다.","footwork":"180도 우회전 후 왼발이 앞으로 나가며 찌른다.","swordpath":"왼 허리에서 칼을 뽑아 돌면서 명치 높이를 비틀어 찌른다."},{"order":12,"name":"발초심사","hanja":"撥草尋蛇","slogan":"오른발을 내면서 45도로 왼쪽에서 오른쪽으로 내려 벰","posture":"중단","action":"strike_do","facing":1,"x":0.52,"foot":"R","lean":6,"crouch":0.1,"lift":null,"turn":null,"stance":0.6,"kneel":0,"duration":1500,"kiai":"얏","target":"do","desc":"뒤의 오른발이 앞으로 나가면서 찌른 칼을 뽑아 왼 어깨에 매었다가 바로 좌상에서 우하로 크게 내려벤다. 오른발과 베는 동작이 일치하도록 하고 뒤의 왼발이 빨리 따라붙어 중단 발 자세가 된다. 칼을 빼고 어깨에 메고 내려베는 동작을 한숨에 연결한다.","footwork":"오른발이 앞으로 나가며 벤다. 왼발이 바로 따라 붙는다.","swordpath":"왼 어깨에서 우하 방향으로 크게 내려벤다."},{"order":13,"name":"표두압정","hanja":"豹頭壓頂","slogan":"왼발부터 1(왼쪽 돌리고), 2(오른발, 오른쪽 돌리고), 3(점프), 4 박자에 찌름","posture":"안자","action":"thrust","facing":1,"x":0.6,"foot":"R","lean":10,"crouch":0,"lift":null,"turn":"우","stance":0.8,"kneel":0,"duration":1800,"kiai":"얏","target":"thrust","desc":"왼발이 나가며 칼을 왼쪽으로 감고, 오른발이 나가며 오른쪽으로 감아, 오른발로 높이 도약해 앞으로 뛰어 왼발을 디딘 후 오른발을 앞으로 하여 이마 높이를 비틀어 찌른다. 찌름 후 왼발을 약간 뒤로 물리고 오른발을 끌어당기며 칼을 뽑아 중단→상단세. 오른발을 왼발 뒤로 돌려 오른쪽으로 180도 돌아 후면(북향)하고 중단세를 취한다.","footwork":"왼발·오른발 각각 감으며 전진, 도약 후 왼·오른발로 찌른다. 이후 우180도 돌아 중단.","swordpath":"좌우로 감으며 전진, 이마 높이를 비틀어 찌른다. 완료 후 후면 중단세."}]},{"name":"중장","hanjaName":"中章","locked":false,"steps":[{"order":1,"name":"조천","hanja":"朝天","slogan":"오른발을 당기고 중단세, 오른쪽으로 돌면서 오른발을 앞으로 내디디면서 칼을 크게 머리치듯이 내려서 중단세 왼발 나가면서 오른발을 든 상태의 상단세","posture":"상단","action":"oneleg","facing":-1,"x":0.5,"foot":"L","lean":3,"crouch":0,"lift":"R","turn":null,"stance":0.25,"kneel":0,"duration":1500,"kiai":null,"target":null,"desc":"왼발을 일보 앞으로 내어서 후면(북향)을 향하게 딛고, 오른 무릎을 직각이 되도록 들면서 칼을 상단세로 높이 든다. 상단은 칼을 수직에서 30~40도 뒤로 눕히고 오른손을 거의 뻗을 정도로 높이 든다. 이어 오른쪽으로 180도 돌면서 들었던 오른발을 내려놓으며 중단세를 취한다.","footwork":"왼발을 앞으로 내딛고 오른 무릎을 직각으로 든다. 이어 오른쪽 180도 돌아 중단.","swordpath":"칼을 상단으로 높이 들어 수직에서 30~40도 뒤로 눕힌다."},{"order":2,"name":"좌협수두","hanja":"左挾獸頭","slogan":"오른발을 내리면서 오른쪽으로 돌고 중단세 왼발 나가고 오른발을 들면서 칼을 왼쪽 겨드랑이에 낌","posture":"좌어깨","action":"oneleg","facing":1,"x":0.54,"foot":"L","lean":2,"crouch":0,"lift":"R","turn":null,"stance":0.3,"kneel":0,"duration":1400,"kiai":null,"target":null,"desc":"조천에서 오른쪽 180도 돌아 남향 중단세 후, 다시 왼발을 일보 앞으로 내디디면서 오른 무릎을 들고 칼을 왼쪽 어깨에 메듯이 든다. 발 자세는 조천과 동일하며 칼 자세는 지검대적과 유사하다. 칼날은 전면을 향하며 수직에서 30도 기울어진다.","footwork":"왼발을 앞으로 내딛으며 오른 무릎을 직각으로 든다.","swordpath":"칼을 왼쪽 어깨에 메되 칼날은 전면, 수직에서 30도 기울인다."},{"order":3,"name":"향우방적","hanja":"向右防賊","slogan":"오른쪽으로 돌면서 오른발을 내딛고 왼발을 직각으로 든 채 뒤쪽의 목을 날리는 동작","posture":"내략","action":"sweep","facing":-1,"x":0.5,"foot":"R","lean":4,"crouch":0,"lift":"L","turn":"우","stance":0.45,"kneel":0,"duration":1500,"kiai":null,"target":null,"desc":"몸을 우측으로 틀면서 왼쪽 어깨의 칼을 왼쪽 어깨 아래로 수평으로 내리며, 들었던 오른발을 왼발 뒤로 내려놓고 오른쪽으로 돌아 북향하면서 수평으로 최대한 크게 휘두른다. 허리가 가장 먼저 회전, 칼을 휘두르는 것과 왼쪽 무릎을 드는 것이 동시에 이루어진다. 휘두른 칼과 오른팔은 몸체와 직각, 왼쪽 주먹은 오른팔보다 더 우측으로 나가 멈춘다.","footwork":"들었던 오른발을 왼발 뒤로 내리며 오른쪽으로 회전한다. 왼 무릎을 든다.","swordpath":"왼쪽 어깨에서 수평으로 내려 최대한 크게 오른쪽으로 휘두른다."},{"order":4,"name":"후일격","hanja":"後一擊","slogan":"왼발을 내리고 오른발을 나가면서 정면 머리치기","posture":"중단","action":"strike","facing":-1,"x":0.44,"foot":"R","lean":8,"crouch":0,"lift":null,"turn":null,"stance":0.75,"kneel":0,"duration":1600,"kiai":"얏","target":"men","desc":"들었던 왼쪽 발을 앞으로 내어 디디면서 칼을 상단으로 높이 들고, 오른발이 크게 앞으로 나가면서 배꼽까지 내려벤다. 왼발은 오른발에 즉시 따라 붙는다.","footwork":"왼발을 내딛고 오른발이 크게 나가며 벤다.","swordpath":"상단에서 배꼽까지 강하게 내려벤다."},{"order":5,"name":"전기","hanja":"展旗","slogan":"오른발을 이동시키면서 오른쪽으로 돌면서 칼로 다리를 방어하는 동작","posture":"상단","action":"sweep","facing":1,"x":0.54,"foot":"R","lean":2,"crouch":0,"lift":null,"turn":"우","stance":0.5,"kneel":0,"duration":1500,"kiai":null,"target":null,"desc":"왼발을 축으로 오른발을 왼발 뒤로 빼어 우측으로 180도 돌면서, 칼이 오른발을 스치듯 아래로 돌려 칼날을 위로 하여 아래에서 위로 크게 치켜든다. 우내략세와 동작이 동일하나, 전기세는 기를 펼치듯 치켜드는 것에 중점을 둔다.","footwork":"왼발을 축으로 오른발을 뒤로 빼며 우측 180도 돈다.","swordpath":"칼을 아래에서 위로 치켜들어 칼날이 위를 향하며 상단으로 든다."},{"order":6,"name":"진전격적","hanja":"進前擊賊","slogan":"돌고 난 후 오른발을 구르면서 정면 머리치기","posture":"중단","action":"strike","facing":1,"x":0.56,"foot":"R","lean":8,"crouch":0,"lift":null,"turn":null,"stance":0.8,"kneel":0,"duration":1600,"kiai":"얏","target":"men","desc":"전기세에서 치켜든 칼로 오른발이 앞으로 나아가면서 적의 정면을 배꼽까지 크게 내려벤다. 왼발은 오른발에 재빠르게 따라 붙는다.","footwork":"오른발을 앞으로 내딛고 왼발이 바로 따라 붙는다.","swordpath":"상단에서 수직으로 배꼽까지 크게 내려벤다."},{"order":7,"name":"금계독립","hanja":"金鷄獨立","slogan":"왼쪽으로 250도 정도 돌면서 왼쪽 다리를 들고 팔상세","posture":"우어깨","action":"oneleg","facing":1,"x":0.5,"foot":"R","lean":2,"crouch":0,"lift":"L","turn":null,"stance":0.2,"kneel":0,"duration":1500,"kiai":null,"target":null,"desc":"진전격적에서 내려친 칼을 머리 위로 들었다가 오른 어깨 쪽으로 거두면서, 왼 무릎을 직각으로 들어올려 외다리로 서서 균형을 잡는다. 다음 좌요격으로 이어지는 연결 동작이다.","footwork":"오른발로 지탱하고 왼 무릎을 직각으로 든다.","swordpath":"칼을 머리 위로 들었다가 오른 어깨 위로 거둔다."},{"order":8,"name":"좌요격","hanja":"左腰擊","slogan":"270도 방향으로 왼발 오른발을 나가면서 칼을 45도 방향으로 오른쪽에서 왼쪽으로 목을 벤 후 다시 왼쪽 다리를 들고","posture":"좌어깨","action":"strike_do","facing":-1,"x":0.56,"foot":"L","lean":5,"crouch":0.1,"lift":"L","turn":"좌","stance":0.6,"kneel":0,"duration":1600,"kiai":"얏","target":"do","desc":"왼발을 좌측으로 내어 딛고 오른발을 그 방향으로 한 걸음 더 나아가면서 우상에서 좌하로 크게 내려친다. 그 여세로 몸을 좌측으로 180도 돌리면서 칼은 왼쪽 어깨에 메고 왼쪽 무릎을 든다. 좌요격 시작부터 벨 때까지 시선을 목표에 고정, 베고 돌며 칼을 메는 동작의 중심잡기가 중요하다.","footwork":"왼발→오른발로 전진하여 베고, 그 여세로 좌180도 돌아 왼 무릎을 든다.","swordpath":"우상에서 좌하로 크게 내려치고, 돌면서 왼쪽 어깨에 칼을 멘다."},{"order":9,"name":"우요격","hanja":"右腰擊","slogan":"왼발 오른발 왼발을 굴린 후 왼쪽에서 오른쪽으로 목을 벤 후 당초의 180도 방향으로 보면서 순간적으로 오른발을 들고","posture":"우어깨","action":"strike_do","facing":1,"x":0.6,"foot":"L","lean":5,"crouch":0.1,"lift":"R","turn":"우","stance":0.6,"kneel":0,"duration":1700,"kiai":"얏","target":"do","desc":"들었던 왼발을 동쪽으로 내딛고 오른발을 그 방향으로 한 발, 이어 왼발을 다시 내딛으면서 좌상에서 우하로 크게 내려벤다. 그 여세로 몸을 우측으로 225도 돌리면서 칼을 오른쪽 어깨에 메고 오른쪽 무릎을 든다. 225도 우회전이므로 베기의 반동을 잘 이용한다. 완료 후 왼발 하나로 서는 우어깨칼 자세.","footwork":"왼발·오른발·왼발로 전진하여 베고, 그 여세로 우225도 돌아 오른 무릎을 든다.","swordpath":"좌상에서 우하로 크게 내려치고, 돌면서 오른쪽 어깨에 칼을 멘다."},{"order":10,"name":"후일자","hanja":"後一刺","slogan":"오른발을 내리고 왼발을 앞으로 뻗으면서 찌름","posture":"안자","action":"thrust","facing":-1,"x":0.52,"foot":"L","lean":10,"crouch":0,"lift":null,"turn":"우후","stance":0.7,"kneel":0,"duration":1600,"kiai":"얏","target":"thrust","desc":"들었던 오른발을 후면(북향)으로 내어 딛고, 오른쪽 어깨의 칼끝을 내려서 북쪽을 향하게 하고, 이어서 왼발이 나가면서 명치 높이를 찌른다. 일자의 찌르는 자세와 동일하며 뒤의 오른 무릎과 허리를 펴고 앞의 왼 무릎은 굽힌다. 찌를 때 칼등이 왼쪽 아래로, 칼날이 위로 향하도록 비틀어 찌른다.","footwork":"오른발을 북향으로 내딛고 왼발이 나가며 찌른다.","swordpath":"오른 어깨에서 칼끝을 내려 명치 높이를 비틀어 찌른다. 칼은 수평보다 약간 아래."},{"order":11,"name":"장교분수","hanja":"長蛟噴水","slogan":"왼쪽으로 돌면서 왼발을 내딛고 오른발을 내디디면서 정면 머리치기","posture":"중단","action":"strike","facing":1,"x":0.54,"foot":"R","lean":8,"crouch":0,"lift":null,"turn":"좌","stance":0.75,"kneel":0,"duration":1700,"kiai":"얏","target":"men","desc":"왼발을 오른발 한보 뒤로 크게 이동시키며 오른발을 축으로 좌측으로 180도 돌아, 왼발을 남쪽으로 내어 딛고 이어서 오른발이 나가면서 크고 빠르게 적의 배꼽까지 내려벤다. 찌른 칼을 돌려 빼고 그대로 상단으로 드는 동작이 연결된다. 후일자의 찌름에서 회전, 베기까지 한 흐름으로 행한다.","footwork":"왼발을 크게 뒤로 빼며 좌180도 돌아 왼발 딛고 오른발이 나간다.","swordpath":"찌른 칼을 빼며 돌아 상단에서 배꼽까지 크고 빠르게 내려벤다."}]},{"name":"종장","hanjaName":"終章","locked":false,"steps":[{"order":1,"name":"백원출동","hanja":"白猿出洞","slogan":"왼발 나가고 오른발 들면서 왼쪽 겨드랑이에 칼을 끼운 후 찌를 태세를 취함","posture":"발검","action":"ready","facing":1,"x":0.44,"foot":"L","lean":2,"crouch":0.3,"lift":"R","turn":null,"stance":0.5,"kneel":0,"duration":1600,"kiai":null,"target":null,"desc":"왼발을 일보 앞으로 내어서 오른 무릎을 들면서 칼자루는 몸 좌측 허리에, 칼끝은 우측으로 대각선을 유지하면서 몸을 약간 웅크린다. 시선은 북서쪽(자신의 우측 뒤)을 향한다. 강력한 찌름의 예비동작으로, 칼날은 전면을 향하고 칼등은 몸쪽, 앞에서 보아 30도·옆에서 보아 10도 기울인다.","footwork":"왼발을 앞으로 내딛고 오른 무릎을 든다. 시선은 우측 뒤를 향한다.","swordpath":"칼자루를 왼 허리에, 칼끝은 우측 대각선. 칼날은 전면을 향한다."},{"order":2,"name":"우찬격","hanja":"右鑽擊","slogan":"120도 방향으로 오른쪽으로 돌면서 오른발을 쭉 내디디면서 찌름","posture":"안자","action":"thrust","facing":1,"x":0.52,"foot":"R","lean":10,"crouch":0,"lift":null,"turn":"우","stance":0.65,"kneel":0,"duration":1500,"kiai":"얏","target":"thrust","desc":"왼발 앞바닥을 축으로 오른쪽으로 135도 돌면서 오른발을 북서향으로 내어 딛고 북서쪽 적의 명치를 강력하게 찌른다. 뒤의 왼 무릎과 허리는 펴고 앞의 오른 무릎은 굽힌다. 들고 있던 오른발을 빠르게 내어 디디므로 발구름 소리가 날 수 있으나 반드시 굴러야 하는 것은 아니다.","footwork":"왼발 앞부분을 축으로 우135도 돌아 오른발을 내딛으며 찌른다.","swordpath":"좌 허리에서 북서쪽 적의 명치를 비틀어 강력하게 찌른다."},{"order":3,"name":"용약일자","hanja":"勇躍一刺","slogan":"오른쪽으로 돌면서 오른발을 내딛고 왼발을 쭉 뻗으면서 찌름","posture":"안자","action":"thrust","facing":1,"x":0.58,"foot":"L","lean":10,"crouch":0,"lift":null,"turn":"우","stance":0.85,"kneel":0,"duration":1700,"kiai":"얏","target":"thrust","desc":"양손이 왼쪽 허리에 오도록 칼을 빼어(칼날이 좌측), 왼발을 축으로 오른발을 왼발 뒤로 남쪽을 향하여 크게 빼며 우측으로 225도 돌면서, 다시 왼발을 남쪽으로 크게 내면서 전면 적의 명치를 찌른다. 상체의 우 돌림은 칼을 뽑은 후 시작되어야 하며 칼자루가 왼 허리에, 칼끝은 우상 대각선. 225도 회전을 위해 오른발을 뒤로 크게 빼야 한다.","footwork":"칼 뽑아 오른발을 뒤로 크게 빼며 우225도 돌아 왼발이 앞으로 나간다.","swordpath":"왼 허리에서 칼을 뽑아 전면 명치를 비틀어 찌른다."},{"order":4,"name":"후일격","hanja":"後一擊","slogan":"왼쪽으로 돌면서 왼발 내딛고 오른발 내디디면서 정면 머리치기","posture":"중단","action":"strike","facing":1,"x":0.64,"foot":"R","lean":8,"crouch":0,"lift":null,"turn":"좌","stance":0.8,"kneel":0,"duration":1700,"kiai":"얏","target":"men","desc":"왼발을 크게 뒤로 빼면서 오른발을 축으로 좌측으로 180도 돌려 왼발을 내어 딛고, 이어서 오른발이 나가면서 크고 빠르게 적의 배꼽까지 내려벤다.","footwork":"왼발을 크게 빼며 좌180도 돌아 왼발 딛고 오른발로 전진한다.","swordpath":"상단에서 배꼽까지 크고 빠르게 내려벤다."},{"order":5,"name":"후일자","hanja":"後一刺","slogan":"칼을 돌린 후 왼발 내디디면서 찌름","posture":"안자","action":"thrust","facing":1,"x":0.52,"foot":"L","lean":10,"crouch":0,"lift":null,"turn":"우후","stance":0.7,"kneel":0,"duration":1600,"kiai":"얏","target":"thrust","desc":"후일격에 이어 오른발을 뒤로 돌려 180도 돌아 뒤쪽의 적을 향하고, 왼발이 나가면서 명치 높이를 비틀어 찌른다. 칼등이 왼쪽 아래로, 칼날이 위로 향하게 비틀어 찌른다.","footwork":"오른발을 뒤로 돌려 180도 돌고 왼발이 나가며 찌른다.","swordpath":"칼끝을 내려 명치 높이를 비틀어 찌른다."},{"order":6,"name":"향우방적","hanja":"向右防賊","slogan":"오른쪽으로 돌면서 왼발을 직각으로 들고 평행하게 가슴을 베고","posture":"내략","action":"sweep","facing":1,"x":0.58,"foot":"R","lean":4,"crouch":0,"lift":"L","turn":"우","stance":0.45,"kneel":0,"duration":1500,"kiai":null,"target":null,"desc":"왼발을 약간 당기면서 찔렀던 칼을 빼어 왼쪽 어깨 아래로 수평으로 들고 몸을 오른쪽으로 틀어 남향하면서 수평으로 최대한 크게 휘두른다. 허리가 가장 먼저 회전하고, 칼을 휘두르는 것과 왼쪽 무릎을 드는 것이 동시에 이루어진다. 휘두른 칼과 오른팔은 몸체와 직각, 왼쪽 주먹은 오른팔보다 더 우측으로 나가 멈춘다.","footwork":"왼발을 약간 당기며 오른쪽으로 회전한다. 왼 무릎을 든다.","swordpath":"왼 어깨 아래 수평에서 오른쪽으로 최대한 크게 수평 휘두른다."},{"order":7,"name":"향전살적①","hanja":"向前殺賊①","slogan":"왼발, 오른발을 굴리면서 정면 머리치기","posture":"중단","action":"strike","facing":1,"x":0.62,"foot":"R","lean":8,"crouch":0,"lift":null,"turn":null,"stance":0.8,"kneel":0,"duration":1600,"kiai":"얏","target":"men","desc":"들었던 왼쪽 발을 전방(남향)으로 내어 디디면서 칼을 상단으로 높이 들고 오른발이 크게 앞으로 나가면서 전방의 적을 배꼽까지 벤다.","footwork":"왼발을 앞으로 내딛고 오른발이 크게 나가며 벤다.","swordpath":"상단으로 높이 들었다가 배꼽까지 수직으로 내려벤다."},{"order":8,"name":"향전살적②","hanja":"向前殺賊②","slogan":"왼발, 오른발을 굴리면서 정면 머리치기","posture":"중단","action":"strike","facing":1,"x":0.68,"foot":"R","lean":8,"crouch":0,"lift":null,"turn":null,"stance":0.85,"kneel":0,"duration":1600,"kiai":"얏","target":"men","desc":"다시 왼발을 일보 앞으로 내면서 칼을 상단으로 높이 들어 오른발이 크게 나가면서 전방의 적을 배꼽까지 벤다. 향전살적세를 연속으로 두 번 행한다.","footwork":"왼발을 앞으로 내딛고 오른발이 크게 나가며 벤다.","swordpath":"상단으로 높이 들었다가 배꼽까지 수직으로 내려벤다."},{"order":9,"name":"시우상전","hanja":"時雨相戰","slogan":"왼발 후, 오른발을 쭉 뻗으면서 찌름","posture":"안자","action":"thrust","facing":1,"x":0.7,"foot":"R","lean":8,"crouch":0.1,"lift":null,"turn":null,"stance":0.7,"kneel":0,"duration":1600,"kiai":"얏","target":"do","desc":"왼발을 앞으로 낸 뒤 오른발이 나가면서 아래쪽(무릎 높이)을 찌른다. 본국검법의 마지막 공격 동작. 두 번의 향전살적 후 쓰러진 상대에 대한 최종 찌름이다.","footwork":"왼발을 앞으로 낸 후 오른발이 나가며 찌른다.","swordpath":"무릎 높이를 아래 방향으로 찌른다."}]}];
+const INTRO = {"order":0,"name":"발검","hanja":"發劍","slogan":"오른발 앞으로 나가며 칼을 뽑는다","posture":"발검","action":"draw","facing":1,"x":0.46,"foot":"R","lean":0,"crouch":0,"lift":null,"turn":null,"stance":0.3,"kneel":0,"duration":1700,"kiai":null,"target":null,"desc":"오른발을 앞으로 내디디며 칼집에서 칼을 뽑아 든다. 본국검법의 첫 동작으로, 검을 빼어 들며 적을 맞이할 채비를 갖춘다.","footwork":"오른발 앞으로 한 걸음 내디딘다.","swordpath":"칼집(좌요) → 우상방으로 발도(拔刀).","label":"시작하기"};
+const OUTRO = {"order":0,"name":"수검","hanja":"收劍","slogan":"칼을 꽂으면서 왼발을 끌어 당김. 뒤로 3발작 물러난 후(4발작째에서 발을 붙임) 오른쪽으로 돌아서서 인사","posture":"발검","action":"ready","facing":1,"x":0.6,"foot":"RL","lean":0,"crouch":0.15,"lift":null,"turn":null,"stance":0.3,"kneel":0,"duration":2200,"kiai":null,"target":null,"desc":"왼발부터 뒤로 물리면서 칼을 빼어 중단세를 취하고, 왼손으로 칼집을 잡으며 칼을 잡은 오른손을 우측으로 보내어 칼끝이 아래를 향하게 한다. 왼발을 뒤로 물리고 오른 무릎을 굽힌다. 이어서 칼을 꽂으며 연무를 마친다. 거합도의 피뿌림 자세를 흉내내지 않도록 주의한다.","footwork":"왼발부터 뒤로 물리고 오른 무릎을 굽힌다.","swordpath":"칼끝을 아래로 향하게 하여 칼집에 꽂는다.","label":"마무리"};
+
+/* ============================================================
+   자세(자루기준 좌표) — fwd+ = 향하는 쪽, Y- = 위, hipY 기준
+   검 고정 길이로 렌더.
+   ============================================================ */
+const SWORD_LEN = 120;
+const POSTURES = {
+  /* hand: 골반 기준 [facing방향, 위방향(-=위)]
+     tip:  칼끝 목표 (동일 기준)
+     각도를 세분화해 각 자세의 실제 손목 각도 반영 */
+  '중단':   {hand:[22,-26], tip:[90,-58]},   /* 앞으로 내밀어 목 겨눔 */
+  '좌어깨': {hand:[-18,-80],tip:[-40,-170]}, /* 왼 어깨 위, 칼날 뒤로 */
+  '우어깨': {hand:[16,-82], tip:[44,-172]},  /* 오른 어깨 위, 칼날 앞으로 */
+  '발검':   {hand:[6,-16],  tip:[58,-28]},   /* 발도 직후, 낮은 자세 */
+  '내략':   {hand:[28,-20], tip:[88,-8]},    /* 수평으로 쓸어내기 */
+  '상단':   {hand:[-4,-110],tip:[-42,-178]}, /* 머리 위 최고점 */
+  '하단':   {hand:[24,-10], tip:[86,24]},    /* 아래를 향해 쓸기 */
+  '맹호':   {hand:[14,-44], tip:[20,-154]},  /* 칼을 세워 몸 가림 */
+  '안자':   {hand:[42,-28], tip:[100,-50]},  /* 찌르기 직전 비틀림 */
+};
+const STRIKE = {
+  men:    {hand:[54,-30], tip:[102,-46]},  /* 머리치기: 수직 내려침 완료 */
+  do:     {hand:[52,-20], tip:[104,-28]},  /* 허리치기: 수평에 가까운 베기 */
+  thrust: {hand:[58,-26], tip:[108,-48]},  /* 찌름: 앞으로 뻗어 비틀어 찌름 */
+};
+
+const cv = document.getElementById('stage');
+const ctx = cv.getContext('2d');
+let DPR = Math.min(window.devicePixelRatio||1, 2);
+let W=0, Hh=0;
+function resize(){
+  const cssW = cv.parentElement.clientWidth;
+  // 단일 인물 렌더 기준 — 캔버스 자체를 1.1배 확대 (인물 스케일은 고정)
+  const CANVAS_SCALE = 1.1;
+  const ratio = (cssW<480 ? 1.15 : cssW<680 ? 0.86 : 0.62) * CANVAS_SCALE;
+  const minH  = (cssW<480 ? 420 : 380) * CANVAS_SCALE;
+  const maxH  = 620 * CANVAS_SCALE;
+  const cssH = Math.round(Math.min(Math.max(cssW*ratio, minH), maxH));
+  cv.style.height = cssH+'px';
+  cv.width = Math.round(cssW*DPR); cv.height = Math.round(cssH*DPR);
+  W=cssW; Hh=cssH; ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener('resize', ()=>{resize();draw();});
+
+// ── 전체 동작: 시작하기(발검) + 본 33세 + 마무리(수검) ──
+const ALL_STEPS = (function(){
+  var arr=[];
+  if(INTRO) arr.push(Object.assign({},INTRO,{stageName:INTRO.label,stageHanja:'',isIntro:true}));
+  STAGES.forEach(function(stage){
+    stage.steps.forEach(function(step){
+      arr.push(Object.assign({},step,{stageName:stage.name,stageHanja:stage.hanjaName}));
+    });
+  });
+  if(OUTRO) arr.push(Object.assign({},OUTRO,{stageName:OUTRO.label,stageHanja:'',isOutro:true}));
+  return arr;
+})();
+// 단락 경계 — 본 33세 기준 globalIdx (intro가 있으면 +1 오프셋)
+const STAGE_OFFSET = INTRO ? 1 : 0;
+const STAGE_RANGES = (function(){
+  var arr=[], idx=STAGE_OFFSET;
+  STAGES.forEach(function(stage){
+    arr.push({name:stage.name,hanja:stage.hanjaName,start:idx,end:idx+stage.steps.length-1,count:stage.steps.length});
+    idx+=stage.steps.length;
+  });
+  return arr;
+})();
+function stageOfStep(gi){
+  if(gi<STAGE_OFFSET) return STAGE_RANGES[0]; // intro 구간: 표시상 첫 단락으로 처리
+  for(var i=0;i<STAGE_RANGES.length;i++){if(gi<=STAGE_RANGES[i].end)return STAGE_RANGES[i];}
+  return STAGE_RANGES[STAGE_RANGES.length-1];
+}
+// 본 33세 기준 1-based 번호 (intro/outro는 null)
+function honBenNumber(gi){
+  var cur=ALL_STEPS[gi];
+  if(cur.isIntro||cur.isOutro) return null;
+  return gi - STAGE_OFFSET + 1;
+}
+const HON_TOTAL = (function(){var t=0;STAGE_RANGES.forEach(function(r){t+=r.count;});return t;})();
+function steps(){return ALL_STEPS;}
+let stepIdx=0, t=0, playing=false, speed=1.0, lastTime=0;
+let viewDir='right'; // 'right'=→ 방향(좌측/靑 NPC), 'left'=← 방향(우측/白 NPC)
+
+/* ---- helpers ---- */
+function lerp(a,b,k){return a+(b-a)*k;}
+function lerpArr(a,b,k){return [lerp(a[0],b[0],k),lerp(a[1],b[1],k)];}
+function easeStrike(x){return 1-Math.pow(1-x,3.2);}
+function easeSmooth(x){return x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2;}
+function shade(hex,amt){
+  hex=hex.replace('#','');if(hex.length===3)hex=hex.split('').map(c=>c+c).join('');
+  let r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
+  r=Math.max(0,Math.min(255,r+amt));g=Math.max(0,Math.min(255,g+amt));b=Math.max(0,Math.min(255,b+amt));
+  return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+const STRIKE_ACTS=['strike','strike_do','thrust'];
+function effParams(step){
+  const base = POSTURES[step.posture] || POSTURES['중단'];
+  let hand=[...base.hand], tip=[...base.tip];
+  if(STRIKE_ACTS.includes(step.action) && step.target && STRIKE[step.target]){
+    hand=[...STRIKE[step.target].hand]; tip=[...STRIKE[step.target].tip];
+  }
+  // stance: 보폭(런지 깊이). null이면 action 기반 자동 추정
+  let stance = step.stance;
+  if(stance===null||stance===undefined){
+    if(step.action==='strike'||step.action==='thrust') stance=0.7;   // 공격: 깊은 런지
+    else if(step.action==='strike_do') stance=0.55;
+    else if(step.foot==='RL') stance=0.15;                            // 나란히
+    else stance=0.4;                                                 // 기본
+  }
+  return {hand,tip,lean:step.lean||0,crouch:step.crouch||0,lift:step.lift||null,
+          stance:stance, kneel:step.kneel||0};
+}
+
+/* ---- 철검(鐵劍) 렌더 — 고정 길이 ---- */
+function drawSword(hx,hy,tx,ty){
+  const dx0=tx-hx,dy0=ty-hy,d0=Math.hypot(dx0,dy0)||1;
+  const ux=dx0/d0, uy=dy0/d0;
+  tx=hx+ux*SWORD_LEN; ty=hy+uy*SWORD_LEN;
+  const nx=-uy, ny=ux, len=SWORD_LEN;
+  const gripLen=len*0.20;
+  const tsubaX=hx+ux*gripLen, tsubaY=hy+uy*gripLen;
+  // 자루(柄)
+  const gW=4.2;
+  ctx.fillStyle='#2A1B10';
+  ctx.beginPath();
+  ctx.moveTo(hx+nx*gW,hy+ny*gW);ctx.lineTo(tsubaX+nx*(gW),tsubaY+ny*(gW));
+  ctx.lineTo(tsubaX-nx*(gW),tsubaY-ny*(gW));ctx.lineTo(hx-nx*gW,hy-ny*gW);
+  ctx.closePath();ctx.fill();
+  // 자루 감기
+  ctx.strokeStyle='#caa05a';ctx.lineWidth=1;
+  for(let i=1;i<4;i++){const gx=hx+ux*gripLen*i/4,gy=hy+uy*gripLen*i/4;
+    ctx.beginPath();ctx.moveTo(gx-nx*gW,gy-ny*gW);ctx.lineTo(gx+nx*gW,gy+ny*gW);ctx.stroke();}
+  // 코등이(護手)
+  ctx.fillStyle='#3a3026';ctx.beginPath();ctx.arc(tsubaX,tsubaY,5.2,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#6a5a3e';ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(tsubaX,tsubaY,5.2,0,Math.PI*2);ctx.stroke();
+  // 도신(刀身) — 강철 그라데이션
+  const bladeLen=len-gripLen;
+  const baseHW=3.2, tipHW=1.0;
+  function pt(f,side){const fr=(f-gripLen)/bladeLen;const hw=lerp(baseHW,tipHW,fr);
+    const x=hx+ux*f, y=hy+uy*f;return [x+nx*hw*side, y+ny*hw*side];}
+  const [b0x,b0y]=pt(gripLen,1),[b1x,b1y]=pt(gripLen,-1);
+  const [t0x,t0y]=pt(len-2,1),[t1x,t1y]=pt(len-2,-1);
+  const bg=ctx.createLinearGradient(tsubaX-nx*4,tsubaY-ny*4,tsubaX+nx*4,tsubaY+ny*4);
+  bg.addColorStop(0,'#5C6878');bg.addColorStop(.45,'#C6D2DE');bg.addColorStop(.55,'#E8EFF6');bg.addColorStop(1,'#6E7C8C');
+  ctx.fillStyle=bg;
+  ctx.beginPath();ctx.moveTo(b0x,b0y);ctx.lineTo(t0x,t0y);ctx.lineTo(tx,ty);ctx.lineTo(t1x,t1y);ctx.lineTo(b1x,b1y);ctx.closePath();ctx.fill();
+  // 칼날 선(刃)
+  ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=0.9;
+  ctx.beginPath();ctx.moveTo(tsubaX+nx*0.5,tsubaY+ny*0.5);ctx.lineTo(tx,ty);ctx.stroke();
+  // 칼끝(鋒)
+  ctx.fillStyle='#EAF2FA';ctx.beginPath();ctx.arc(tx,ty,2.2,0,Math.PI*2);ctx.fill();
+}
+
+/* ---- 단일 검수(劍手) 렌더 ---- */
+const BODY='#C8B488', BODY_DEEP='#6E5A38';
+function solveElbowPos(shX,shY,hX,hY,upper,fore,bendDir){
+  const dx=hX-shX,dy=hY-shY;let dist=Math.hypot(dx,dy);const maxR=upper+fore-1;
+  if(dist<0.1)dist=0.1;if(dist>maxR)dist=maxR;
+  let cosA=(upper*upper+dist*dist-fore*fore)/(2*upper*dist);cosA=Math.max(-1,Math.min(1,cosA));
+  const angA=Math.acos(cosA),base=Math.atan2(dy,dx),ea=base+bendDir*angA;
+  return {ex:shX+upper*Math.cos(ea),ey:shY+upper*Math.sin(ea)};
+}
+
+/* ── 입체 사지: 두 점 사이를 굵기(w1→w2) 캡슐 폴리곤으로, 음영 그라데이션 ──
+   lightDir: 빛 방향(+1=오른쪽에서, -1=왼쪽에서) */
+function limbShape(x1,y1,x2,y2,w1,w2,baseCol,lightDir){
+  const dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy)||0.001;
+  const ux=dx/len, uy=dy/len;     // 축 방향
+  const nx=-uy, ny=ux;            // 법선(굵기 방향)
+  // 사지 단면 4점 + 끝 둥글림
+  const p1a=[x1+nx*w1, y1+ny*w1], p1b=[x1-nx*w1, y1-ny*w1];
+  const p2a=[x2+nx*w2, y2+ny*w2], p2b=[x2-nx*w2, y2-ny*w2];
+  // 그라데이션: 법선 방향으로 빛/그림자
+  const gx1=x1+nx*lightDir*w1*1.4, gy1=y1+ny*lightDir*w1*1.4;
+  const gx2=x1-nx*lightDir*w1*1.4, gy2=y1-ny*lightDir*w1*1.4;
+  const g=ctx.createLinearGradient(gx1,gy1,gx2,gy2);
+  g.addColorStop(0, shade(baseCol, 26));    // 하이라이트
+  g.addColorStop(0.5, baseCol);
+  g.addColorStop(1, shade(baseCol, -30));    // 그림자
+  ctx.fillStyle=g;
+  ctx.beginPath();
+  ctx.moveTo(p1a[0],p1a[1]);
+  ctx.lineTo(p2a[0],p2a[1]);
+  // 끝(관절) 둥글림
+  ctx.arc(x2,y2,w2,Math.atan2(p2a[1]-y2,p2a[0]-x2),Math.atan2(p2b[1]-y2,p2b[0]-x2),false);
+  ctx.lineTo(p1b[0],p1b[1]);
+  ctx.arc(x1,y1,w1,Math.atan2(p1b[1]-y1,p1b[0]-x1),Math.atan2(p1a[1]-y1,p1a[0]-x1),false);
+  ctx.closePath();
+  ctx.fill();
+}
+/* ── 관절/덩어리: 음영 있는 원형 ── */
+function jointBlob(x,y,r,baseCol,lightDir){
+  const g=ctx.createRadialGradient(x-lightDir*r*0.4, y-r*0.4, r*0.2, x, y, r);
+  g.addColorStop(0, shade(baseCol,30));
+  g.addColorStop(1, shade(baseCol,-22));
+  ctx.fillStyle=g;
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+}
+
+function drawFigure(px,eff,facing,bodyColor,deepColor,opts){
+  /* ══════════════════════════════════════════
+     레퍼런스: 흰 도복 상의 + 검정 긴 주름 袴
+  ══════════════════════════════════════════ */
+  opts=opts||{};
+  var labelSide=(opts.labelSide!==undefined)?opts.labelSide:1;
+  var frontFoot=opts.frontFoot||(facing>0?'R':'L');
+  var frontId,backId;
+  if(frontFoot==='RL'){frontId='L=R';backId='L=R';}  /* 평행: 두 발 모두 L=R 표기 */
+  else if(frontFoot==='L'){frontId='L';backId='R';}
+  else{frontId='R';backId='L';}
+
+  const S=1.5;
+  const groundY=Hh-60;
+  const crouch=eff.crouch||0;
+  const lift=eff.lift;
+  const lean=(eff.lean||0)*facing;
+  const stance=(eff.stance!==undefined?eff.stance:0.4);
+  const kneel=eff.kneel||0;
+
+  /* ── 색상 팔레트 (레퍼런스 기반) ── */
+  const SKIN    = '#E8C9A8';       /* 얼굴·손 피부 */
+  const SKIN_SH = '#C4926A';       /* 피부 그림자 */
+  const GI_W    = '#F4F1EC';       /* 상의 흰 도복 */
+  const GI_W_SH = '#D0CBBD';       /* 상의 그림자 */
+  const GI_W_LN = '#B8B2A4';       /* 상의 주름선 */
+  const OBI     = '#111418';       /* 허리띠 검정 */
+  const OBI_H   = '#2A2E34';       /* 허리띠 하이라이트 */
+  const HAK     = opts.hakColor || '#1C2235';      /* 하의 앞다리(가리는 쪽) */
+  const HAK_BK  = opts.hakColorBack || shade(HAK,-26); /* 하의 뒷다리(가려지는 쪽) */
+  const HAK_SH  = shade(HAK,-30);
+  const HAK_LN  = shade(HAK,18);
+  const lightDir=-facing;
+
+  /* ── 골격 치수 (상의:하의 = 1:2) ── */
+  const THIGH=Math.round(38*S);
+  const SHIN =Math.round(38*S);
+  const TORSO=Math.round(40*S);        /* 상의 높이 80% 축소: 60px */
+  const HR   =Math.round(14*S);        /* 머리 반지름 */
+  const HIP_STAND=Math.round(110*S);   /* 하의 높이 증가: 165px — 상의 축소분 보충 */
+  const hipH =HIP_STAND -crouch*Math.round(36*S)
+              -stance*Math.round(24*S)
+              -kneel*Math.round(32*S);
+  const hipY    =groundY-hipH;
+  const shoulderY=hipY-TORSO+kneel*8;
+  const sx      =px+lean*S;
+  const headCx  =sx+lean*S*0.4;
+  const headCy  =shoulderY-HR-8;
+
+  /* ── 관절 좌표 ── */
+  const hipBias =facing*stance*6;
+  const hipF={x:px+facing*14+hipBias, y:hipY+10};
+  const hipB={x:px-facing*10+hipBias, y:hipY+12};
+  const frR=Math.round(22*S)+stance*Math.round(37*S);
+  const bkR=Math.round(22*S)+stance*Math.round(34*S);
+  const ankY=groundY-18;
+  const ankF={x:px+facing*frR, y:ankY};
+  let ankB,kneeB;
+  function solveKnee(hip,ank,T,S2,bd){
+    const dx=ank.x-hip.x,dy=ank.y-hip.y;
+    let d=Math.hypot(dx,dy)||0.1; const m=T+S2-1;
+    if(d>m)d=m;
+    let c=(T*T+d*d-S2*S2)/(2*T*d); c=Math.max(-1,Math.min(1,c));
+    const a=Math.acos(c),b2=Math.atan2(dy,dx),ea=b2+bd*a;
+    return {x:hip.x+T*Math.cos(ea),y:hip.y+T*Math.sin(ea)};
+  }
+  const kneeF=solveKnee(hipF,ankF,THIGH,SHIN,facing>0?1:-1);
+  if(kneel>0.05){
+    kneeB={x:hipB.x-facing*(14+stance*16),y:groundY-14-(1-kneel)*Math.round(32*S)};
+    ankB={x:kneeB.x-facing*48,y:groundY-6};
+  } else {
+    ankB={x:px-facing*bkR,y:ankY};
+    kneeB=solveKnee(hipB,ankB,THIGH,SHIN,facing>0?1:-1);
+  }
+
+  /* ── 그림자 ── */
+  ctx.save(); ctx.fillStyle='rgba(0,0,0,0.22)';
+  ctx.beginPath();
+  ctx.ellipse(px+facing*8,groundY+4,Math.round((42+stance*50)*S*0.7),11,0,0,Math.PI*2);
+  ctx.fill(); ctx.restore();
+
+  /* ══════════════════════════════════════════
+     하의(袴): 허리~발목 긴 주름 스커트형
+     — 다리 IK는 하의 내부에서만 참조
+     — 겉에서는 긴 천으로 덮인 실루엣만 보임
+  ══════════════════════════════════════════ */
+  function drawHakama(){
+    /* 하의의 밑단 Y: 발목 위에서 끝나 발이 보이도록 */
+    const hemY = groundY - 28;
+    /* 허리 너비 */
+    const wHalf = Math.round(20*S);
+    /* 밑단 너비: 동작에 따라 펼쳐짐 */
+    const hemSpread = Math.round((38 + stance*48)*S);
+    /* 앞뒤 자락의 x 방향 offset (런지할수록 앞이 당겨짐) */
+    const pullF = facing*stance*Math.round(28*S);
+    const pullB = -facing*stance*Math.round(18*S);
+    /* 허리 Y */
+    const waistY2 = hipY+4;
+
+    /* 앞다리는 화면상 facing 방향에 위치 → 그쪽 자락이 더 넓게(앞다리가 가림) */
+    const frontSideSpread = hemSpread*0.86;   /* 앞다리 쪽: 넓게 */
+    const backSideSpread  = hemSpread*0.58;   /* 뒷다리 쪽: 좁게 */
+    const hemFrontX = px + facing*frontSideSpread + pullF;
+    const hemBackX  = px - facing*backSideSpread + pullB;
+    /* 센터 경계: 앞다리 자락이 살짝 넘어와 뒷다리를 덮음 */
+    const centerX = px - facing*Math.round(2*S);
+    const centerHemX = px + facing*Math.round(10*S) + pullF*0.4;
+
+    /* ── (1) 뒷다리 자락 (가려지는 쪽) — 먼저, HAK_BK 단색 ── */
+    ctx.fillStyle=HAK_BK;
+    ctx.beginPath();
+    ctx.moveTo(px-wHalf, waistY2);
+    ctx.lineTo(centerX, waistY2);              /* 허리 중앙 */
+    ctx.lineTo(centerHemX, hemY);              /* 밑단 중앙(앞다리에 살짝 덮임) */
+    ctx.lineTo(hemBackX, hemY);                /* 뒷다리쪽 밑단 */
+    ctx.quadraticCurveTo(
+      px-facing*(wHalf+2)+pullB*0.6, (waistY2+hemY)*0.5,
+      px-wHalf, waistY2
+    );
+    ctx.closePath(); ctx.fill();
+    /* 뒷자락 주름선 */
+    ctx.strokeStyle=shade(HAK_BK,16); ctx.lineWidth=1.3;
+    for(let i=0;i<3;i++){
+      const f=(i+0.5)/3;
+      const tx1=px-wHalf*0.85*f, ty1=waistY2+6;
+      const tx2=px-facing*backSideSpread*f+pullB*0.5, ty2=hemY-3;
+      ctx.beginPath(); ctx.moveTo(tx1,ty1); ctx.lineTo(tx2,ty2); ctx.stroke();
+    }
+
+    /* ── (2) 앞다리 자락 (가리는 쪽) — 위에, HAK 단색 ── */
+    ctx.fillStyle=HAK;
+    ctx.beginPath();
+    ctx.moveTo(centerX, waistY2);              /* 허리 중앙 */
+    ctx.lineTo(px+wHalf, waistY2);             /* 허리 앞쪽 */
+    ctx.quadraticCurveTo(
+      px+facing*(wHalf+6)+pullF*0.6, (waistY2+hemY)*0.5,
+      hemFrontX, hemY
+    );
+    ctx.lineTo(centerHemX, hemY);              /* 밑단 중앙(뒷자락을 덮음) */
+    ctx.closePath(); ctx.fill();
+    /* 앞자락 주름선 */
+    ctx.strokeStyle=shade(HAK,-18); ctx.lineWidth=1.4;
+    for(let i=0;i<4;i++){
+      const f=(i+0.5)/4;
+      const tx1=centerX+facing*(wHalf*0.9)*f, ty1=waistY2+6;
+      const tx2=centerHemX+(hemFrontX-centerHemX)*f, ty2=hemY-2;
+      ctx.beginPath(); ctx.moveTo(tx1,ty1); ctx.lineTo(tx2,ty2); ctx.stroke();
+    }
+    /* 앞/뒤 자락 경계선 (접힘 강조) */
+    ctx.strokeStyle=shade(HAK,-26); ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(centerX, waistY2+2);
+    ctx.lineTo(centerHemX, hemY);
+    ctx.stroke();
+
+    /* 밑단 마감선 (전체) */
+    ctx.strokeStyle='rgba(0,0,0,.35)'; ctx.lineWidth=2.5;
+    ctx.beginPath();
+    ctx.moveTo(hemBackX, hemY);
+    ctx.lineTo(hemFrontX, hemY);
+    ctx.stroke();
+  }
+
+  /* ══════════════════════════════════════════
+     발(맨발) — 하의 아래 발등만 살짝 보임
+  ══════════════════════════════════════════ */
+  function drawFoot(ax,ay,lbl,flat,isFront){
+    const alpha  = isFront ? 1.0  : 0.55;
+    const bright = isFront ? 18   : -8;
+    const dark   = isFront ? -22  : -38;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    const g=ctx.createLinearGradient(ax,ay-6,ax,ay+10);
+    g.addColorStop(0, shade(SKIN,bright));
+    g.addColorStop(1, shade(SKIN,dark));
+    ctx.fillStyle=g;
+    ctx.beginPath();
+    if(flat){
+      ctx.moveTo(ax+facing*8,ay-4);
+      ctx.quadraticCurveTo(ax+facing*12,ay+5,ax+facing*5,ay+8);
+      ctx.lineTo(ax-facing*20,ay+8);
+      ctx.quadraticCurveTo(ax-facing*26,ay+4,ax-facing*22,ay-2);
+      ctx.quadraticCurveTo(ax-facing*6,ay-6,ax+facing*8,ay-4);
+    } else {
+      ctx.moveTo(ax-facing*10,ay-4);
+      ctx.quadraticCurveTo(ax-facing*13,ay+7,ax-facing*6,ay+9);
+      ctx.lineTo(ax+facing*18,ay+9);
+      ctx.quadraticCurveTo(ax+facing*24,ay+6,ax+facing*20,ay+1);
+      ctx.quadraticCurveTo(ax+facing*8,ay-6,ax-facing*10,ay-4);
+    }
+    ctx.closePath(); ctx.fill();
+    if(isFront){
+      ctx.strokeStyle=shade(SKIN,-32); ctx.lineWidth=1.2;
+      for(let t=0;t<4;t++){
+        const tx=ax+facing*(18-t*5),ty=ay+2;
+        ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx,ty+6);ctx.stroke();
+      }
+      ctx.strokeStyle='rgba(255,220,180,.45)'; ctx.lineWidth=1.8;
+      ctx.beginPath();
+      ctx.moveTo(ax+facing*18,ay+1);
+      ctx.quadraticCurveTo(ax+facing*22,ay+4,ax+facing*16,ay+7);
+      ctx.stroke();
+    }
+    if(lbl){
+      const lcol = lbl==='R' ? '#FFD040' : lbl==='L' ? '#88C4FF' : '#D8C4F0';
+      ctx.font='bold 13px monospace';
+      ctx.textAlign='center'; ctx.textBaseline='bottom';
+      const lx=ax+labelSide*32,ly=ay+4;
+      ctx.strokeStyle='rgba(0,0,0,.92)'; ctx.lineWidth=5;
+      ctx.strokeText(lbl,lx,ly); ctx.fillStyle=lcol; ctx.fillText(lbl,lx,ly);
+    }
+    ctx.restore();
+  }
+
+  /* 하의 그리기 */
+  drawHakama();
+
+  /* 발 렌더 — 하의 위에 그려서 항상 보이도록: 뒷발 먼저(흐리게) → 앞발 나중(진하게) */
+  drawFoot(ankB.x,ankB.y,backId,kneel>0.05,false);
+  drawFoot(ankF.x,ankF.y,frontId,false,true);
+
+  /* ══════════════════════════════════════════
+     허리 오비(帯): 넓은 검정 띠
+  ══════════════════════════════════════════ */
+  const obiTop  = hipY-Math.round(10*S);
+  const obiBot  = hipY+Math.round(10*S);
+  const obiW    = Math.round(22*S);
+  const oG=ctx.createLinearGradient(px-obiW,0,px+obiW,0);
+  oG.addColorStop(0,shade(OBI,16));
+  oG.addColorStop(0.5,OBI_H);
+  oG.addColorStop(1,shade(OBI,-8));
+  ctx.fillStyle=oG;
+  roundRect(px-obiW,obiTop,(obiW*2),(obiBot-obiTop),4); ctx.fill();
+  /* 오비 테두리 */
+  ctx.strokeStyle=shade(OBI,8); ctx.lineWidth=1;
+  roundRect(px-obiW,obiTop,(obiW*2),(obiBot-obiTop),4); ctx.stroke();
+  /* 뒷 매듭 (타이코) — facing 반대방향에 작은 사각형 */
+  ctx.fillStyle=shade(OBI,14);
+  roundRect(px-facing*Math.round(8*S)-Math.round(10*S), obiTop+Math.round(2*S),
+            Math.round(20*S), obiBot-obiTop-Math.round(4*S), 3); ctx.fill();
+
+  /* ══════════════════════════════════════════
+     상의(上衣): 흰 도복
+  ══════════════════════════════════════════ */
+  const chestY=shoulderY+4;
+  const topX=sx;
+  const midX=lerp(px,topX,0.5);
+  const shW=Math.round(12*S);   /* 어깨 반폭 */
+  const waW=Math.round(16*S);   /* 허리 반폭 */
+
+  /* 상의 몸판 */
+  const tG=ctx.createLinearGradient(topX-facing*shW*1.4,0,topX+facing*shW*1.4,0);
+  tG.addColorStop(0, facing>0?shade(GI_W,-30):shade(GI_W,8));
+  tG.addColorStop(0.5, GI_W);
+  tG.addColorStop(1, facing>0?shade(GI_W,8):shade(GI_W,-30));
+  ctx.fillStyle=tG;
+  ctx.beginPath();
+  /* 뒤 어깨 → 등 → 오비 위 */
+  ctx.moveTo(topX-facing*shW, chestY+2);
+  ctx.quadraticCurveTo(
+    midX-facing*(shW*0.8), (chestY+obiTop)*0.55,
+    px-facing*waW, obiTop+2
+  );
+  /* 허리 밑 자락 (오비 위에 살짝 걸침) */
+  ctx.lineTo(px-facing*(waW+6), obiBot-4);
+  ctx.lineTo(px+facing*(waW+2), obiBot-6);
+  ctx.lineTo(px+facing*waW, obiTop+2);
+  /* 앞 어깨 */
+  ctx.quadraticCurveTo(
+    midX+facing*(shW*0.8+4), (chestY+obiTop)*0.52,
+    topX+facing*shW, chestY+2
+  );
+  ctx.closePath(); ctx.fill();
+
+  /* 상의 주름 */
+  ctx.strokeStyle=GI_W_LN; ctx.lineWidth=1.6;
+  [-0.4,-0.12,0.14,0.38].forEach(function(r){
+    ctx.beginPath();
+    ctx.moveTo(midX+facing*r*shW, chestY+10);
+    ctx.lineTo(midX+facing*(r*waW*0.8+2), obiTop+4);
+    ctx.stroke();
+  });
+
+  /* 깃(衿) V자 여밈 */
+  ctx.strokeStyle=GI_W_SH; ctx.lineWidth=4.5;
+  ctx.beginPath();
+  ctx.moveTo(topX-facing*shW*0.22, chestY+6);
+  ctx.lineTo(topX+facing*shW*0.1, (chestY+obiTop)*0.5);
+  ctx.lineTo(midX+facing*4, obiTop-2);
+  ctx.stroke();
+  /* 깃 안쪽 */
+  ctx.strokeStyle=shade(GI_W_SH,16); ctx.lineWidth=2.5;
+  ctx.beginPath();
+  ctx.moveTo(topX-facing*shW*0.04, chestY+10);
+  ctx.lineTo(topX+facing*shW*0.24, (chestY+obiTop)*0.48);
+  ctx.stroke();
+
+  /* 어깨 패드 (도복 어깨선에 밀착, 작게) */
+  const shFX=topX+facing*shW, shFY=chestY+4;
+  const shBX=topX-facing*shW, shBY=chestY+8;
+  /* 어깨 둥근 마감만 살짝 — 몸통 색과 동일, 작은 타원 */
+  ctx.fillStyle=shade(GI_W,-4);
+  ctx.beginPath();
+  ctx.ellipse(shBX,shBY,Math.round(6*S),Math.round(5*S),0.2,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle=GI_W;
+  ctx.beginPath();
+  ctx.ellipse(shFX,shFY,Math.round(7*S),Math.round(5.5*S),-0.15,0,Math.PI*2); ctx.fill();
+
+  /* ── 팔 IK ── */
+  const handX=px+facing*eff.hand[0]*S, handY=hipY+eff.hand[1]*S;
+  const tipX =px+facing*eff.tip[0]*S,  tipY =hipY+eff.tip[1]*S;
+  /* 칼자루 방향: 칼끝(tip) → 손(hand) 반대로 이어지는 자루 */
+  const blDx=tipX-handX, blDy=tipY-handY, blLen=Math.hypot(blDx,blDy)||1;
+  const blUx=blDx/blLen, blUy=blDy/blLen;     /* 칼날 방향 단위벡터 */
+  /* 양손 그립: 앞손(코등이쪽) = handX 근처, 뒷손 = 자루 따라 칼끝 반대로 떨어짐 */
+  const gripGap=Math.round(15*S);             /* 두 손 간격 */
+  const frontHX=handX, frontHY=handY;                       /* 앞손(칼끝 쪽) */
+  const backHX=handX-blUx*gripGap, backHY=handY-blUy*gripGap; /* 뒷손(자루 끝쪽) */
+
+  const UPPER=Math.round(28*S), FORE=Math.round(25*S);
+  const bend=facing>0?1:-1;
+  const {ex:eBx,ey:eBy}=solveElbowPos(shBX,shBY,backHX,backHY,UPPER,FORE,bend);
+  const {ex:eFx,ey:eFy}=solveElbowPos(shFX,shFY,frontHX,frontHY,UPPER,FORE,bend);
+
+  /* 소매(袖): 넓고 사각에 가까운 형태 */
+  const slvW1=Math.round(9*S),  slvW2=Math.round(9*S);  /* 상완 폭 */
+  const cufW1=Math.round(8*S),  cufW2=Math.round(4*S);  /* 전완: 손목만 좁아짐 */
+
+  /* 뒷팔 소매 (뒷손까지) */
+  const slvBCol=shade(GI_W,-22);
+  limbShape(shBX,shBY,eBx,eBy,slvW1,slvW2,slvBCol,lightDir);
+  limbShape(eBx,eBy,backHX,backHY,cufW1,cufW2,shade(slvBCol,-5),lightDir);
+  jointBlob(eBx,eBy,Math.round(6*S),slvBCol,lightDir);
+  /* 소매 끝단 */
+  ctx.strokeStyle=shade(slvBCol,-18); ctx.lineWidth=3;
+  const bdx=eBx-backHX, bdy=eBy-backHY, blen=Math.hypot(bdx,bdy)||1;
+  const bnx=-bdy/blen, bny=bdx/blen;
+  ctx.beginPath();
+  ctx.moveTo(backHX+bnx*cufW2*0.9,backHY+bny*cufW2*0.9);
+  ctx.lineTo(backHX-bnx*cufW2*0.9,backHY-bny*cufW2*0.9); ctx.stroke();
+
+  /* 앞팔 소매 (앞손까지) */
+  const slvFCol=shade(GI_W,4);
+  limbShape(shFX,shFY,eFx,eFy,slvW1,slvW2,slvFCol,lightDir);
+  limbShape(eFx,eFy,frontHX,frontHY,cufW1,cufW2,shade(slvFCol,-3),lightDir);
+  jointBlob(eFx,eFy,Math.round(6*S),slvFCol,lightDir);
+  const fvdx=eFx-frontHX, fvdy=eFy-frontHY, flen=Math.hypot(fvdx,fvdy)||1;
+  const fnx=-fvdy/flen, fny=fvdx/flen;
+  ctx.strokeStyle=shade(slvFCol,-16); ctx.lineWidth=3;
+  ctx.beginPath();
+  ctx.moveTo(frontHX+fnx*cufW2*0.9,frontHY+fny*cufW2*0.9);
+  ctx.lineTo(frontHX-fnx*cufW2*0.9,frontHY-fny*cufW2*0.9); ctx.stroke();
+
+  /* ══════════════════════════════════════════
+     손(두 손 그립) — 칼자루 선을 따라 앞뒤로 배치
+  ══════════════════════════════════════════ */
+  (function drawHands(){
+    const gripAng=Math.atan2(blUy,blUx);
+    function drawPalm(cx,cy,scale,col){
+      const pw=Math.round(4.5*S*scale);   /* 손 폭 축소 */
+      const ph=Math.round(6*S*scale);     /* 손 길이 축소 */
+      const pg=ctx.createRadialGradient(cx,cy,1,cx,cy,ph);
+      pg.addColorStop(0,shade(col,12)); pg.addColorStop(1,shade(col,-22));
+      ctx.fillStyle=pg;
+      ctx.beginPath(); ctx.ellipse(cx,cy,ph,pw,gripAng+Math.PI/2,0,Math.PI*2); ctx.fill();
+      /* 손가락이 자루를 감싼 윤곽 */
+      ctx.strokeStyle=shade(col,-30); ctx.lineWidth=1;
+      ctx.beginPath(); ctx.ellipse(cx,cy,ph,pw,gripAng+Math.PI/2,0,Math.PI*2); ctx.stroke();
+    }
+    /* 뒷손(자루 끝쪽, 어둡게) */
+    drawPalm(backHX,backHY,0.95,shade(SKIN,-14));
+    /* 앞손(코등이쪽) */
+    drawPalm(frontHX,frontHY,1.0,shade(SKIN,-4));
+  })();
+
+  /* ══════════════════════════════════════════
+     머리 + 목
+  ══════════════════════════════════════════ */
+  /* 목 */
+  const neckW=Math.round(5.5*S);
+  limbShape(topX-facing*2,chestY-2, headCx,headCy+HR,neckW,neckW,shade(SKIN,-10),lightDir);
+
+  /* 두상 (측면 실루엣) */
+  const hgr=ctx.createRadialGradient(
+    headCx-lightDir*HR*0.4, headCy-HR*0.38, HR*0.15,
+    headCx, headCy, HR*1.1
+  );
+  hgr.addColorStop(0, shade(SKIN,32));
+  hgr.addColorStop(0.7, SKIN);
+  hgr.addColorStop(1, shade(SKIN,-22));
+  ctx.fillStyle=hgr;
+  ctx.beginPath();
+  ctx.moveTo(headCx-facing*HR,headCy+HR*0.1);
+  /* 뒤통수 */
+  ctx.quadraticCurveTo(headCx-facing*HR*0.95,headCy-HR*1.15, headCx,headCy-HR*1.22);
+  /* 이마→코 */
+  ctx.quadraticCurveTo(headCx+facing*HR*0.88,headCy-HR*0.88, headCx+facing*HR*1.06,headCy-HR*0.08);
+  /* 코→턱 */
+  ctx.quadraticCurveTo(headCx+facing*HR*0.94,headCy+HR*0.52, headCx+facing*HR*0.38,headCy+HR*0.96);
+  /* 턱→뒷목 */
+  ctx.quadraticCurveTo(headCx-facing*HR*0.55,headCy+HR*1.04, headCx-facing*HR,headCy+HR*0.1);
+  ctx.closePath(); ctx.fill();
+
+  /* 귀 */
+  ctx.fillStyle=shade(SKIN,-8);
+  ctx.beginPath();
+  ctx.ellipse(headCx-facing*HR*0.9,headCy+HR*0.14,Math.round(3*S),Math.round(4.5*S),0,0,Math.PI*2);
+  ctx.fill();
+
+  /* 눈 */
+  ctx.fillStyle='rgba(25,14,6,.78)';
+  ctx.beginPath();
+  ctx.ellipse(headCx+facing*HR*0.52,headCy-HR*0.06,Math.round(3*S),Math.round(2.2*S),0,0,Math.PI*2);
+  ctx.fill();
+  /* 눈 하이라이트 */
+  ctx.fillStyle='rgba(255,255,255,.55)';
+  ctx.beginPath();
+  ctx.arc(headCx+facing*(HR*0.52-2),headCy-HR*0.15,1.8,0,Math.PI*2); ctx.fill();
+
+  /* 눈썹 */
+  ctx.strokeStyle='rgba(45,25,8,.7)'; ctx.lineWidth=2.2;
+  ctx.lineCap='round';
+  ctx.beginPath();
+  ctx.moveTo(headCx+facing*HR*0.3,headCy-HR*0.35);
+  ctx.quadraticCurveTo(headCx+facing*HR*0.5,headCy-HR*0.42, headCx+facing*HR*0.7,headCy-HR*0.3);
+  ctx.stroke();
+
+  /* 코 (측면 — 얕은 라인) */
+  ctx.strokeStyle='rgba(160,100,60,.35)'; ctx.lineWidth=1.5;
+  ctx.beginPath();
+  ctx.moveTo(headCx+facing*HR*0.86,headCy+HR*0.05);
+  ctx.lineTo(headCx+facing*HR*0.7,headCy+HR*0.18);
+  ctx.stroke();
+
+  /* ── 남성 헤어 (짧은 옆면 + 위로 자연스럽게 올라간 형태) ── */
+  const HAIR = '#1E1208';
+  const HAIR_H = 'rgba(70,42,16,.45)';
+  /* 뒷머리 기반층 */
+  ctx.fillStyle=HAIR;
+  ctx.beginPath();
+  ctx.moveTo(headCx-facing*HR,headCy+HR*0.1);
+  ctx.quadraticCurveTo(headCx-facing*HR*0.9,headCy-HR*1.18, headCx-facing*HR*0.1,headCy-HR*1.28);
+  ctx.quadraticCurveTo(headCx+facing*HR*0.55,headCy-HR*1.22, headCx+facing*HR*0.85,headCy-HR*0.82);
+  ctx.quadraticCurveTo(headCx+facing*HR*0.6,headCy-HR*0.28, headCx-facing*HR*0.55,headCy+HR*1.0);
+  ctx.quadraticCurveTo(headCx-facing*HR*0.8,headCy+HR*0.8, headCx-facing*HR,headCy+HR*0.1);
+  ctx.closePath(); ctx.fill();
+  /* 앞머리 레이어 (이마 라인) */
+  ctx.fillStyle=shade(HAIR,8);
+  ctx.beginPath();
+  ctx.moveTo(headCx+facing*HR*0.85,headCy-HR*0.82);
+  ctx.quadraticCurveTo(headCx+facing*HR*0.7,headCy-HR*1.1, headCx+facing*HR*0.2,headCy-HR*1.26);
+  ctx.quadraticCurveTo(headCx-facing*HR*0.1,headCy-HR*1.28, headCx-facing*HR*0.1,headCy-HR*1.1);
+  ctx.quadraticCurveTo(headCx+facing*HR*0.5,headCy-HR*1.0, headCx+facing*HR*0.82,headCy-HR*0.6);
+  ctx.closePath(); ctx.fill();
+  /* 헤어 하이라이트 (윗면 광택) */
+  ctx.strokeStyle=HAIR_H; ctx.lineWidth=3.5; ctx.lineCap='round';
+  ctx.beginPath();
+  ctx.moveTo(headCx-facing*HR*0.4,headCy-HR*1.22);
+  ctx.quadraticCurveTo(headCx+facing*HR*0.2,headCy-HR*1.3, headCx+facing*HR*0.65,headCy-HR*1.0);
+  ctx.stroke();
+
+  /* ── 입술 (심플한 선) ── */
+  ctx.strokeStyle='rgba(170,90,70,.75)'; ctx.lineWidth=2.2; ctx.lineCap='round';
+  ctx.beginPath();
+  ctx.moveTo(headCx+facing*HR*0.56,headCy+HR*0.42);
+  ctx.quadraticCurveTo(headCx+facing*HR*0.72,headCy+HR*0.46, headCx+facing*HR*0.84,headCy+HR*0.40);
+  ctx.stroke();
+
+  /* ── 검 ── */
+  drawSword(handX,handY,tipX,tipY);
+  return {headCx,headCy,handX,handY,hipY,tipX,tipY};
+}
+
+/* 가상의 적(賊) 표적 — 찌름/벰 방향 표시 */
+function drawTarget(px,facing,target,k){
+  const groundY=Hh-50, baseY=groundY-110;
+  const tx=px+facing*150;
+  let ty=baseY;
+  if(target==='do') ty=groundY-58;
+  else if(target==='thrust') ty=groundY-90;
+  ctx.save();
+  ctx.globalAlpha=0.32+0.28*Math.sin(Math.min(1,k)*Math.PI);
+  ctx.strokeStyle='#C24A3A';ctx.lineWidth=1.6;
+  ctx.beginPath();ctx.arc(tx,ty,13,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.arc(tx,ty,5,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(tx-19,ty);ctx.lineTo(tx-7,ty);ctx.moveTo(tx+7,ty);ctx.lineTo(tx+19,ty);
+  ctx.moveTo(tx,ty-19);ctx.lineTo(tx,ty-7);ctx.moveTo(tx,ty+7);ctx.lineTo(tx,ty+19);ctx.stroke();
+  ctx.fillStyle='rgba(194,74,58,.85)';ctx.font='bold 11px "Nanum Myeongjo","Noto Serif KR",serif';ctx.textAlign='center';
+  ctx.fillText('賊',tx,ty-20);
+  ctx.restore();
+}
+function drawImpact(x,y,k){ctx.save();const r=6+k*18;ctx.globalAlpha=1-k;ctx.strokeStyle='#E6C77E';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.stroke();ctx.restore();}
+
+/* 검로 잔상(검 궤적) */
+function drawTrail(px,facing,prevEff,curEff,k,hipY){
+  if(k<0.05||k>0.96)return;
+  ctx.save();ctx.globalAlpha=0.18*(1-Math.abs(k-0.5)*1.4);
+  ctx.strokeStyle='#E8EFF6';ctx.lineWidth=2;
+  for(let s=0.3;s<=0.7;s+=0.2){
+    const tip=lerpArr(prevEff.tip,curEff.tip,Math.max(0,k-s*0.3));
+    const tx=px+facing*tip[0], ty=hipY+tip[1];
+    ctx.beginPath();ctx.arc(tx,ty,1.5,0,Math.PI*2);ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/* ── 회전 방향 시각화: 발밑에 호+화살촉 ──
+   turnType: '좌'(반시계 90°) '우'(시계 90°) '좌후'(반시계 180°) '우후'(시계 180°)
+   k: 0~1 진행도, color: 인물 색 */
+function drawTurnArc(px, groundY, turnType, k, color){
+  if(!turnType) return;
+  const cw = (turnType[0]==='우');           // 시계방향 여부
+  const half = (turnType.length>1);          // '후' = 180°
+  const sweep = half ? Math.PI : Math.PI*0.62;
+  const cy = groundY - 4;                     // 발밑 중심
+  const R = 30;                               // 호 반지름
+  // 진행도에 따라 호가 그려지는 비율
+  const prog = Math.min(1, k*1.15);
+  // 기준 시작각 (바닥 평면에 눕힌 타원 호)
+  const startA = cw ? -Math.PI*0.15 : Math.PI*1.15;
+  const dir = cw ? 1 : -1;
+  const endA = startA + dir*sweep*prog;
+
+  ctx.save();
+  ctx.globalAlpha = 0.85 * (k<0.12 ? k/0.12 : k>0.9 ? (1-k)/0.1 : 1);
+  // 바닥에 눕히기 위해 y축 스케일 축소
+  ctx.translate(px, cy);
+  ctx.scale(1, 0.42);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 3.2;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.arc(0, 0, R, startA, endA, !cw);
+  ctx.stroke();
+  // 화살촉 (호의 끝)
+  const ax = Math.cos(endA)*R, ay = Math.sin(endA)*R;
+  const tang = endA + dir*Math.PI/2;          // 접선 방향
+  const ah = 9;
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(ax, ay);
+  ctx.lineTo(ax - Math.cos(tang-0.4)*ah, ay - Math.sin(tang-0.4)*ah);
+  ctx.lineTo(ax - Math.cos(tang+0.4)*ah, ay - Math.sin(tang+0.4)*ah);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  // 중앙 회전 아이콘 + 각도 라벨 (납작화 영향 안 받게 별도)
+  if(k>0.15 && k<0.9){
+    ctx.save();
+    ctx.globalAlpha = 0.95;
+    ctx.font = '900 14px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.lineJoin = 'round';
+    const sym = cw ? '↻' : '↺';
+    const deg = half ? '180°' : '90°';
+    const txt = sym+deg;
+    const ly = groundY+18;
+    // 두꺼운 외곽선으로 가독성 강화
+    ctx.strokeStyle = 'rgba(0,0,0,.9)';
+    ctx.lineWidth = 5;
+    ctx.strokeText(txt, px, ly);
+    ctx.fillStyle = color;
+    ctx.fillText(txt, px, ly);
+    ctx.restore();
+  }
+}
+
+function mapX(xn){const oL=W*0.18, oR=W*0.82;return lerp(oL,oR,xn);}
+function mapXL(xn){const oL=W*0.08, oR=W*0.42;return lerp(oL,oR,xn);}
+function mapXR(xn){const oL=W*0.92, oR=W*0.58;return lerp(oL,oR,xn);}
+
+function easeForStep(step){return STRIKE_ACTS.includes(step.action)?easeStrike:easeSmooth;}
+
+function draw(){
+  ctx.clearRect(0,0,W,Hh);
+  const groundY=Hh-50;
+
+  // ── 배경: 바닥 + 격자 ──
+  const fg=ctx.createLinearGradient(0,groundY-10,0,Hh);
+  fg.addColorStop(0,'#322618');fg.addColorStop(1,'#1E160D');
+  ctx.fillStyle=fg;ctx.fillRect(0,groundY,W,Hh-groundY);
+  ctx.strokeStyle='rgba(74,58,40,.5)';ctx.lineWidth=1;
+  for(let i=1;i<8;i++){const x=W*i/8;ctx.beginPath();ctx.moveTo(x,groundY);ctx.lineTo(x+(x-W/2)*0.16,Hh);ctx.stroke();}
+  ctx.strokeStyle='#4A3A28';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,groundY);ctx.lineTo(W,groundY);ctx.stroke();
+
+  // ── 세(勢) 데이터 보간 ──
+  const ss=steps();
+  const prev=stepIdx>0?ss[stepIdx-1]:ss[0];
+  const cur=ss[stepIdx];
+  const ease=easeForStep(cur);
+  const k=ease(Math.min(1,t));
+
+  const ep0=effParams(prev), ep1=effParams(cur);
+  function wasHigh(p){return ['좌어깨','우어깨','상단'].includes(p);}
+  function tipArc(p0,p1,kk,isSt,high){
+    if(!isSt||!high)return lerpArr(p0,p1,kk);
+    const midX=p0[0]+(p1[0]-p0[0])*0.35+18, midY=p0[1]+(p1[1]-p0[1])*0.25;
+    if(kk<=0.5)return lerpArr(p0,[midX,midY],kk*2);
+    return lerpArr([midX,midY],p1,(kk-0.5)*2);
+  }
+  const isStk=['strike','strike_do'].includes(cur.action);
+  const tip=tipArc(ep0.tip,ep1.tip,k,isStk,wasHigh(prev.posture));
+  const eff={hand:lerpArr(ep0.hand,ep1.hand,k),tip,lean:lerp(ep0.lean,ep1.lean,k),
+    crouch:lerp(ep0.crouch,ep1.crouch,k),lift:(k>0.5?ep1.lift:ep0.lift),
+    stance:lerp(ep0.stance,ep1.stance,k),kneel:lerp(ep0.kneel,ep1.kneel,k)};
+
+  // ── 회전 플립 ── (좌후/우후 = 180° 뒤돌기, 좌/우 = 90° 제자리)
+  let facingBase=cur.facing, flip=1;
+  const isTurn = !!cur.turn;
+  const isHalfTurn = isTurn && cur.turn.length>1;     // 180°
+  if(isTurn && prev.facing!==cur.facing){
+    flip=Math.max(0.10,Math.abs(Math.cos(k*Math.PI)));
+    facingBase = (k<0.5) ? prev.facing : cur.facing;
+  } else if(isTurn){
+    flip=Math.max(0.55,Math.abs(Math.cos(k*Math.PI*0.5)));
+  }
+
+  // ── 방향 토글: viewDir='right'(→) 왼쪽(靑) NPC / 'left'(←) 오른쪽(白) NPC ──
+  const isRightView = (viewDir==='right');
+  const facing = isRightView ? facingBase : -facingBase;
+  const px = lerp(mapX(prev.x), mapX(cur.x), k);
+  const BLUE='#A8C4E0', BLUE_D='#3A5878';
+  const WHITE='#E8E4DC', WHITE_D='#8A8078';
+  const bodyColor = isRightView ? BLUE : WHITE;
+  const bodyDeep  = isRightView ? BLUE_D : WHITE_D;
+  const hakFront  = isRightView ? '#1E5FC8' : '#3A4A6E';
+  const hakBack   = isRightView ? '#123E8C' : '#1C2235';
+  const labelSide = isRightView ? 1 : -1;
+  const arcColor  = isRightView ? '#88C4FF' : '#E8E4DC';
+
+  let turnForArc = cur.turn;
+  if(isTurn && !isRightView){
+    turnForArc = (cur.turn[0]==='좌'?'우':'좌') + (isHalfTurn?'후':'');
+  }
+  if(isTurn) drawTurnArc(px, groundY, turnForArc, k, arcColor);
+  if(STRIKE_ACTS.includes(cur.action)){
+    drawTarget(px,facing,cur.target||'men',k);
+  }
+  ctx.save();
+  ctx.translate(px,0);ctx.scale(flip,1);ctx.translate(-px,0);
+  const R=drawFigure(px,eff,facing,bodyColor,bodyDeep,{frontFoot:cur.foot,labelSide:labelSide,hakColor:hakFront,hakColorBack:hakBack});
+  ctx.restore();
+  drawTrail(px,facing,ep0,{tip},k,R.hipY);
+
+  // ── 임팩트 ──
+  if(STRIKE_ACTS.includes(cur.action) && k>0.6 && k<0.96){
+    const kk=(k-0.6)/0.36;
+    const iy=(cur.target==='do')?groundY-58:(cur.target==='thrust')?groundY-90:groundY-110;
+    drawImpact(px+facing*120, iy, kk);
+  }
+}
+
+/* ---- animation loop ---- */
+function tick(now){
+  if(!lastTime)lastTime=now;
+  const dt=now-lastTime;lastTime=now;
+  if(playing){
+    const dur=steps()[stepIdx].duration/speed;
+    t+=dt/dur;
+    if(t>=1){
+      t=0;
+      if(stepIdx<steps().length-1){stepIdx++;}
+      else{playing=false;t=1;stepIdx=steps().length-1;setPlayBtn();}
+      syncUI();
+    }
+    draw();
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ---- UI sync ---- */
+function syncUI(){
+  var ss=steps(), cur=ss[stepIdx];
+  var sr=stageOfStep(stepIdx);
+  var honN=honBenNumber(stepIdx);
+  // 大 표어
+  var sl=document.getElementById('slogan');
+  document.getElementById('slOrd').textContent = cur.isIntro ? '시작하기' : cur.isOutro ? '마무리' : ('제 '+honN+' 세');
+  document.getElementById('slHanja').textContent=cur.hanja;
+  document.getElementById('slName').textContent=cur.name;
+  document.getElementById('slSub').textContent=cur.slogan;
+  sl.classList.remove('flash');void sl.offsetWidth;sl.classList.add('flash');
+  // 배지
+  document.getElementById('bsNum').textContent = cur.isIntro ? '시작하기' : cur.isOutro ? '마무리' : ('勢 '+honN+' / '+HON_TOTAL);
+  document.getElementById('bsName').textContent=cur.name;
+  var bt=document.getElementById('badgeTurn');
+  if(cur.turn){
+    var tmap={
+      '좌':'↺ 왼쪽으로 돌기',
+      '우':'↻ 오른쪽으로 돌기',
+      '좌후':'↺ 뒤로 돌기 (좌 180°)',
+      '우후':'↻ 뒤로 돌기 (우 180°)'
+    };
+    bt.textContent=tmap[cur.turn]||('↺ '+cur.turn);
+    bt.classList.add('on');
+  }
+  else bt.classList.remove('on');
+  // info bar — 현재 동작
+  // info-bar 단락 하이라이트
+  var curStageIdx=STAGE_RANGES.indexOf(sr);
+  for(var si=0;si<STAGE_RANGES.length;si++){
+    var el=document.getElementById('ibStage'+si);
+    if(el) el.classList.toggle('active', si===curStageIdx && !cur.isIntro && !cur.isOutro);
+  }
+  // 스크럽
+  document.getElementById('curStep').textContent = cur.isIntro ? '시작' : cur.isOutro ? '끝' : honN;
+  document.getElementById('totStep').textContent = HON_TOTAL;
+  document.getElementById('scrubFill').style.width=(stepIdx/(ss.length-1))*100+'%';
+  document.querySelectorAll('#scrubTicks .tick').forEach(function(el,i){el.classList.toggle('done',i<=stepIdx);});
+}
+function setPlayBtn(){document.getElementById('btnPlay').innerHTML=playing?'❚❚ 정지':'▶ 재생';}
+
+function jumpStep(i){playing=false;setPlayBtn();stepIdx=i;t=0;syncUI();draw();}
+function buildTicks(){const c=document.getElementById('scrubTicks');c.innerHTML='';steps().forEach(()=>{const d=document.createElement('div');d.className='tick';c.appendChild(d);});}
+
+/* boot init */
+function initAll(){
+  // 전체 세 수(본 33세 기준) 및 단락별 갯수를 실제 데이터로 동적 채움
+  var totalEl=document.getElementById('ibTotal');
+  if(totalEl) totalEl.textContent='전체 '+HON_TOTAL+'세';
+  STAGE_RANGES.forEach(function(sr,i){
+    var box=document.getElementById('ibStage'+i);
+    if(!box) return;
+    var cnt=box.querySelector('.ib-cnt');
+    if(cnt) cnt.textContent=sr.count;
+  });
+  buildTicks();syncUI();draw();
+}
+
+/* 컨트롤 */
+document.getElementById('btnPlay').onclick=()=>{if(stepIdx>=steps().length-1&&t>=1){stepIdx=0;t=0;syncUI();}playing=!playing;lastTime=0;setPlayBtn();};
+
+/* 방향 토글: → 방향(좌측/靑) ↔ ← 방향(우측/白) */
+function setViewDir(dir){
+  viewDir=dir;
+  document.getElementById('btnDirRight').classList.toggle('active', dir==='right');
+  document.getElementById('btnDirLeft').classList.toggle('active', dir==='left');
+  draw();
+}
+document.getElementById('btnDirRight').onclick=()=>setViewDir('right');
+document.getElementById('btnDirLeft').onclick=()=>setViewDir('left');
+
+document.getElementById('btnNext').onclick=()=>{playing=false;setPlayBtn();if(stepIdx<steps().length-1){stepIdx++;t=0;syncUI();draw();}};
+document.getElementById('btnPrev').onclick=()=>{playing=false;setPlayBtn();if(stepIdx>0){stepIdx--;t=0;syncUI();draw();}};
+document.getElementById('btnFirst').onclick=()=>{playing=false;setPlayBtn();stepIdx=0;t=0;syncUI();draw();};
+document.getElementById('btnLast').onclick=()=>{playing=false;setPlayBtn();stepIdx=steps().length-1;t=1;syncUI();draw();};
+document.getElementById('speed').onclick=(e)=>{if(e.target.dataset.s){speed=parseFloat(e.target.dataset.s);document.querySelectorAll('#speed button').forEach(b=>b.classList.toggle('active',b===e.target));}};
+document.getElementById('scrub').onclick=(e)=>{const r=e.currentTarget.getBoundingClientRect();const p=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));playing=false;setPlayBtn();stepIdx=Math.round(p*(steps().length-1));t=0;syncUI();draw();};
+window.addEventListener('keydown',(e)=>{
+  if(e.code==='Space'){e.preventDefault();document.getElementById('btnPlay').click();}
+  else if(e.code==='ArrowRight'){document.getElementById('btnNext').click();}
+  else if(e.code==='ArrowLeft'){document.getElementById('btnPrev').click();}
+});
+
+/* boot */
+resize();initAll();requestAnimationFrame(tick);
+</script>
+</body>
+</html>
