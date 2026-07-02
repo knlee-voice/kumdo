@@ -82,24 +82,25 @@ body {
 .tab-bar::-webkit-scrollbar { display: none; }
 .tab-btn {
   flex: 1; min-width: 58px;
-  padding: 9px 5px;
-  border: 2px solid var(--border);
+  padding: 10px 5px;
+  border: 2.5px solid var(--border-md);
   border-radius: 10px;
-  background: var(--bg);
+  background: var(--white);
   cursor: pointer;
-  font-size: 12px; font-weight: 700;
+  font-size: 14px; font-weight: 800;
   color: var(--text2);
   text-align: center; line-height: 1.3;
   white-space: nowrap; user-select: none;
   transition: all .15s ease;
-  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  box-shadow: 0 2px 6px rgba(0,0,0,.10);
 }
 .tab-btn:active { transform: scale(.96); }
 .tab-btn.active {
   background: var(--tc);
   border-color: var(--tc);
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0,0,0,.18);
+  box-shadow: 0 3px 10px rgba(0,0,0,.22);
+  transform: translateY(-1px);
 }
 
 /* ════════════════════════════════
@@ -537,17 +538,18 @@ body {
   color: var(--text2); font-weight: 700;
   font-size: 13px; white-space: nowrap;
 }
-.unified-table td:nth-child(2) { font-weight: 600; }
+.unified-table td:nth-child(2) { font-weight: 700; font-size: 15px; }
 
-/* 이름 그리드 (자문·협력위원 4열) */
+/* 이름 그리드 (자문·협력위원·Tournament STAFF 4열) */
 .name-grid td {
   text-align: center; width: 25%;
-  font-weight: 500; font-size: 15px;
+  font-weight: 700; font-size: 15px;
+  color: var(--text);
   border: 1px solid var(--border);
   padding: 10px 6px;
 }
 .name-grid tr:first-child td { border-top: none; }
-.name-grid td:first-child { border-left: none; color: var(--text); font-size: 15px; }
+.name-grid td:first-child { border-left: none; color: var(--text); font-size: 15px; font-weight: 700; }
 .name-grid td:last-child  { border-right: none; }
 
 /* 운영석 2열 레이아웃 (임원진 | 본부석) */
@@ -566,8 +568,42 @@ body {
   padding: 6px 10px; border-radius: 0 6px 6px 0; line-height: 1.5;
 }
 
-/* 의무 지원 강조 박스 */
-.med-box {
+/* 부서별 부장 — 줄 라인 없는 테이블 */
+.dept-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 15px;
+}
+.dept-table thead tr { background: var(--bg); }
+.dept-table th {
+  padding: 7px 10px; text-align: left;
+  font-size: 11px; font-weight: 700; color: var(--text3);
+  text-transform: uppercase; letter-spacing: .04em;
+  border-bottom: 1px solid var(--border);
+}
+.dept-table td {
+  padding: 9px 10px;
+  color: var(--text); vertical-align: middle;
+  border: none;  /* 줄 라인 없음 */
+}
+.dept-table tr:nth-child(even) td { background: var(--bg); }
+.dept-table td:first-child { color: var(--text3); font-weight: 700; font-size: 12px; white-space: nowrap; }
+.dept-table td:nth-child(2) { font-weight: 700; }
+
+/* 의무 지원 노트 — 무난한 회색 라인 스타일 */
+.med-note {
+  margin-top: 8px; font-size: 13px;
+  color: var(--text2); line-height: 1.6;
+  padding: 8px 12px;
+  background: var(--bg); border-left: 3px solid var(--border-md);
+  border-radius: 0 6px 6px 0;
+}
+.med-note-label {
+  font-size: 11px; font-weight: 700; color: var(--text3);
+  text-transform: uppercase; letter-spacing: .05em;
+  margin-right: 8px;
+}
+
+
   margin-top: 10px;
   border: 1.5px solid #c0392b;
   border-radius: var(--rad-sm);
@@ -661,20 +697,9 @@ body {
               <tr><td>대회장</td><td>김성철</td></tr>
               <tr><td>감사</td><td>김정국</td></tr>
               <tr><td>실무부회장</td><td>신용만</td></tr>
-              <tr><td>부대회장</td><td>박경옥 · 구광모 · 김석 · 장지영 · 이수안</td></tr>
+              <tr><td>부대회장</td><td>박경옥  구광모  김석  장지영  이수안</td></tr>
               <tr><td>임원장</td><td>이형우</td></tr>
-              <tr>
-                <td style="vertical-align:top;">본부임원</td>
-                <td>
-                  <table class="unified-table name-grid" style="margin-top:2px;">
-                    <tbody>
-                      <tr><td>강병규</td><td>김준성</td><td>김현진</td><td>박동우</td></tr>
-                      <tr><td>박찬민</td><td>손진선</td><td>석재윤</td><td>윤정하</td></tr>
-                      <tr><td>이영수</td><td>이태훈</td><td>정만영</td><td>최병권</td></tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
+              <tr><td style="vertical-align:top;">본부임원</td><td>강병규  김준성  김현진  박동우  박찬민  손진선  석재윤  윤정하  이영수  이태훈  정만영  최병권</td></tr>
             </tbody>
           </table>
         </div>
@@ -698,26 +723,18 @@ body {
               <tr><td>의무부장</td><td>김영수</td><td>강기만</td></tr>
             </tbody>
           </table>
-          <div class="med-box">
-            <div class="med-box-title">의무 지원</div>
-            <div class="med-box-body">
-              <span>에이치드림정형외과 의료팀 3명 파견</span>
-              <span>특수구급차</span>
-              <span>구급대원 1</span>
-              <span>응급구조사 1</span>
-            </div>
+          <div class="med-note">
+            <span class="med-note-label">의무 지원</span>
+            에이치드림정형외과 의료팀 3명 파견&nbsp;&nbsp;특수구급차&nbsp;&nbsp;구급대원 1&nbsp;&nbsp;응급구조사 1
           </div>
         </div>
 
         <!-- 자문위원 -->
         <div class="roster-group">
           <div class="sec-head sec-head-slate">자문위원</div>
-          <table class="unified-table name-grid">
+          <table class="unified-table">
             <tbody>
-              <tr><td>강기만</td><td>김신성</td><td>김정규</td><td>김형섭</td></tr>
-              <tr><td>박명운</td><td>변종혁</td><td>서용원</td><td>성기익</td></tr>
-              <tr><td>손문성</td><td>신현욱</td><td>유재봉</td><td>윤강훈</td></tr>
-              <tr><td>이성근</td><td>이훈호</td><td>주재승</td><td>최중섭</td></tr>
+              <tr><td style="vertical-align:top; color:var(--text3); font-size:12px; white-space:nowrap;">명단</td><td>강기만  김신성  김정규  김형섭  박명운  변종혁  서용원  성기익  손문성  신현욱  유재봉  윤강훈  이성근  이훈호  주재승  최중섭</td></tr>
             </tbody>
           </table>
         </div>
@@ -725,10 +742,9 @@ body {
         <!-- 협력위원 -->
         <div class="roster-group" style="border-bottom:none; margin-bottom:0; padding-bottom:4px;">
           <div class="sec-head sec-head-slate">협력위원</div>
-          <table class="unified-table name-grid">
+          <table class="unified-table">
             <tbody>
-              <tr><td>고영미</td><td>김순화</td><td>김재열</td><td>김지선</td></tr>
-              <tr><td>송호석</td><td>주정신</td><td>지현정</td><td>황지훈</td></tr>
+              <tr><td style="vertical-align:top; color:var(--text3); font-size:12px; white-space:nowrap;">명단</td><td>고영미  김순화  김재열  김지선  송호석  주정신  지현정  황지훈</td></tr>
             </tbody>
           </table>
         </div>
@@ -752,19 +768,9 @@ body {
         <!-- Tournament STAFF -->
         <div class="roster-group" style="margin-top:10px;">
           <div class="sec-head sec-head-slate">Tournament STAFF &nbsp;— 44명</div>
-          <table class="unified-table name-grid">
+          <table class="unified-table">
             <tbody>
-              <tr><td>김은강</td><td>강연우</td><td>고은빈</td><td>김가현</td></tr>
-              <tr><td>김도언</td><td>김민서</td><td>김민지</td><td>김서울</td></tr>
-              <tr><td>김예림</td><td>김정해</td><td>김지우</td><td>김지유</td></tr>
-              <tr><td>남서현</td><td>노예림</td><td>박서윤</td><td>박서준</td></tr>
-              <tr><td>박지수</td><td>박지호</td><td>성우재</td><td>신가연</td></tr>
-              <tr><td>양희원</td><td>오지수</td><td>유가연</td><td>유현정</td></tr>
-              <tr><td>윤가람</td><td>윤경하</td><td>이동건</td><td>이서윤</td></tr>
-              <tr><td>이서윤</td><td>이아름</td><td>이유빈</td><td>이은솔</td></tr>
-              <tr><td>임혜숙</td><td>정승민</td><td>정인호</td><td>조강민</td></tr>
-              <tr><td>주윤건</td><td>최수민</td><td>최인화</td><td>최치민</td></tr>
-              <tr><td>한동재</td><td>홍민영</td><td>황윤하</td><td>황준산</td></tr>
+              <tr><td style="vertical-align:top; color:var(--text3); font-size:12px; white-space:nowrap;">명단</td><td>김은강  강연우  고은빈  김가현  김도언  김민서  김민지  김서울  김예림  김정해  김지우  김지유  남서현  노예림  박서윤  박서준  박지수  박지호  성우재  신가연  양희원  오지수  유가연  유현정  윤가람  윤경하  이동건  이서윤  이서윤  이아름  이유빈  이은솔  임혜숙  정승민  정인호  조강민  주윤건  최수민  최인화  최치민  한동재  홍민영  황윤하  황준산</td></tr>
             </tbody>
           </table>
         </div>
@@ -773,11 +779,11 @@ body {
         <div class="roster-group" style="border-bottom:none; margin-bottom:0; padding-bottom:4px;">
           <div class="sec-head sec-head-slate">Broadcast / Interpreter STAFF &nbsp;— 3명</div>
           <table class="unified-table">
-            <thead><tr><th>성명</th><th>담당 언어</th></tr></thead>
             <tbody>
-              <tr><td>이경님</td><td>영어</td></tr>
-              <tr><td>Yamazak Hitomi</td><td>일본어</td></tr>
-              <tr><td>안지</td><td>중국어</td></tr>
+              <tr>
+                <td style="vertical-align:top; color:var(--text3); font-size:12px; white-space:nowrap;">명단</td>
+                <td>이경님 <span style="font-size:12px;color:var(--text3);font-weight:400;">(영어)</span>&nbsp;&nbsp;Yamazak Hitomi <span style="font-size:12px;color:var(--text3);font-weight:400;">(일본어)</span>&nbsp;&nbsp;안지 <span style="font-size:12px;color:var(--text3);font-weight:400;">(중국어)</span></td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -888,27 +894,27 @@ body {
       </div>
       <div class="card-body">
         <div class="field">
-          <div class="field-label">7/10 금</div>
-          <div class="field-val sm">환영만찬 18:00<br>서울 올림픽파크텔 올림피아홀</div>
+          <div class="field-label" style="font-size:14px;">7/10 금</div>
+          <div class="field-val">환영만찬 18:00<br>서울 올림픽파크텔 올림피아홀</div>
         </div>
         <div class="field">
-          <div class="field-label">7/11 토</div>
-          <div class="field-val sm">
-            셔틀버스 06:30 동서울터미널 → 한석봉체육관<br>
-            <span style="font-size:11px;color:var(--text3);">선수 · 진행요원 · 심판</span><br>
+          <div class="field-label" style="font-size:14px;">7/11 토</div>
+          <div class="field-val">
+            셔틀버스 06:30 (동서울터미널 → 한석봉체육관)<br>
+            <span style="font-size:12px;color:var(--text3);">선수 · 진행요원 · 심판</span><br>
             심판회의 08:40<br>
             개인전 본경기<br>
             개인전 시상식<br>
-            셔틀버스 경기 종료 후 한석봉체육관 → 동서울터미널
+            셔틀버스 경기 종료 후 (한석봉체육관 → 동서울터미널)
           </div>
         </div>
         <div class="field" style="border-bottom:none;">
-          <div class="field-label">7/12 일</div>
-          <div class="field-val sm">
+          <div class="field-label" style="font-size:14px;">7/12 일</div>
+          <div class="field-val">
             심판회의 08:40 · 개회식 10:00<br>
             단체전 본경기<br>
             단체전 시상식 · 폐회식<br>
-            셔틀버스 경기 종료 후 한석봉체육관 → 동서울터미널
+            셔틀버스 경기 종료 후 (한석봉체육관 → 동서울터미널)
           </div>
         </div>
       </div>
