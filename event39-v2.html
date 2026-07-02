@@ -62,7 +62,7 @@ body {
   line-height: 1.3; letter-spacing: -.01em;
 }
 .hdr-title em { color: #F0C040; font-style: normal; }
-.hdr-info { margin-top: 7px; font-size: 16px; color: rgba(255,255,255,.6); line-height: 1.55; }
+.hdr-info { margin-top: 5px; font-size: 14px; color: rgba(255,255,255,.6); line-height: 1.35; }
 
 /* ════════════════════════════════
    탭 바
@@ -78,13 +78,13 @@ body {
 }
 .tab-bar::-webkit-scrollbar { display: none; }
 .tab-btn {
-  flex: 1; min-width: 72px;
-  padding: 12px 8px;
+  flex: 1; min-width: 60px;
+  padding: 10px 6px;
   border: 2px solid var(--border);
   border-radius: 10px;
   background: var(--bg);
   cursor: pointer;
-  font-size: 16px; font-weight: 700;
+  font-size: 13px; font-weight: 700;
   color: var(--text2);
   text-align: center; line-height: 1.3;
   white-space: nowrap; user-select: none;
@@ -311,7 +311,35 @@ body {
 .sl-sub  { font-size: 13px; color: var(--text2); margin-top: 3px; line-height: 1.45; }
 
 
-/* 참가국 그리드 */
+/* 진행요원 인원 요약 한 줄 */
+.staff-summary {
+  font-size: 14px; font-weight: 600; color: var(--text2);
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--rad-sm); padding: 10px 14px;
+  margin-bottom: 12px; line-height: 1.5;
+}
+
+/* 후원 심플 레이아웃 */
+.sponsor-group {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.sponsor-label {
+  font-size: 12px; font-weight: 700;
+  color: var(--text3); text-transform: uppercase;
+  letter-spacing: .06em; margin-bottom: 8px;
+}
+.sponsor-tags {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.sponsor-tags span {
+  font-size: 13px; font-weight: 500; color: var(--text);
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 5px 10px;
+  line-height: 1;
+}
+
+
 .country-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -549,7 +577,7 @@ body {
 @media (max-width: 360px) {
   body { font-size: 16px; }
   .hdr-title { font-size: 22px; }
-  .tab-btn { font-size: 15px; }
+  .tab-btn { font-size: 13px; }
 }
 </style>
 </head>
@@ -566,8 +594,9 @@ body {
 <nav class="tab-bar" id="tabBar">
   <button class="tab-btn active" data-panel="p1" data-tc="#1B3F7A" data-tcbg="#eef2f9">주요 사항</button>
   <button class="tab-btn"        data-panel="p2" data-tc="#1B3F7A" data-tcbg="#eef2f9">대회 정보</button>
-  <button class="tab-btn"        data-panel="p3" data-tc="#8a5e00" data-tcbg="#fdf5e6">환영만찬<br>7 / 10</button>
-  <button class="tab-btn"        data-panel="p4" data-tc="#8a1f1f" data-tcbg="#fdf0f0">본경기<br>7/11~12</button>
+  <button class="tab-btn"        data-panel="p3" data-tc="#8a5e00" data-tcbg="#fdf5e6">환영만찬<br>(7/10)</button>
+  <button class="tab-btn"        data-panel="p4" data-tc="#8a1f1f" data-tcbg="#fdf0f0">본경기<br>1일차(7/11)</button>
+  <button class="tab-btn"        data-panel="p5" data-tc="#1a5e38" data-tcbg="#edf6f1">본경기<br>2일차(7/12)</button>
 </nav>
 
 <!-- ════════ 메인 ════════ -->
@@ -657,28 +686,45 @@ body {
         <span class="acc-arrow">▼</span>
       </button>
       <div class="accordion-body">
-        <div class="stat-grid">
-          <div class="stat-card">
-            <div class="stat-label">1박 참가</div>
-            <div class="stat-val">31<span class="stat-unit">명</span></div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">2박 참가</div>
-            <div class="stat-val">10<span class="stat-unit">명</span></div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">여성</div>
-            <div class="stat-val">33<span class="stat-unit">명</span></div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">남성</div>
-            <div class="stat-val">14<span class="stat-unit">명</span></div>
-          </div>
+
+        <!-- 인원 한 줄 요약 -->
+        <div class="staff-summary">
+          총 41명 &nbsp;·&nbsp; 1박 31명 / 2박 10명 &nbsp;·&nbsp; 여 33명 / 남 14명
         </div>
-        <div class="field" style="border-bottom:none; padding-top:6px;">
-          <div class="field-label">교통편</div>
-          <div class="field-val sm">대회진행요원 교통편 및 명단 현황 확인 필요<br>총 41명 (1박 31명 + 2박 10명)</div>
+
+        <!-- Tournament STAFF -->
+        <div class="roster-group" style="margin-top:10px;">
+          <div class="sec-head sec-head-slate">Tournament STAFF &nbsp;— 44명</div>
+          <table class="unified-table name-grid">
+            <tbody>
+              <tr><td>김은강</td><td>강연우</td><td>고은빈</td><td>김가현</td></tr>
+              <tr><td>김도언</td><td>김민서</td><td>김민지</td><td>김서울</td></tr>
+              <tr><td>김예림</td><td>김정해</td><td>김지우</td><td>김지유</td></tr>
+              <tr><td>남서현</td><td>노예림</td><td>박서윤</td><td>박서준</td></tr>
+              <tr><td>박지수</td><td>박지호</td><td>성우재</td><td>신가연</td></tr>
+              <tr><td>양희원</td><td>오지수</td><td>유가연</td><td>유현정</td></tr>
+              <tr><td>윤가람</td><td>윤경하</td><td>이동건</td><td>이서윤</td></tr>
+              <tr><td>이서윤</td><td>이아름</td><td>이유빈</td><td>이은솔</td></tr>
+              <tr><td>임혜숙</td><td>정승민</td><td>정인호</td><td>조강민</td></tr>
+              <tr><td>주윤건</td><td>최수민</td><td>최인화</td><td>최치민</td></tr>
+              <tr><td>한동재</td><td>홍민영</td><td>황윤하</td><td>황준산</td></tr>
+            </tbody>
+          </table>
         </div>
+
+        <!-- Broadcast / Interpreter STAFF -->
+        <div class="roster-group" style="border-bottom:none; margin-bottom:0; padding-bottom:4px;">
+          <div class="sec-head sec-head-slate">Broadcast / Interpreter STAFF &nbsp;— 3명</div>
+          <table class="unified-table">
+            <thead><tr><th>성명</th><th>담당 언어</th></tr></thead>
+            <tbody>
+              <tr><td>이경님</td><td>영어</td></tr>
+              <tr><td>Yamazak Hitomi</td><td>일본어</td></tr>
+              <tr><td>안지</td><td>중국어</td></tr>
+            </tbody>
+          </table>
+        </div>
+
       </div>
     </div>
 
@@ -730,9 +776,50 @@ body {
       </div>
     </div>
 
-  </section>
+    <!-- 후원 -->
+    <div class="card">
+      <button class="accordion-btn" onclick="toggleAcc(this)">
+        후원
+        <span class="acc-arrow">▼</span>
+      </button>
+      <div class="accordion-body">
 
-  <!-- ████████ TAB 2: 대회 정보 ████████ -->
+        <div class="sponsor-group">
+          <div class="sponsor-label">의료 지원</div>
+          <div class="sponsor-tags">
+            <span>삼성흉부외과</span><span>구광모항외과</span><span>미래치과</span>
+            <span>봄피부과의원</span><span>에이치드림정형외과</span><span>연세이안과의원</span>
+            <span>창문외과</span><span>청라여성병원</span><span>코즈이비인후과</span>
+          </div>
+        </div>
+
+        <div class="sponsor-group">
+          <div class="sponsor-label">도장 · 단체</div>
+          <div class="sponsor-tags">
+            <span>다솜유죽도</span><span>순천향대검도부</span><span>SJ투자파트너스</span>
+            <span>모션하이테크</span><span>알톤스포츠</span><span>법무법인 한수</span>
+            <span>아사이블로이코리아</span><span>나우텍검도몰닷컴</span>
+          </div>
+        </div>
+
+        <div class="sponsor-group">
+          <div class="sponsor-label">무도구 · 장비</div>
+          <div class="sponsor-tags">
+            <span>도일무도구</span><span>대한무도구</span><span>제일무도구</span><span>명성전자담배</span>
+          </div>
+        </div>
+
+        <div class="sponsor-group" style="border-bottom:none; padding-bottom:0;">
+          <div class="sponsor-label">지자체 · 체육회</div>
+          <div class="sponsor-tags">
+            <span>경기도 가평군</span><span>가평군체육회</span><span>가평군검도회</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </section>
   <section class="panel" id="p2">
 
     <!-- 참가국 -->
@@ -742,14 +829,14 @@ body {
         <div class="card-head-title">참가국</div>
       </div>
       <div class="card-body">
-        <div class="country-grid">
-          <div class="country-item">🇰🇷<span>한국</span></div>
-          <div class="country-item">🇯🇵<span>일본</span></div>
-          <div class="country-item">🇹🇼<span>대만</span></div>
-          <div class="country-item">🇨🇳<span>중국</span></div>
-          <div class="country-item">🇭🇰<span>홍콩</span></div>
-          <div class="country-item">🇦🇷<span>아르헨티나</span></div>
-          <div class="country-item">🇵🇭<span>필리핀</span></div>
+        <div class="sponsor-tags" style="padding:2px 0;">
+          <span>🇰🇷 한국</span>
+          <span>🇯🇵 일본</span>
+          <span>🇹🇼 대만</span>
+          <span>🇨🇳 중국</span>
+          <span>🇭🇰 홍콩</span>
+          <span>🇦🇷 아르헨티나</span>
+          <span>🇵🇭 필리핀</span>
         </div>
       </div>
     </div>
@@ -1283,7 +1370,107 @@ body {
 
   </section>
 
-</main>
+  <!-- ████████ TAB 5: 본경기 2일차 (단체전) ████████ -->
+  <section class="panel" id="p5">
+
+    <!-- 단체전 일정 -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-icon">■</div>
+        <div class="card-head-title">단체전 일정</div>
+        <span class="card-head-badge">7/12 일</span>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <div class="field-label">심판회의</div>
+          <div class="field-val">2026. 7. 12.(일) 08:40</div>
+        </div>
+        <div class="field">
+          <div class="field-label">개회식</div>
+          <div class="field-val">10:00 — 10:30</div>
+        </div>
+        <div class="field">
+          <div class="field-label">경기장</div>
+          <div class="field-val sm">한석봉체육관 (1~8경기장)<br>가평체육관 (9~10경기장)</div>
+        </div>
+        <div class="field" style="border-bottom:none;">
+          <div class="field-label">순서</div>
+          <div class="field-val sm">개회식 → 단체전 본경기 → 단체전 시상식 → 폐회식</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 개회식 체크리스트 -->
+    <div class="card">
+      <div class="card-head" id="ckTeamHead" onclick="toggleCardCheck3()" style="cursor:pointer;">
+        <div id="ckTeamBox" style="
+          width:28px; height:28px; border-radius:7px; flex-shrink:0;
+          border:2.5px solid var(--border); background:var(--white);
+          display:flex; align-items:center; justify-content:center;
+          font-size:16px; font-weight:700; color:#fff; transition:all .15s;
+        "></div>
+        <div class="card-head-title">개회식 체크리스트</div>
+        <span id="ckTeamStatus" style="
+          font-size:13px; font-weight:700; padding:3px 10px;
+          border-radius:999px; background:#ebebeb; color:var(--text3);
+          white-space:nowrap;
+        ">예정</span>
+      </div>
+      <div class="card-body" style="padding:6px 0;">
+        <div class="simple-list" id="teamChecklist">
+          <div class="sl-item" onclick="toggleSl3(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text"><div class="sl-main">개회 선언</div></div>
+          </div>
+          <div class="sl-item" onclick="toggleSl3(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text"><div class="sl-main">국민의례</div></div>
+          </div>
+          <div class="sl-item" onclick="toggleSl3(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text"><div class="sl-main">우승기 반환</div></div>
+          </div>
+          <div class="sl-item" onclick="toggleSl3(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text"><div class="sl-main">환영사 · 대회사 · 격려사 · 축사</div></div>
+          </div>
+          <div class="sl-item" onclick="toggleSl3(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text"><div class="sl-main">선수 선서</div></div>
+          </div>
+          <div class="sl-item" onclick="toggleSl3(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text"><div class="sl-main">심판 선서</div></div>
+          </div>
+          <div class="sl-item" onclick="toggleSl3(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text"><div class="sl-main">심판장 주의</div></div>
+          </div>
+          <div class="sl-item" onclick="toggleSl3(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text"><div class="sl-main">공개 연무</div></div>
+          </div>
+          <div class="sl-item" onclick="toggleSl3(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text"><div class="sl-main">경기 개시</div></div>
+          </div>
+          <div class="sl-item" onclick="toggleSl3(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text"><div class="sl-main">성적 발표</div></div>
+          </div>
+          <div class="sl-item" onclick="toggleSl3(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text"><div class="sl-main">시상식</div></div>
+          </div>
+          <div class="sl-item" onclick="toggleSl3(this)" style="border-bottom:none;">
+            <div class="sl-box"></div>
+            <div class="sl-text"><div class="sl-main">폐회식</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
 
 <!-- ════════ 범례 (하단 고정) ════════ -->
 <div class="legend">
@@ -1412,6 +1599,40 @@ function toggleCk(item) {
   const status = item.querySelector('.ck-status');
   box.textContent    = isDone ? '' : '✓';
   status.textContent = isDone ? '예정' : '완료';
+}
+
+/* ── 단체전(p5) 체크리스트 ── */
+function toggleSl3(item) {
+  item.classList.toggle('done');
+  item.querySelector('.sl-box').textContent = item.classList.contains('done') ? '✓' : '';
+  updateTeamHead();
+}
+function updateTeamHead() {
+  const items  = document.querySelectorAll('#teamChecklist .sl-item');
+  const total  = items.length;
+  const done   = document.querySelectorAll('#teamChecklist .sl-item.done').length;
+  const box    = document.getElementById('ckTeamBox');
+  const status = document.getElementById('ckTeamStatus');
+  if (done === 0) {
+    box.style.background = 'var(--white)'; box.style.borderColor = 'var(--border)'; box.textContent = '';
+    status.style.background = '#ebebeb'; status.style.color = 'var(--text3)'; status.textContent = '예정';
+  } else if (done === total) {
+    box.style.background = '#1a5e38'; box.style.borderColor = '#1a5e38'; box.textContent = '✓';
+    status.style.background = '#d0eedd'; status.style.color = '#1a5e38'; status.textContent = '완료';
+  } else {
+    box.style.background = '#1a5e38'; box.style.borderColor = '#1a5e38'; box.textContent = '→';
+    status.style.background = '#d6e3f5'; status.style.color = '#1B3F7A'; status.textContent = `${done}/${total}`;
+  }
+}
+function toggleCardCheck3() {
+  const items   = document.querySelectorAll('#teamChecklist .sl-item');
+  const allDone = document.querySelectorAll('#teamChecklist .sl-item.done').length === items.length;
+  items.forEach(item => {
+    const box = item.querySelector('.sl-box');
+    if (allDone) { item.classList.remove('done'); box.textContent = ''; }
+    else         { item.classList.add('done');    box.textContent = '✓'; }
+  });
+  updateTeamHead();
 }
 </script>
 </body>
