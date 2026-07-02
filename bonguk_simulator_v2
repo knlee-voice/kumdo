@@ -1,0 +1,2726 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>本國劍法 · 본국검법 / 연무 시뮬레이터</title>
+<style>
+  :root {
+    --bg-0: #0a0a0c;
+    --bg-1: #131318;
+    --bg-2: #1c1c24;
+    --ink: #e8e6df;
+    --ink-dim: #8a8780;
+    --ink-faint: #4a4842;
+    --rule: #2a2a32;
+    --taegeuk-red: #c8233a;
+    --taegeuk-blue: #2a4a8a;
+    --gold: #b89968;
+    --accent: #d4b87a;
+    --hakama: #16161e;
+    --hakama-fold: #0d0d12;
+    --gi: #1f1f28;
+    --sword-blade: #c8c4b8;
+    --sword-hilt: #1a1410;
+    --sword-tsuba: #6a5a40;
+    --footprint: rgba(212, 184, 122, 0.55);
+    --footprint-current: #d4b87a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg-0);
+    color: var(--ink);
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .hanja {
+    font-family: 'Noto Serif KR', 'Nanum Myeongjo', serif;
+    letter-spacing: 0.06em;
+  }
+
+  /* ====== Layout ====== */
+  .app {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    grid-template-rows: 108px 60px 1fr 70px;
+    height: 100vh;
+    width: 100vw;
+    gap: 1px;
+    background: var(--rule);
+  }
+
+  header.title-bar {
+    grid-column: 1 / -1;
+    background: var(--bg-1);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 20px;
+    border-bottom: 1px solid var(--rule);
+  }
+  header.title-bar .mark {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  header.title-bar .mark .hanja-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 40px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+  }
+  header.title-bar .mark .ko-title {
+    font-size: 35px;
+    color: var(--ink-dim);
+    letter-spacing: 0.2em;
+  }
+  header.title-bar .meta {
+    margin-left: auto;
+    font-size: 14px;
+    color: var(--ink-faint);
+    letter-spacing: 0.1em;
+  }
+
+  /* ====== Stage ====== */
+  .stage {
+    background: var(--bg-1);
+    position: relative;
+    overflow: hidden;
+  }
+  #stage-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Stage overlay: compass + cross-hairs */
+  .stage-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .compass-box {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: 180px;
+    background: rgba(10, 10, 12, 0.72);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--rule);
+    padding: 10px 12px 12px;
+    pointer-events: auto;
+  }
+  .compass-box .label {
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .compass-box .label .deg {
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+  #compass-canvas {
+    display: block;
+    width: 156px;
+    height: 156px;
+  }
+
+  .stage-title-frame {
+    grid-column: 1;
+    background: var(--bg-1);
+    border-bottom: 1px solid var(--rule);
+    border-left: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+  }
+  .stage-title-frame .hanja-name {
+    color: var(--accent);
+    font-family: 'Noto Serif KR', serif;
+    font-size: 27px;
+    letter-spacing: 0.15em;
+  }
+
+  .keyframe-tag {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    color: var(--ink-faint);
+    text-align: right;
+  }
+  .keyframe-tag .num {
+    color: var(--accent);
+    font-size: 30px;
+    font-family: 'Noto Serif KR', serif;
+    letter-spacing: 0;
+    line-height: 1;
+  }
+
+  /* ====== Sidebar ====== */
+  .sidebar {
+    background: var(--bg-1);
+    overflow-y: auto;
+    grid-row: 2 / 5;
+  }
+  .sidebar-header {
+    padding: 16px 20px 10px;
+    border-bottom: 1px solid var(--rule);
+    position: sticky;
+    top: 0;
+    background: var(--bg-1);
+    z-index: 5;
+  }
+  .sidebar-header .h {
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+  .sidebar-header .sub {
+    font-family: 'Noto Serif KR', serif;
+    color: var(--accent);
+    font-size: 18px;
+    margin-top: 2px;
+    letter-spacing: 0.1em;
+  }
+  .sidebar-header .section-tabs {
+    display: flex;
+    gap: 0;
+    margin-top: 10px;
+    border-top: 1px solid var(--rule);
+    padding-top: 8px;
+  }
+  .sidebar-header .section-tabs button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--ink-dim);
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    padding: 4px 0;
+    cursor: pointer;
+    font-family: inherit;
+    transition: color 0.15s;
+  }
+  .sidebar-header .section-tabs button.active {
+    color: var(--accent);
+  }
+  .form-list {
+    list-style: none;
+  }
+  .form-list li {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--rule);
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    transition: background 0.12s;
+  }
+  .form-list li:hover {
+    background: var(--bg-2);
+  }
+  .form-list li.active {
+    background: linear-gradient(90deg, rgba(212, 184, 122, 0.08), transparent);
+    border-left: 2px solid var(--accent);
+    padding-left: 18px;
+  }
+  .form-list li .num {
+    font-family: 'Noto Serif KR', serif;
+    color: var(--ink-faint);
+    font-size: 15px;
+    min-width: 26px;
+    padding-top: 1px;
+  }
+  .form-list li.active .num {
+    color: var(--accent);
+  }
+  .form-list li .names {
+    flex: 1;
+    min-width: 0;
+  }
+  .form-list li .names .ko {
+    font-size: 15px;
+    color: var(--ink);
+    letter-spacing: 0.05em;
+  }
+  .form-list li .names .li-desc {
+    font-size: 16px;
+    color: var(--ink-dim);
+    line-height: 1.6;
+    margin-top: 6px;
+    letter-spacing: 0.01em;
+  }
+  .form-list li.active .names .li-desc {
+    color: var(--ink);
+  }
+  .form-list li .names .hj {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 12px;
+    color: var(--ink-faint);
+    letter-spacing: 0.1em;
+    margin-top: 1px;
+  }
+  .form-list li.section-divider {
+    background: var(--bg-2);
+    padding: 6px 20px;
+    pointer-events: none;
+    border-left: none;
+  }
+  .form-list li.section-divider .label {
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    font-family: 'Noto Serif KR', serif;
+  }
+
+  /* ====== Controls ====== */
+  .controls {
+    grid-column: 1 / 2;
+    background: var(--bg-1);
+    border-top: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 0 24px;
+    gap: 12px;
+  }
+  .btn-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ctrl-btn {
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    font-family: inherit;
+    font-size: 16px;
+  }
+  .ctrl-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .ctrl-btn.primary {
+    background: var(--accent);
+    color: var(--bg-0);
+    border-color: var(--accent);
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+  }
+  .ctrl-btn.primary:hover {
+    background: var(--gold);
+    color: var(--bg-0);
+  }
+  .progress-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--rule);
+    position: relative;
+    cursor: pointer;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.1s linear;
+  }
+  .progress-marks {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .progress-marks .mark {
+    position: absolute;
+    top: -3px;
+    width: 1px;
+    height: 10px;
+    background: var(--ink-faint);
+    opacity: 0.4;
+  }
+  .progress-marks .mark.section {
+    background: var(--gold);
+    opacity: 0.8;
+    height: 14px;
+    top: -5px;
+  }
+  .progress-label {
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    color: var(--ink-dim);
+    font-family: 'Noto Serif KR', serif;
+    min-width: 76px;
+    text-align: right;
+  }
+  .progress-label .cur {
+    color: var(--accent);
+    font-size: 18px;
+  }
+  .speed-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--ink-dim);
+    letter-spacing: 0.1em;
+  }
+  .speed-btn-group {
+    display: flex;
+    gap: 4px;
+  }
+  .speed-btn {
+    background: transparent;
+    color: var(--ink-dim);
+    border: 1px solid var(--rule);
+    padding: 6px 10px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .speed-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .speed-btn.active {
+    background: var(--accent);
+    color: var(--bg-0);
+    border-color: var(--accent);
+  }
+  .loop-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--ink-dim);
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    user-select: none;
+  }
+  .loop-toggle input { cursor: pointer; accent-color: var(--accent); }
+
+  /* ====== Description (removed) ====== */
+
+  /* ====== Subtle background pattern ====== */
+  .stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 50% 100%, rgba(212, 184, 122, 0.04), transparent 60%),
+      linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.3) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-1); }
+  ::-webkit-scrollbar-thumb { background: var(--rule); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--ink-faint); }
+
+  /* ============================================================
+     반응형 레이아웃 설계 원칙
+
+     기본(데스크탑 가로형):
+       2열 그리드 - 좌(스테이지+제목바+컨트롤), 우(사이드바 320px)
+       4행: 헤더(108) / 제목바(60) / 1fr(스테이지) / 컨트롤(70)
+       사이드바는 grid-row: 2/5 (제목바+스테이지+컨트롤 높이)
+
+     세로형 / 좁은 화면(aspect-ratio < 1 또는 모바일):
+       1열 5행 세로 스택
+       헤더 / 제목바 / 스테이지(고정 비율) / 사이드바 / 컨트롤
+
+     판단 기준: aspect-ratio < 1 일 때 세로 스택 진입
+     (단, 모바일 좁은 화면용 폰트/패딩 미세 조정은 별도 처리)
+     ============================================================ */
+
+  /* ====== 세로형 레이아웃 (PC 세로창 + 모바일 portrait 공통) ====== */
+  @media (max-aspect-ratio: 1/1) {
+    .app {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto minmax(38vh, 52vh) minmax(160px, 1fr) auto;
+      height: 100vh;
+      gap: 1px;
+    }
+    header.title-bar { grid-column: 1; grid-row: 1; }
+    .stage-title-frame { grid-column: 1; grid-row: 2; }
+    .stage { grid-column: 1; grid-row: 3; }
+    .sidebar { grid-column: 1; grid-row: 4; max-height: none; }
+    .controls {
+      grid-column: 1;
+      grid-row: 5;
+      flex-wrap: wrap;
+      padding: 10px 16px;
+      gap: 8px 12px;
+      height: auto;
+    }
+    .progress-wrap { order: 3; width: 100%; flex-basis: 100%; }
+  }
+
+  /* ====== 모바일 좁은 폭 미세조정 (스마트폰) ====== */
+  @media (max-width: 600px) and (orientation: portrait) {
+    .app {
+      grid-template-rows: 48px 40px 42vh minmax(120px, 22vh) auto;
+    }
+    header.title-bar { padding: 0 12px; gap: 10px; }
+    header.title-bar .mark .hanja-title { font-size: 24px; letter-spacing: 0.1em; }
+    header.title-bar .mark .ko-title { font-size: 15px; letter-spacing: 0.1em; }
+    header.title-bar .meta { display: none; }
+
+    .stage-title-frame { padding: 0 12px; }
+    .stage-title-frame .hanja-name { font-size: 14px; }
+
+    .keyframe-tag { bottom: 10px; right: 10px; }
+    .keyframe-tag .num { font-size: 20px; }
+    .compass-box { bottom: 10px; left: 10px; width: 96px; padding: 6px 8px 8px; }
+    #compass-canvas { width: 80px; height: 80px; }
+    .compass-box .label { font-size: 8px; margin-bottom: 3px; }
+
+    .sidebar-header { padding: 10px 14px 8px; }
+    .form-list li { padding: 10px 14px; }
+
+    .controls { padding: 8px 12px; gap: 8px 10px; }
+    .ctrl-btn { width: 34px; height: 34px; font-size: 12px; }
+    .ctrl-btn.primary { width: 40px; height: 40px; }
+    .speed-control { font-size: 10px; }
+    .progress-label { min-width: 60px; font-size: 10px; }
+    .speed-btn { padding: 4px 6px; font-size: 11px; }
+  }
+
+  /* ====== PC 세로형 (601~1100px, 세로 비율) - 세로 스택 안에서 폰트 보정 ====== */
+  @media (min-width: 601px) and (max-width: 1100px) and (max-aspect-ratio: 1/1) {
+    .app {
+      grid-template-rows: 80px 50px minmax(40vh, 50vh) minmax(180px, 1fr) auto;
+    }
+    .compass-box { width: 150px; }
+    #compass-canvas { width: 130px; height: 130px; }
+    .controls { padding: 10px 24px; gap: 10px 16px; }
+  }
+
+  /* ====== 가로형이지만 폭이 좁은 PC창(900px 이하) - 사이드바 폭 축소 ====== */
+  @media (min-aspect-ratio: 1/1) and (max-width: 1100px) {
+    .app {
+      grid-template-columns: 1fr 260px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="title-bar">
+    <div class="mark">
+      <span class="hanja-title">本國劍法</span>
+      <span class="ko-title">본국검법 / 연무 시뮬레이터</span>
+    </div>
+    <div class="meta">대한 검도 · 古劒譜 復原</div>
+  </header>
+
+  <div class="stage-title-frame">
+    <span class="hanja-name" id="tag-hanja-main">持劒對賊勢 (지검대적세)</span>
+  </div>
+
+  <div class="stage">
+    <canvas id="stage-canvas"></canvas>
+    <div class="stage-overlay">
+      <div class="keyframe-tag">
+        <div><span class="num" id="tag-num">01</span> <span style="opacity:0.5">/ <span id="tag-total">33</span></span></div>
+        <div style="margin-top:4px" id="tag-phase">初章 · 초장</div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sub">동작 목록</div>
+    </div>
+    <ul class="form-list" id="form-list"></ul>
+  </aside>
+
+  <div class="controls">
+    <div class="btn-group">
+      <button class="ctrl-btn" id="btn-first" title="처음으로">⏮</button>
+      <button class="ctrl-btn" id="btn-prev" title="이전 동작">◀</button>
+      <button class="ctrl-btn primary" id="btn-play" title="재생/정지">▶</button>
+      <button class="ctrl-btn" id="btn-next" title="다음 동작">▶</button>
+      <button class="ctrl-btn" id="btn-last" title="마지막">⏭</button>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+        <div class="progress-marks" id="progress-marks"></div>
+      </div>
+      <div class="progress-label">
+        <span class="cur" id="progress-cur">01</span> / <span id="progress-total">33</span>
+      </div>
+    </div>
+
+    <label class="loop-toggle" style="margin-left: 8px;">
+      <input type="checkbox" id="loop-toggle" checked>
+      <span>LOOP</span>
+    </label>
+
+    <div class="speed-control">
+      <span>SPEED</span>
+      <div class="speed-btn-group" id="speed-btn-group">
+        <button class="speed-btn" data-speed="0.5">0.5×</button>
+        <button class="speed-btn" data-speed="0.75">0.75×</button>
+        <button class="speed-btn active" data-speed="1">1.0×</button>
+        <button class="speed-btn" data-speed="1.5">1.5×</button>
+        <button class="speed-btn" data-speed="2">2.0×</button>
+      </div>
+    </div>
+  </div>
+
+
+<script>
+/* ====================================================================
+   본국검법 시뮬레이터
+   - 측면 뷰: 인물은 항상 오른쪽을 향해 표시 (자세 식별 최적화)
+   - 나침반 뷰: 실제 방위(facing)와 발걸음 트레일을 별도 표시
+   - 키프레임 보간 애니메이션
+   ==================================================================== */
+
+// ----- 포즈 프리셋: 관절은 hip(엉덩이) 기준 상대 좌표 (px) -----
+// 인물은 오른쪽(facing right)을 향해 서 있는 측면 도식
+// 좌표계: +x = 인물의 앞(오른쪽), -x = 뒤, +y = 아래
+// 인물의 신체 부위 명칭은 "앞쪽(front)"과 "뒤쪽(back)"으로 통일 (carrera-style):
+//   - frontShoulder: 카메라에 가까운 어깨 → 측면 뷰에서 잘 보이는 쪽
+//   - backShoulder: 카메라에서 멀리 있는 어깨
+// 단, 한국검법 동작 설명에서 "왼발/오른발"이 자주 등장하므로,
+// 인물이 오른쪽으로 향할 때:
+//   - 앞발(front foot) = 오른발, 뒷발(back foot) = 왼발 (대부분의 경우)
+// 회전 시에는 facing 각도로 처리
+
+const POSE = {
+  // 기본 시작 자세: 칼을 왼쪽으로 들고 양발 평행
+  start: {
+    head: {x: 0, y: -150},
+    neck: {x: 0, y: -130},
+    chest: {x: 0, y: -90},
+    hip: {x: 0, y: 0},
+    // 어깨
+    frontShoulder: {x: 8, y: -120},
+    backShoulder:  {x: -8, y: -120},
+    // 팔 (앞=오른팔, 뒤=왼팔, 인물 기준)
+    frontElbow: {x: 18, y: -75},
+    frontHand:  {x: 28, y: -30},
+    backElbow:  {x: -2, y: -80},
+    backHand:   {x: -10, y: -35},
+    // 다리: 발은 hip 기준
+    frontFoot: {x: 10, y: 0},
+    backFoot:  {x: -10, y: 0},
+    frontKnee: {x: 8, y: -2}, // legs hidden by hakama
+    backKnee:  {x: -8, y: -2},
+    // 칼
+    swordGrip: 'left-side-low', // 'both' | 'right' | 'left' | 'left-armpit' | 'left-side-low' | 'sheath'
+    swordOrigin: 'frontHand',   // 어느 손에서 시작
+    swordAngle: -100,            // 칼 각도 (deg, 0=오른쪽, -90=위, 180=왼쪽)
+    swordLength: 95,
+    leanX: 0,
+    leanY: 0,
+  },
+
+  // 중단세 (앞발=오른발)
+  chudan_right_forward: {
+    head: {x: 0, y: -150},
+    neck: {x: 0, y: -130},
+    chest: {x: 0, y: -90},
+    hip: {x: 0, y: 0},
+    frontShoulder: {x: 10, y: -120},
+    backShoulder:  {x: -10, y: -120},
+    frontElbow: {x: 30, y: -90},
+    frontHand:  {x: 45, y: -70},
+    backElbow:  {x: 8, y: -90},
+    backHand:   {x: 25, y: -75},
+    frontFoot: {x: 35, y: 0},
+    backFoot:  {x: -20, y: 0},
+    frontKnee: {x: 25, y: -5},
+    backKnee:  {x: -15, y: -5},
+    swordGrip: 'both',
+    swordOrigin: 'frontHand',
+    swordAngle: -5,
+    swordLength: 95,
+    leanX: 4,
+    leanY: 0,
+  },
+
+  // 중단세 (앞발=왼발)
+  chudan_left_forward: {
+    head: {x: 0, y: -150},
+    neck: {x: 0, y: -130},
+    chest: {x: 0, y: -90},
+    hip: {x: 0, y: 0},
+    frontShoulder: {x: 10, y: -120},
+    backShoulder:  {x: -10, y: -120},
+    frontElbow: {x: 30, y: -90},
+    frontHand:  {x: 45, y: -70},
+    backElbow:  {x: 8, y: -90},
+    backHand:   {x: 25, y: -75},
+    frontFoot: {x: -20, y: 0},
+    backFoot:  {x: 35, y: 0},  // 왼발이 앞 → backFoot이 실제로 앞
+    frontKnee: {x: -15, y: -5},
+    backKnee:  {x: 25, y: -5},
+    swordGrip: 'both',
+    swordOrigin: 'frontHand',
+    swordAngle: -5,
+    swordLength: 95,
+    leanX: 4,
+    leanY: 0,
+  },
+
+  // 상단세 (칼 머리 위로): 진전격적세 직전
+  sangdan_charge: {
+    head: {x: 0, y: -150},
+    neck: {x: 0, y: -130},
+    chest: {x: 0, y: -90},
+    hip: {x: 0, y: 0},
+    frontShoulder: {x: 8, y: -122},
+    backShoulder:  {x: -8, y: -122},
+    frontElbow: {x: 14, y: -155},
+    frontHand:  {x: 8,  y: -185},
+    backElbow:  {x: -8, y: -155},
+    backHand:   {x: -2, y: -185},
+    frontFoot: {x: 15, y: 0},
+    backFoot:  {x: -25, y: 0},
+    frontKnee: {x: 8, y: -5},
+    backKnee:  {x: -15, y: -5},
+    swordGrip: 'both',
+    swordOrigin: 'frontHand',
+    swordAngle: -130,
+    swordLength: 95,
+    leanX: -2,
+    leanY: 0,
+  },
+
+  // 진전격적세 (정면 머리치기 - 따라가는 자세)
+  jeongmyeon_strike: {
+    head: {x: 2, y: -148},
+    neck: {x: 2, y: -128},
+    chest: {x: 4, y: -88},
+    hip: {x: 0, y: 0},
+    frontShoulder: {x: 14, y: -120},
+    backShoulder:  {x: -4, y: -120},
+    frontElbow: {x: 38, y: -118},
+    frontHand:  {x: 62, y: -110},
+    backElbow:  {x: 22, y: -120},
+    backHand:   {x: 48, y: -113},
+    frontFoot: {x: 45, y: 0},
+    backFoot:  {x: -25, y: 0},
+    frontKnee: {x: 30, y: -5},
+    backKnee:  {x: -18, y: -5},
+    swordGrip: 'both',
+    swordOrigin: 'frontHand',
+    swordAngle: -8,
+    swordLength: 95,
+    leanX: 6,
+    leanY: 0,
+  },
+
+  // 금계독립세 / 팔상세: 왼다리 들고 칼 머리 위로 비스듬히
+  palsangse_left_lifted: {
+    head: {x: 0, y: -152},
+    neck: {x: 0, y: -132},
+    chest: {x: 0, y: -90},
+    hip: {x: 0, y: -5},
+    frontShoulder: {x: 8, y: -125},
+    backShoulder:  {x: -8, y: -125},
+    frontElbow: {x: 22, y: -158},
+    frontHand:  {x: 28, y: -190},
+    backElbow:  {x: 0, y: -158},
+    backHand:   {x: 14, y: -188},
+    frontFoot: {x: 8, y: 0},      // 지지발 (오른발)
+    backFoot:  {x: -5, y: -50},   // 들린 왼발
+    frontKnee: {x: 6, y: -8},
+    backKnee:  {x: -2, y: -28},
+    swordGrip: 'both',
+    swordOrigin: 'frontHand',
+    swordAngle: -110,
+    swordLength: 95,
+    leanX: 0,
+    leanY: -5,
+  },
+
+  // 일자세: 찌름 후 (앞발 거두어들임)
+  iljase_thrust: {
+    head: {x: 0, y: -150},
+    neck: {x: 0, y: -130},
+    chest: {x: 0, y: -90},
+    hip: {x: 0, y: 0},
+    frontShoulder: {x: 10, y: -120},
+    backShoulder:  {x: -10, y: -120},
+    frontElbow: {x: 35, y: -110},
+    frontHand:  {x: 60, y: -100},
+    backElbow:  {x: 18, y: -115},
+    backHand:   {x: 45, y: -105},
+    frontFoot: {x: -10, y: 0},
+    backFoot:  {x: -10, y: 0},
+    frontKnee: {x: -8, y: -5},
+    backKnee:  {x: -8, y: -5},
+    swordGrip: 'both',
+    swordOrigin: 'frontHand',
+    swordAngle: 5,
+    swordLength: 95,
+    leanX: 4,
+    leanY: 0,
+  },
+
+  // 맹호은림세: 칼을 목 근처 높이로 (코등이 = tsuba가 목 옆)
+  maengho_eunrim: {
+    head: {x: 0, y: -150},
+    neck: {x: 0, y: -130},
+    chest: {x: 0, y: -90},
+    hip: {x: 0, y: 0},
+    frontShoulder: {x: 8, y: -120},
+    backShoulder:  {x: -8, y: -120},
+    frontElbow: {x: -12, y: -110},
+    frontHand:  {x: -2, y: -135},
+    backElbow:  {x: -20, y: -115},
+    backHand:   {x: -15, y: -135},
+    frontFoot: {x: 12, y: 0},
+    backFoot:  {x: -12, y: 0},
+    frontKnee: {x: 8, y: -5},
+    backKnee:  {x: -8, y: -5},
+    swordGrip: 'both',
+    swordOrigin: 'frontHand',
+    swordAngle: 45,  // 칼끝이 오른쪽 위
+    swordLength: 95,
+    leanX: 0,
+    leanY: 0,
+  },
+
+  // 직부송서세: 칼을 허리에 끼고
+  jikbu_songseo: {
+    head: {x: 0, y: -150},
+    neck: {x: 0, y: -130},
+    chest: {x: 0, y: -90},
+    hip: {x: 0, y: 0},
+    frontShoulder: {x: 10, y: -120},
+    backShoulder:  {x: -10, y: -120},
+    frontElbow: {x: 22, y: -85},
+    frontHand:  {x: 28, y: -45},
+    backElbow:  {x: -5, y: -85},
+    backHand:   {x: 5, y: -45},
+    frontFoot: {x: 35, y: 0},
+    backFoot:  {x: -20, y: 0},
+    frontKnee: {x: 25, y: -5},
+    backKnee:  {x: -15, y: -5},
+    swordGrip: 'both',
+    swordOrigin: 'frontHand',
+    swordAngle: 0,  // 칼이 허리 옆에 수평
+    swordLength: 95,
+    leanX: 2,
+    leanY: 0,
+  },
+
+  // 발초심사세: 우상→좌하 베기 (45도)
+  balcho_simsa: {
+    head: {x: 0, y: -148},
+    neck: {x: 0, y: -128},
+    chest: {x: 2, y: -88},
+    hip: {x: 0, y: 0},
+    frontShoulder: {x: 12, y: -120},
+    backShoulder:  {x: -8, y: -120},
+    frontElbow: {x: 35, y: -90},
+    frontHand:  {x: 55, y: -70},
+    backElbow:  {x: 15, y: -100},
+    backHand:   {x: 40, y: -80},
+    frontFoot: {x: 35, y: 0},
+    backFoot:  {x: -20, y: 0},
+    frontKnee: {x: 25, y: -5},
+    backKnee:  {x: -15, y: -5},
+    swordGrip: 'both',
+    swordOrigin: 'frontHand',
+    swordAngle: 30,  // 우하로 내려간 상태
+    swordLength: 95,
+    leanX: 6,
+    leanY: 0,
+  },
+
+  // 표두압정세: 점프 후 찌름
+  pyodu_apjeong: {
+    head: {x: 0, y: -158},
+    neck: {x: 0, y: -138},
+    chest: {x: 2, y: -96},
+    hip: {x: 0, y: -8},
+    frontShoulder: {x: 10, y: -128},
+    backShoulder:  {x: -10, y: -128},
+    frontElbow: {x: 35, y: -118},
+    frontHand:  {x: 65, y: -108},
+    backElbow:  {x: 18, y: -125},
+    backHand:   {x: 50, y: -112},
+    frontFoot: {x: 40, y: 0},
+    backFoot:  {x: -10, y: 0},
+    frontKnee: {x: 25, y: -10},
+    backKnee:  {x: -5, y: -10},
+    swordGrip: 'both',
+    swordOrigin: 'frontHand',
+    swordAngle: -8,
+    swordLength: 95,
+    leanX: 8,
+    leanY: -5,
+  },
+
+  // 조천세: 칼을 하늘로 (상단 자세, 오른발 들고)
+  jocheon: {
+    head: {x: 0, y: -152},
+    neck: {x: 0, y: -132},
+    chest: {x: 0, y: -92},
+    hip: {x: 0, y: -3},
+    frontShoulder: {x: 8, y: -122},
+    backShoulder:  {x: -8, y: -122},
+    frontElbow: {x: 14, y: -158},
+    frontHand:  {x: 8, y: -190},
+    backElbow:  {x: -8, y: -158},
+    backHand:   {x: -2, y: -190},
+    frontFoot: {x: 8, y: -45},  // 오른발 들림
+    backFoot:  {x: -10, y: 0},
+    frontKnee: {x: 5, y: -25},
+    backKnee:  {x: -8, y: -5},
+    swordGrip: 'both',
+    swordOrigin: 'frontHand',
+    swordAngle: -120,
+    swordLength: 95,
+    leanX: 0,
+    leanY: -3,
+  },
+
+  // 좌협수두세: 칼을 왼쪽 겨드랑이에 (오른발 들고)
+  jwahyeop_sudo: {
+    head: {x: 0, y: -150},
+    neck: {x: 0, y: -130},
+    chest: {x: 0, y: -90},
+    hip: {x: 0, y: 0},
+    frontShoulder: {x: 8, y: -120},
+    backShoulder:  {x: -8, y: -120},
+    frontElbow: {x: -10, y: -100},
+    frontHand:  {x: -25, y: -115},
+    backElbow:  {x: -20, y: -110},
+    backHand:   {x: -30, y: -115},
+    frontFoot: {x: 8, y: -50},  // 오른발 들림
+    backFoot:  {x: -10, y: 0},
+    frontKnee: {x: 5, y: -28},
+    backKnee:  {x: -8, y: -5},
+    swordGrip: 'left-armpit',
+    swordOrigin: 'frontHand',
+    swordAngle: 0,
+    swordLength: 95,
+    leanX: -2,
+    leanY: 0,
+  },
+
+  // 향우방적세: 뒤쪽 목을 베는 동작 (왼발 직각으로 들고)
+  hyangwoo_bangjeok: {
+    head: {x: -2, y: -150},
+    neck: {x: -2, y: -130},
+    chest: {x: -4, y: -90},
+    hip: {x: 0, y: 0},
+    frontShoulder: {x: 6, y: -120},
+    backShoulder:  {x: -10, y: -120},
+    frontElbow: {x: -15, y: -100},
+    frontHand:  {x: -35, y: -90},
+    backElbow:  {x: -25, y: -105},
+    backHand:   {x: -40, y: -95},
+    frontFoot: {x: 15, y: 0},
+    backFoot:  {x: -10, y: -45},  // 왼발 들림 (직각으로)
+    frontKnee: {x: 8, y: -5},
+    backKnee:  {x: -5, y: -25},
+    swordGrip: 'both',
+    swordOrigin: 'frontHand',
+    swordAngle: 175,  // 뒤쪽을 향함
+    swordLength: 95,
+    leanX: -4,
+    leanY: 0,
+  },
+
+  // 전기세: 칼로 다리 방어 (낮은 자세)
+  jeonki: {
+    head: {x: 2, y: -135},
+    neck: {x: 2, y: -118},
+    chest: {x: 4, y: -82},
+    hip: {x: 0, y: 8},
+    frontShoulder: {x: 10, y: -108},
+    backShoulder:  {x: -8, y: -108},
+    frontElbow: {x: 28, y: -75},
+    frontHand:  {x: 45, y: -35},
+    backElbow:  {x: 10, y: -85},
+    backHand:   {x: 30, y: -45},
+    frontFoot: {x: 40, y: 0},
+    backFoot:  {x: -25, y: 0},
+    frontKnee: {x: 28, y: -3},
+    backKnee:  {x: -18, y: -3},
+    swordGrip: 'both',
+    swordOrigin: 'frontHand',
+    swordAngle: 25,  // 비스듬히 아래
+    swordLength: 95,
+    leanX: 8,
+    leanY: 5,
+  },
+
+  // 좌요격세 (왼발 들고): 오른→왼 목베기 후 왼발 들기
+  jwa_yogyeok: {
+    head: {x: 0, y: -150},
+    neck: {x: 0, y: -130},
+    chest: {x: 0, y: -90},
+    hip: {x: 0, y: 0},
+    frontShoulder: {x: 10, y: -120},
+    backShoulder:  {x: -10, y: -120},
+    frontElbow: {x: 15, y: -88},
+    frontHand:  {x: 5, y: -70},
+    backElbow:  {x: -10, y: -100},
+    backHand:   {x: -20, y: -85},
+    frontFoot: {x: 12, y: 0},
+    backFoot:  {x: 0, y: -45},   // 왼발 들림
+    frontKnee: {x: 8, y: -5},
+    backKnee:  {x: 2, y: -25},
+    swordGrip: 'both',
+    swordOrigin: 'frontHand',
+    swordAngle: 160,
+    swordLength: 95,
+    leanX: -2,
+    leanY: 0,
+  },
+
+  // 우요격세 (오른발 들고): 왼→오른 목베기 후 오른발 들기
+  woo_yogyeok: {
+    head: {x: 0, y: -150},
+    neck: {x: 0, y: -130},
+    chest: {x: 0, y: -90},
+    hip: {x: 0, y: 0},
+    frontShoulder: {x: 10, y: -120},
+    backShoulder:  {x: -10, y: -120},
+    frontElbow: {x: 25, y: -100},
+    frontHand:  {x: 50, y: -85},
+    backElbow:  {x: 12, y: -110},
+    backHand:   {x: 35, y: -95},
+    frontFoot: {x: 10, y: -45},   // 오른발 들림
+    backFoot:  {x: -12, y: 0},
+    frontKnee: {x: 6, y: -25},
+    backKnee:  {x: -8, y: -5},
+    swordGrip: 'both',
+    swordOrigin: 'frontHand',
+    swordAngle: 20,
+    swordLength: 95,
+    leanX: 4,
+    leanY: 0,
+  },
+
+  // 후일자세: 왼발 앞으로 뻗으면서 찌름
+  hujaja_thrust: {
+    head: {x: 0, y: -148},
+    neck: {x: 0, y: -128},
+    chest: {x: 2, y: -88},
+    hip: {x: 0, y: 0},
+    frontShoulder: {x: 10, y: -118},
+    backShoulder:  {x: -10, y: -118},
+    frontElbow: {x: 38, y: -105},
+    frontHand:  {x: 70, y: -95},
+    backElbow:  {x: 22, y: -110},
+    backHand:   {x: 55, y: -100},
+    frontFoot: {x: -10, y: 0},   // 오른발은 뒤
+    backFoot:  {x: 50, y: 0},    // 왼발이 앞 (backFoot이 실제로 앞)
+    frontKnee: {x: -5, y: -5},
+    backKnee:  {x: 35, y: -8},
+    swordGrip: 'both',
+    swordOrigin: 'frontHand',
+    swordAngle: -3,
+    swordLength: 95,
+    leanX: 8,
+    leanY: 0,
+  },
+
+  // 백원출동세: 칼을 왼쪽 겨드랑이 + 오른발 들고
+  baekwon_chuldong: {
+    head: {x: 0, y: -150},
+    neck: {x: 0, y: -130},
+    chest: {x: 0, y: -90},
+    hip: {x: 0, y: 0},
+    frontShoulder: {x: 8, y: -120},
+    backShoulder:  {x: -8, y: -120},
+    frontElbow: {x: -10, y: -100},
+    frontHand:  {x: -25, y: -110},
+    backElbow:  {x: -20, y: -105},
+    backHand:   {x: -30, y: -110},
+    frontFoot: {x: 10, y: -45},   // 오른발 들림
+    backFoot:  {x: -12, y: 0},
+    frontKnee: {x: 5, y: -25},
+    backKnee:  {x: -8, y: -5},
+    swordGrip: 'left-armpit',
+    swordOrigin: 'frontHand',
+    swordAngle: 0,
+    swordLength: 95,
+    leanX: -2,
+    leanY: 0,
+  },
+
+  // 우찬격세 / 용약일자세: 깊은 찌름
+  deep_thrust: {
+    head: {x: 4, y: -145},
+    neck: {x: 4, y: -125},
+    chest: {x: 6, y: -85},
+    hip: {x: 0, y: 5},
+    frontShoulder: {x: 14, y: -115},
+    backShoulder:  {x: -6, y: -115},
+    frontElbow: {x: 42, y: -100},
+    frontHand:  {x: 78, y: -88},
+    backElbow:  {x: 24, y: -108},
+    backHand:   {x: 62, y: -95},
+    frontFoot: {x: 55, y: 0},
+    backFoot:  {x: -30, y: 0},
+    frontKnee: {x: 38, y: -5},
+    backKnee:  {x: -20, y: -8},
+    swordGrip: 'both',
+    swordOrigin: 'frontHand',
+    swordAngle: -2,
+    swordLength: 95,
+    leanX: 12,
+    leanY: 5,
+  },
+
+  // 향후방적세: 가슴 베기 (왼발 직각으로)
+  hyanghu_bangjeok: {
+    head: {x: 0, y: -150},
+    neck: {x: 0, y: -130},
+    chest: {x: 0, y: -90},
+    hip: {x: 0, y: 0},
+    frontShoulder: {x: 10, y: -120},
+    backShoulder:  {x: -10, y: -120},
+    frontElbow: {x: 28, y: -98},
+    frontHand:  {x: 55, y: -88},
+    backElbow:  {x: 10, y: -105},
+    backHand:   {x: 38, y: -93},
+    frontFoot: {x: 12, y: 0},
+    backFoot:  {x: -2, y: -50},  // 왼발 직각으로 들림
+    frontKnee: {x: 8, y: -5},
+    backKnee:  {x: 0, y: -28},
+    swordGrip: 'both',
+    swordOrigin: 'frontHand',
+    swordAngle: 5,  // 가슴 높이 수평
+    swordLength: 95,
+    leanX: 4,
+    leanY: 0,
+  },
+
+  // 시우상전세: 마지막 찌름 (왼발 쭉 뻗으며)
+  siwoo_sangjeon: {
+    head: {x: 6, y: -145},
+    neck: {x: 6, y: -125},
+    chest: {x: 8, y: -85},
+    hip: {x: 0, y: 5},
+    frontShoulder: {x: 14, y: -115},
+    backShoulder:  {x: -6, y: -115},
+    frontElbow: {x: 42, y: -100},
+    frontHand:  {x: 80, y: -88},
+    backElbow:  {x: 24, y: -108},
+    backHand:   {x: 65, y: -95},
+    frontFoot: {x: -10, y: 0},   // 오른발 뒤
+    backFoot:  {x: 60, y: 0},    // 왼발 앞으로 길게
+    frontKnee: {x: -5, y: -5},
+    backKnee:  {x: 38, y: -8},
+    swordGrip: 'both',
+    swordOrigin: 'frontHand',
+    swordAngle: -3,
+    swordLength: 95,
+    leanX: 14,
+    leanY: 5,
+  },
+
+  // 마무리: 칼을 꽂으면서 (납검)
+  bow_finish: {
+    head: {x: 0, y: -150},
+    neck: {x: 0, y: -130},
+    chest: {x: 0, y: -90},
+    hip: {x: 0, y: 0},
+    frontShoulder: {x: 8, y: -120},
+    backShoulder:  {x: -8, y: -120},
+    frontElbow: {x: 15, y: -78},
+    frontHand:  {x: 18, y: -35},
+    backElbow:  {x: -4, y: -78},
+    backHand:   {x: -2, y: -38},
+    frontFoot: {x: 10, y: 0},
+    backFoot:  {x: -10, y: 0},
+    frontKnee: {x: 8, y: -5},
+    backKnee:  {x: -8, y: -5},
+    swordGrip: 'sheath',
+    swordOrigin: 'frontHand',
+    swordAngle: -95,  // 거의 수직, 왼쪽 옆구리
+    swordLength: 95,
+    leanX: 0,
+    leanY: 0,
+  },
+};
+
+// ----- 동작 정의 (33동작 + 시작/마무리) -----
+// 각 동작은 keyframes[]를 가짐. 각 키프레임은:
+//   pose: POSE의 키 (또는 직접 객체)
+//   facing: 세계 좌표에서 인물이 향하는 방향 (deg, 0=앞=동쪽, 90=오른쪽=남쪽, 180=뒤=서쪽, 270=왼쪽=북쪽)
+//   t: 동작 내 시점 (0~1)
+// 동작 사이는 자연스럽게 보간
+const FORMS = [
+  // 시작 자세
+  {
+    section: '初章 · 초장',
+    nameKo: '지검대적세',
+    nameHj: '持劒對賊勢',
+    desc: '오른발을 내면서 칼을 옆으로 뽑고, 왼발을 앞으로 당기면서 양 발을 평행하게 하여 칼을 왼쪽으로 듦.',
+    keyframes: [
+      { t: 0.0, pose: 'start', facing: 0 },
+      { t: 0.5, pose: 'start', facing: 0 },
+      { t: 1.0, pose: 'start', facing: 0 },
+    ],
+    duration: 2200,
+  },
+  {
+    section: '初章 · 초장',
+    nameKo: '우내략',
+    nameHj: '右內掠',
+    desc: '오른발을 들고 오른쪽으로 돌면서 칼을 거두는 자세.',
+    keyframes: [
+      { t: 0.0, pose: 'start', facing: 0 },
+      { t: 0.5, pose: 'palsangse_left_lifted', facing: 45 },
+      { t: 1.0, pose: 'sangdan_charge', facing: 90 },
+    ],
+    duration: 2000,
+  },
+  {
+    section: '初章 · 초장',
+    nameKo: '진전격적세',
+    nameHj: '進前擊賊勢',
+    desc: '큰머리치기 — 칼을 머리 위로 들었다가 정면으로 내려치는 동작.',
+    keyframes: [
+      { t: 0.0, pose: 'sangdan_charge', facing: 90 },
+      { t: 0.5, pose: 'sangdan_charge', facing: 90 },
+      { t: 1.0, pose: 'jeongmyeon_strike', facing: 90 },
+    ],
+    duration: 1500,
+  },
+  {
+    section: '初章 · 초장',
+    nameKo: '금계독립세',
+    nameHj: '金鷄獨立勢',
+    desc: '왼쪽으로 돌면서 왼다리 들고 팔상세 — 한 다리로 서서 칼을 머리 위로 비스듬히.',
+    keyframes: [
+      { t: 0.0, pose: 'jeongmyeon_strike', facing: 90 },
+      { t: 0.5, pose: 'palsangse_left_lifted', facing: 0 },
+      { t: 1.0, pose: 'palsangse_left_lifted', facing: 0 },
+    ],
+    duration: 1800,
+  },
+  {
+    section: '初章 · 초장',
+    nameKo: '후일격세',
+    nameHj: '後一擊勢',
+    desc: '왼발 내리고 오른발 나가면서 정면 머리치기.',
+    keyframes: [
+      { t: 0.0, pose: 'palsangse_left_lifted', facing: 0 },
+      { t: 0.4, pose: 'sangdan_charge', facing: 0 },
+      { t: 1.0, pose: 'jeongmyeon_strike', facing: 0 },
+    ],
+    duration: 1600,
+  },
+  {
+    section: '初章 · 초장',
+    nameKo: '금계독립세',
+    nameHj: '金鷄獨立勢',
+    desc: '왼쪽으로 돌면서 왼다리 들고 팔상세.',
+    keyframes: [
+      { t: 0.0, pose: 'jeongmyeon_strike', facing: 0 },
+      { t: 0.5, pose: 'palsangse_left_lifted', facing: 270 },
+      { t: 1.0, pose: 'palsangse_left_lifted', facing: 270 },
+    ],
+    duration: 1600,
+  },
+  {
+    section: '初章 · 초장',
+    nameKo: '진전격적세',
+    nameHj: '進前擊賊勢',
+    desc: '왼발을 내리고 오른발 나가면서 정면 머리치기.',
+    keyframes: [
+      { t: 0.0, pose: 'palsangse_left_lifted', facing: 270 },
+      { t: 0.4, pose: 'sangdan_charge', facing: 270 },
+      { t: 1.0, pose: 'jeongmyeon_strike', facing: 270 },
+    ],
+    duration: 1500,
+  },
+  {
+    section: '初章 · 초장',
+    nameKo: '일자세',
+    nameHj: '一刺勢',
+    desc: '칼을 밑에서 감아 올려서 왼발을 내디디면서 찌른 후 왼발을 다시 거두어 들임.',
+    keyframes: [
+      { t: 0.0, pose: 'jeongmyeon_strike', facing: 270 },
+      { t: 0.3, pose: 'chudan_left_forward', facing: 270 },
+      { t: 0.65, pose: 'hujaja_thrust', facing: 270 },
+      { t: 1.0, pose: 'iljase_thrust', facing: 270 },
+    ],
+    duration: 2200,
+  },
+  {
+    section: '初章 · 초장',
+    nameKo: '맹호은림세',
+    nameHj: '猛號隱林勢',
+    desc: '칼을 코등이가 목 근처 높이가 되도록 든 후, 오른쪽으로 오른발 옮기며 돌고, 왼발 앞으로 옮기고 오른쪽으로 한 번 더, 왼쪽으로 돌고 오른발을 앞으로 냄.',
+    keyframes: [
+      { t: 0.0, pose: 'iljase_thrust', facing: 270 },
+      { t: 0.25, pose: 'maengho_eunrim', facing: 270 },
+      { t: 0.50, pose: 'maengho_eunrim', facing: 0 },
+      { t: 0.75, pose: 'maengho_eunrim', facing: 90 },
+      { t: 1.0, pose: 'maengho_eunrim', facing: 0 },
+    ],
+    duration: 3200,
+  },
+  {
+    section: '初章 · 초장',
+    nameKo: '안자세',
+    nameHj: '雁字勢',
+    desc: '중단세 취하고 왼발을 내면서 찌름.',
+    keyframes: [
+      { t: 0.0, pose: 'maengho_eunrim', facing: 0 },
+      { t: 0.3, pose: 'chudan_right_forward', facing: 0 },
+      { t: 1.0, pose: 'hujaja_thrust', facing: 0 },
+    ],
+    duration: 1800,
+  },
+  {
+    section: '中章 · 중장',
+    nameKo: '직부송서세',
+    nameHj: '直符送書勢',
+    desc: '칼을 뺀 후 허리에 끼고 돌고 왼발을 내면서 다시 찌름.',
+    keyframes: [
+      { t: 0.0, pose: 'hujaja_thrust', facing: 0 },
+      { t: 0.35, pose: 'jikbu_songseo', facing: 0 },
+      { t: 0.65, pose: 'jikbu_songseo', facing: 0 },
+      { t: 1.0, pose: 'hujaja_thrust', facing: 0 },
+    ],
+    duration: 2400,
+  },
+  {
+    section: '中章 · 중장',
+    nameKo: '발초심사세',
+    nameHj: '撥艸尋蛇勢',
+    desc: '오른발을 내면서 45도로 왼쪽에서 오른쪽으로 내려 벰.',
+    keyframes: [
+      { t: 0.0, pose: 'hujaja_thrust', facing: 0 },
+      { t: 0.4, pose: 'sangdan_charge', facing: 0 },
+      { t: 1.0, pose: 'balcho_simsa', facing: 0 },
+    ],
+    duration: 2000,
+  },
+  {
+    section: '中章 · 중장',
+    nameKo: '표두압정세',
+    nameHj: '豹頭壓頂勢',
+    desc: '왼발부터 1(왼쪽 돌리고), 2(오른발, 오른쪽 돌리고), 3(점프), 4 박자에 찌름.',
+    keyframes: [
+      { t: 0.0, pose: 'balcho_simsa', facing: 0 },
+      { t: 0.25, pose: 'chudan_left_forward', facing: 315 },
+      { t: 0.50, pose: 'chudan_right_forward', facing: 45 },
+      { t: 0.75, pose: 'sangdan_charge', facing: 0 },
+      { t: 1.0, pose: 'pyodu_apjeong', facing: 0 },
+    ],
+    duration: 2800,
+  },
+  {
+    section: '中章 · 중장',
+    nameKo: '조천세',
+    nameHj: '朝天勢',
+    desc: '오른발 당기고 중단세, 오른쪽으로 돌면서 칼을 머리 치듯 내려 중단세, 왼발 나가면서 오른발 든 상단세.',
+    keyframes: [
+      { t: 0.0, pose: 'pyodu_apjeong', facing: 0 },
+      { t: 0.2, pose: 'chudan_right_forward', facing: 0 },
+      { t: 0.55, pose: 'jeongmyeon_strike', facing: 90 },
+      { t: 0.75, pose: 'chudan_left_forward', facing: 90 },
+      { t: 1.0, pose: 'jocheon', facing: 90 },
+    ],
+    duration: 3000,
+  },
+  {
+    section: '中章 · 중장',
+    nameKo: '좌협수두세',
+    nameHj: '左挾獸頭勢',
+    desc: '오른발을 내리면서 오른쪽으로 돌고 중단세, 왼발 나가고 오른발을 들면서 칼을 왼쪽 겨드랑이에 낌.',
+    keyframes: [
+      { t: 0.0, pose: 'jocheon', facing: 90 },
+      { t: 0.3, pose: 'chudan_right_forward', facing: 180 },
+      { t: 0.65, pose: 'chudan_left_forward', facing: 180 },
+      { t: 1.0, pose: 'jwahyeop_sudo', facing: 180 },
+    ],
+    duration: 2600,
+  },
+  {
+    section: '中章 · 중장',
+    nameKo: '향우방적세',
+    nameHj: '向右防賊勢',
+    desc: '오른쪽으로 돌면서 오른발을 내딛고 왼발을 직각으로 든 채 뒤쪽의 목을 날리는 동작.',
+    keyframes: [
+      { t: 0.0, pose: 'jwahyeop_sudo', facing: 180 },
+      { t: 0.5, pose: 'chudan_right_forward', facing: 90 },
+      { t: 1.0, pose: 'hyangwoo_bangjeok', facing: 90 },
+    ],
+    duration: 2400,
+  },
+  {
+    section: '中章 · 중장',
+    nameKo: '후일격세',
+    nameHj: '後一擊勢',
+    desc: '왼발을 내리고 오른발을 나가면서 정면 머리치기.',
+    keyframes: [
+      { t: 0.0, pose: 'hyangwoo_bangjeok', facing: 90 },
+      { t: 0.4, pose: 'sangdan_charge', facing: 90 },
+      { t: 1.0, pose: 'jeongmyeon_strike', facing: 90 },
+    ],
+    duration: 1600,
+  },
+  {
+    section: '中章 · 중장',
+    nameKo: '전기세',
+    nameHj: '展旗勢',
+    desc: '오른발을 이동시키면서 오른쪽으로 돌면서 칼로 다리를 방어하는 동작.',
+    keyframes: [
+      { t: 0.0, pose: 'jeongmyeon_strike', facing: 90 },
+      { t: 0.5, pose: 'chudan_right_forward', facing: 180 },
+      { t: 1.0, pose: 'jeonki', facing: 180 },
+    ],
+    duration: 2200,
+  },
+  {
+    section: '中章 · 중장',
+    nameKo: '진전살적세',
+    nameHj: '進前殺賊勢',
+    desc: '돌고 난 후 오른발을 구르면서 정면 머리치기.',
+    keyframes: [
+      { t: 0.0, pose: 'jeonki', facing: 180 },
+      { t: 0.4, pose: 'sangdan_charge', facing: 180 },
+      { t: 1.0, pose: 'jeongmyeon_strike', facing: 180 },
+    ],
+    duration: 1700,
+  },
+  {
+    section: '中章 · 중장',
+    nameKo: '금계독립세',
+    nameHj: '金鷄獨立勢',
+    desc: '왼쪽으로 250도 정도 돌면서 왼쪽 다리를 들고 팔상세.',
+    keyframes: [
+      { t: 0.0, pose: 'jeongmyeon_strike', facing: 180 },
+      { t: 0.5, pose: 'palsangse_left_lifted', facing: 60 },
+      { t: 1.0, pose: 'palsangse_left_lifted', facing: 290 },
+    ],
+    duration: 2400,
+  },
+  {
+    section: '中章 · 중장',
+    nameKo: '좌요격세',
+    nameHj: '左腰擊勢',
+    desc: '270도 방향으로 왼발 오른발을 나가면서 칼을 45도 방향으로 오른쪽에서 왼쪽으로 목을 벤 후 다시 왼쪽 다리를 들고.',
+    keyframes: [
+      { t: 0.0, pose: 'palsangse_left_lifted', facing: 290 },
+      { t: 0.35, pose: 'chudan_left_forward', facing: 270 },
+      { t: 0.65, pose: 'sangdan_charge', facing: 270 },
+      { t: 0.85, pose: 'jeongmyeon_strike', facing: 270 },
+      { t: 1.0, pose: 'jwa_yogyeok', facing: 270 },
+    ],
+    duration: 2600,
+  },
+  {
+    section: '中章 · 중장',
+    nameKo: '우요격세',
+    nameHj: '右腰擊勢',
+    desc: '왼발 오른발 왼발을 굴린 후 왼쪽에서 오른쪽으로 목을 벤 후 당초의 180도 방향으로 보면서 오른발을 들고.',
+    keyframes: [
+      { t: 0.0, pose: 'jwa_yogyeok', facing: 270 },
+      { t: 0.3, pose: 'chudan_left_forward', facing: 220 },
+      { t: 0.55, pose: 'chudan_right_forward', facing: 180 },
+      { t: 0.80, pose: 'balcho_simsa', facing: 180 },
+      { t: 1.0, pose: 'woo_yogyeok', facing: 180 },
+    ],
+    duration: 2600,
+  },
+  {
+    section: '中章 · 중장',
+    nameKo: '후일자세',
+    nameHj: '後一刺勢',
+    desc: '오른발을 내리고 왼발을 앞으로 뻗으면서 찌름.',
+    keyframes: [
+      { t: 0.0, pose: 'woo_yogyeok', facing: 180 },
+      { t: 0.4, pose: 'chudan_right_forward', facing: 180 },
+      { t: 1.0, pose: 'hujaja_thrust', facing: 180 },
+    ],
+    duration: 1800,
+  },
+  {
+    section: '終章 · 종장',
+    nameKo: '장교분수세',
+    nameHj: '長蛟噴水勢',
+    desc: '왼쪽으로 돌면서 왼발을 내딛고 오른발을 내디디면서 정면 머리치기.',
+    keyframes: [
+      { t: 0.0, pose: 'hujaja_thrust', facing: 180 },
+      { t: 0.4, pose: 'chudan_left_forward', facing: 90 },
+      { t: 0.7, pose: 'sangdan_charge', facing: 90 },
+      { t: 1.0, pose: 'jeongmyeon_strike', facing: 90 },
+    ],
+    duration: 2200,
+  },
+  {
+    section: '終章 · 종장',
+    nameKo: '백원출동세',
+    nameHj: '白猿出洞勢',
+    desc: '왼발 나가고 오른발 들면서 왼쪽 겨드랑이에 칼을 끼운 후 찌를 태세를 취함.',
+    keyframes: [
+      { t: 0.0, pose: 'jeongmyeon_strike', facing: 90 },
+      { t: 0.5, pose: 'chudan_left_forward', facing: 90 },
+      { t: 1.0, pose: 'baekwon_chuldong', facing: 90 },
+    ],
+    duration: 2000,
+  },
+  {
+    section: '終章 · 종장',
+    nameKo: '우찬격세',
+    nameHj: '右鑽擊勢',
+    desc: '120도 방향으로 오른쪽으로 돌면서 오른발을 쭉 내디디면서 찌름.',
+    keyframes: [
+      { t: 0.0, pose: 'baekwon_chuldong', facing: 90 },
+      { t: 0.5, pose: 'chudan_right_forward', facing: 210 },
+      { t: 1.0, pose: 'deep_thrust', facing: 210 },
+    ],
+    duration: 2200,
+  },
+  {
+    section: '終章 · 종장',
+    nameKo: '용약일자세',
+    nameHj: '勇躍一刺勢',
+    desc: '오른쪽으로 돌면서 오른발을 내딛고 왼발을 쭉 뻗으면서 찌름.',
+    keyframes: [
+      { t: 0.0, pose: 'deep_thrust', facing: 210 },
+      { t: 0.4, pose: 'chudan_right_forward', facing: 270 },
+      { t: 1.0, pose: 'hujaja_thrust', facing: 270 },
+    ],
+    duration: 2000,
+  },
+  {
+    section: '終章 · 종장',
+    nameKo: '후일격세',
+    nameHj: '後一擊勢',
+    desc: '왼쪽으로 돌면서 왼발 내딛고 오른발 내디디면서 정면 머리치기.',
+    keyframes: [
+      { t: 0.0, pose: 'hujaja_thrust', facing: 270 },
+      { t: 0.4, pose: 'chudan_left_forward', facing: 0 },
+      { t: 0.7, pose: 'sangdan_charge', facing: 0 },
+      { t: 1.0, pose: 'jeongmyeon_strike', facing: 0 },
+    ],
+    duration: 2200,
+  },
+  {
+    section: '終章 · 종장',
+    nameKo: '후일자세',
+    nameHj: '後一刺勢',
+    desc: '칼을 돌린 후 왼발 내디디면서 찌름.',
+    keyframes: [
+      { t: 0.0, pose: 'jeongmyeon_strike', facing: 0 },
+      { t: 0.35, pose: 'chudan_right_forward', facing: 0 },
+      { t: 0.55, pose: 'maengho_eunrim', facing: 0 },
+      { t: 1.0, pose: 'hujaja_thrust', facing: 0 },
+    ],
+    duration: 2200,
+  },
+  {
+    section: '終章 · 종장',
+    nameKo: '향후방적세',
+    nameHj: '向後防賊勢',
+    desc: '오른쪽으로 돌면서 왼발을 직각으로 들고 평행하게 가슴을 베고.',
+    keyframes: [
+      { t: 0.0, pose: 'hujaja_thrust', facing: 0 },
+      { t: 0.5, pose: 'chudan_right_forward', facing: 90 },
+      { t: 1.0, pose: 'hyanghu_bangjeok', facing: 90 },
+    ],
+    duration: 2000,
+  },
+  {
+    section: '終章 · 종장',
+    nameKo: '향전살적세',
+    nameHj: '向前殺賊勢',
+    desc: '왼발, 오른발을 굴리면서 정면 머리치기.',
+    keyframes: [
+      { t: 0.0, pose: 'hyanghu_bangjeok', facing: 90 },
+      { t: 0.4, pose: 'sangdan_charge', facing: 90 },
+      { t: 1.0, pose: 'jeongmyeon_strike', facing: 90 },
+    ],
+    duration: 1600,
+  },
+  {
+    section: '終章 · 종장',
+    nameKo: '향전살적세',
+    nameHj: '向前殺賊勢',
+    desc: '왼발, 오른발을 굴리면서 정면 머리치기 (반복).',
+    keyframes: [
+      { t: 0.0, pose: 'jeongmyeon_strike', facing: 90 },
+      { t: 0.35, pose: 'chudan_right_forward', facing: 90 },
+      { t: 0.65, pose: 'sangdan_charge', facing: 90 },
+      { t: 1.0, pose: 'jeongmyeon_strike', facing: 90 },
+    ],
+    duration: 1700,
+  },
+  {
+    section: '終章 · 종장',
+    nameKo: '시우상전세',
+    nameHj: '兕牛相戰勢',
+    desc: '왼발 후, 오른발을 쭉 뻗으면서 찌름 — 본국검법의 마지막 격자 동작.',
+    keyframes: [
+      { t: 0.0, pose: 'jeongmyeon_strike', facing: 90 },
+      { t: 0.4, pose: 'chudan_left_forward', facing: 90 },
+      { t: 1.0, pose: 'siwoo_sangjeon', facing: 90 },
+    ],
+    duration: 2200,
+  },
+  {
+    section: '終章 · 종장',
+    nameKo: '마무리 (납검·인사)',
+    nameHj: '畢 · 禮',
+    desc: '칼을 거두어 칼집에 넣고(納劒), 정면을 향해 예를 갖추어 인사하며 검법을 마침.',
+    keyframes: [
+      { t: 0.0, pose: 'siwoo_sangjeon', facing: 90 },
+      { t: 0.45, pose: 'start', facing: 90 },
+      { t: 1.0, pose: 'bow_finish', facing: 90 },
+    ],
+    duration: 3000,
+  },
+];
+
+// 정식 "세(勢)" 동작 수 — 마무리(납검·인사)는 격자가 아니므로 카운터 분모에서 제외
+const FORM_COUNT = FORMS.filter(f => !f.nameKo.includes('마무리')).length;
+// 발자국 트레일: 각 동작이 끝날 때 인물의 절대 위치(top-down 좌표)
+// 모든 동작의 누적 이동을 기록해 나침반에 트레일로 표시
+// ====================================================================
+function computeFootTrail() {
+  // 단순화: 각 동작에서 인물이 facing 방향으로 약 1.5 보 전진한다고 가정
+  // 회전만 하는 동작은 위치는 그대로
+  const trail = [{x: 0, y: 0, facing: FORMS[0].keyframes[0].facing}];
+  let x = 0, y = 0;
+  for (let i = 0; i < FORMS.length; i++) {
+    const f = FORMS[i];
+    const startFacing = f.keyframes[0].facing;
+    const endFacing = f.keyframes[f.keyframes.length - 1].facing;
+    // 진전, 후일, 향전 같은 단어가 있으면 전진
+    const goesForward = /진전|후일|장교|용약|시우|향전|향후|향우|발초/.test(f.nameKo);
+    const moveDist = goesForward ? 30 : 8;
+    const rad = endFacing * Math.PI / 180;
+    x += Math.cos(rad) * moveDist;
+    y += Math.sin(rad) * moveDist;
+    trail.push({x, y, facing: endFacing});
+  }
+  return trail;
+}
+const FOOT_TRAIL = computeFootTrail();
+
+// ====================================================================
+// 렌더링
+// ====================================================================
+const stageCanvas = document.getElementById('stage-canvas');
+const stageCtx = stageCanvas.getContext('2d');
+
+function resizeStage() {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = stageCanvas.getBoundingClientRect();
+  stageCanvas.width = rect.width * dpr;
+  stageCanvas.height = rect.height * dpr;
+  stageCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', resizeStage);
+setTimeout(resizeStage, 0);
+
+// ----- 보간 헬퍼 -----
+function lerp(a, b, t) { return a + (b - a) * t; }
+function lerpPoint(a, b, t) { return { x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t) }; }
+function lerpAngle(a, b, t) {
+  // 최단 경로 보간
+  let diff = b - a;
+  while (diff > 180) diff -= 360;
+  while (diff < -180) diff += 360;
+  return a + diff * t;
+}
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function interpolatePose(p1, p2, t) {
+  const e = easeInOutCubic(t);
+  const result = {};
+  const pointKeys = ['head','neck','chest','hip','frontShoulder','backShoulder',
+    'frontElbow','frontHand','backElbow','backHand',
+    'frontFoot','backFoot','frontKnee','backKnee'];
+  for (const k of pointKeys) {
+    result[k] = lerpPoint(p1[k], p2[k], e);
+  }
+  result.swordAngle = lerpAngle(p1.swordAngle, p2.swordAngle, e);
+  result.swordLength = lerp(p1.swordLength, p2.swordLength, e);
+  result.leanX = lerp(p1.leanX, p2.leanX, e);
+  result.leanY = lerp(p1.leanY, p2.leanY, e);
+  // 그립과 origin: 50% 지점에서 전환
+  result.swordGrip = e < 0.5 ? p1.swordGrip : p2.swordGrip;
+  result.swordOrigin = e < 0.5 ? p1.swordOrigin : p2.swordOrigin;
+  return result;
+}
+
+function resolveKeyframePose(kf) {
+  if (typeof kf.pose === 'string') return POSE[kf.pose];
+  return kf.pose;
+}
+
+function getCurrentPose(formIdx, formT) {
+  const form = FORMS[formIdx];
+  const kfs = form.keyframes;
+  // 첫 키프레임 이전
+  if (formT <= kfs[0].t) return { pose: resolveKeyframePose(kfs[0]), facing: kfs[0].facing };
+  // 마지막 키프레임 이후
+  if (formT >= kfs[kfs.length-1].t) {
+    return { pose: resolveKeyframePose(kfs[kfs.length-1]), facing: kfs[kfs.length-1].facing };
+  }
+  // 사이 보간
+  for (let i = 0; i < kfs.length - 1; i++) {
+    if (formT >= kfs[i].t && formT <= kfs[i+1].t) {
+      const localT = (formT - kfs[i].t) / (kfs[i+1].t - kfs[i].t);
+      const pose = interpolatePose(resolveKeyframePose(kfs[i]), resolveKeyframePose(kfs[i+1]), localT);
+      const facing = lerpAngle(kfs[i].facing, kfs[i+1].facing, easeInOutCubic(localT));
+      return { pose, facing };
+    }
+  }
+  return { pose: resolveKeyframePose(kfs[0]), facing: kfs[0].facing };
+}
+
+// ----- 인물 그리기 (측면 뷰, 항상 오른쪽 향함) -----
+function drawFigure(ctx, cx, cy, pose, scale = 1) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(scale, scale);
+
+  // 좌표 변환: pose는 hip 기준
+  // 측면 뷰에서 우리가 보는 인물은 오른쪽을 향함
+  const hipX = pose.hip.x + pose.leanX;
+  const hipY = pose.hip.y + pose.leanY;
+
+  // === 뒷다리 (들렸을 때만 보임) — 하카마 뒤에 위치 ===
+  drawHakamaLeg(ctx, hipX, hipY, pose.backKnee, pose.backFoot, 'back');
+
+  // === 하카마 본체 (몸통과 다리 윗부분 가리는 큰 사다리꼴) ===
+  drawHakamaBody(ctx, hipX, hipY, pose);
+
+  // === 뒷발 (하카마 위, 앞발 아래) — 발등이 보이도록 ===
+  drawFoot(ctx, pose.backFoot, true);
+
+  // === 앞다리 (들렸을 때만 보임) ===
+  drawHakamaLeg(ctx, hipX, hipY, pose.frontKnee, pose.frontFoot, 'front');
+
+  // === 앞발 (가장 위) ===
+  drawFoot(ctx, pose.frontFoot, false);
+
+  // === 상의 (Gi/저고리) ===
+  drawGi(ctx, pose);
+
+  // === 머리 ===
+  ctx.fillStyle = '#e8d8c0';
+  ctx.beginPath();
+  ctx.arc(pose.head.x, pose.head.y, 14, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#3a2a1a';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // 머리카락 (위쪽 절반)
+  ctx.fillStyle = '#1a0f08';
+  ctx.beginPath();
+  ctx.arc(pose.head.x, pose.head.y - 3, 13, Math.PI, 0);
+  ctx.fill();
+  // 옆머리/구레나룻
+  ctx.beginPath();
+  ctx.moveTo(pose.head.x - 12, pose.head.y - 2);
+  ctx.lineTo(pose.head.x - 11, pose.head.y + 6);
+  ctx.lineTo(pose.head.x - 8, pose.head.y + 4);
+  ctx.closePath();
+  ctx.fill();
+
+  // 얼굴 방향 표시: 코/턱 (오른쪽 향함)
+  ctx.fillStyle = '#d8c8b0';
+  ctx.beginPath();
+  ctx.moveTo(pose.head.x + 13, pose.head.y + 2);
+  ctx.lineTo(pose.head.x + 16, pose.head.y + 4);
+  ctx.lineTo(pose.head.x + 12, pose.head.y + 6);
+  ctx.closePath();
+  ctx.fill();
+  // 눈
+  ctx.fillStyle = '#1a0f08';
+  ctx.beginPath();
+  ctx.arc(pose.head.x + 7, pose.head.y + 1, 1.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // === 뒤쪽 팔 ===
+  drawArm(ctx, pose.backShoulder, pose.backElbow, pose.backHand, 'back');
+
+  // === 칼 (앞쪽 그립 기준) ===
+  drawSword(ctx, pose);
+
+  // === 앞쪽 팔 (칼 위에 그려서 자연스럽게) ===
+  drawArm(ctx, pose.frontShoulder, pose.frontElbow, pose.frontHand, 'front');
+
+  ctx.restore();
+}
+
+function drawHakamaBody(ctx, hipX, hipY, pose) {
+  // 하카마: 허리(hip)에서 시작해 발 쪽으로 갈수록 넓어지는 사다리꼴
+  const lf = pose.frontFoot;
+  const bf = pose.backFoot;
+  const hakamaTopHalfWidth = 24;
+  // 밑단을 발 위쪽으로 올려서 발등이 옷자락 밑으로 노출되도록
+  const hakamaBottomY = Math.max(lf.y, bf.y, 0) - 5;
+  // 좌우 폭: 발 위치를 넉넉히 넘어서 넓게
+  const leftX = Math.min(lf.x, bf.x) - 22;
+  const rightX = Math.max(lf.x, bf.x) + 22;
+
+  // 하카마 본체
+  ctx.fillStyle = '#16161e';
+  ctx.beginPath();
+  ctx.moveTo(hipX - hakamaTopHalfWidth, hipY - 10);
+  ctx.lineTo(hipX + hakamaTopHalfWidth, hipY - 10);
+  ctx.lineTo(rightX, hakamaBottomY);
+  ctx.lineTo(leftX, hakamaBottomY);
+  ctx.closePath();
+  ctx.fill();
+
+  // 옆선 음영 (하카마 깊이감)
+  const grad = ctx.createLinearGradient(leftX, 0, rightX, 0);
+  grad.addColorStop(0, 'rgba(0,0,0,0.5)');
+  grad.addColorStop(0.5, 'rgba(0,0,0,0)');
+  grad.addColorStop(1, 'rgba(0,0,0,0.5)');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(hipX - hakamaTopHalfWidth, hipY - 10);
+  ctx.lineTo(hipX + hakamaTopHalfWidth, hipY - 10);
+  ctx.lineTo(rightX, hakamaBottomY);
+  ctx.lineTo(leftX, hakamaBottomY);
+  ctx.closePath();
+  ctx.fill();
+
+  // 주름 (수직 라인, 사다리꼴 비율 반영)
+  ctx.strokeStyle = '#0a0a10';
+  ctx.lineWidth = 1;
+  const numPleats = 5;
+  for (let i = 1; i < numPleats; i++) {
+    const r = i / numPleats;
+    const xTop = (hipX - hakamaTopHalfWidth) + 2 * hakamaTopHalfWidth * r;
+    const xBot = leftX + (rightX - leftX) * r;
+    ctx.beginPath();
+    ctx.moveTo(xTop, hipY - 7);
+    ctx.lineTo(xBot, hakamaBottomY - 2);
+    ctx.stroke();
+  }
+
+  // 허리 띠
+  ctx.fillStyle = '#0a0a10';
+  ctx.fillRect(hipX - hakamaTopHalfWidth - 2, hipY - 14, hakamaTopHalfWidth * 2 + 4, 6);
+  // 띠 매듭 (앞쪽으로)
+  ctx.fillStyle = '#0a0a10';
+  ctx.fillRect(hipX + 6, hipY - 16, 12, 10);
+}
+
+function drawHakamaLeg(ctx, hipX, hipY, knee, foot, side) {
+  // 다리는 거의 보이지 않음 (하카마에 가려짐). 들렸을 때만 무릎-발 라인 표시.
+  // 발 자체는 drawFigure에서 별도 z-순서로 렌더링.
+  const lifted = foot.y < -10;
+  if (lifted) {
+    // 들린 다리: 무릎-발 라인을 하카마 색으로 그림 (확장된 옷자락처럼)
+    ctx.strokeStyle = '#16161e';
+    ctx.lineWidth = 18;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(hipX, hipY - 8);
+    ctx.lineTo(knee.x, knee.y);
+    ctx.lineTo(foot.x, foot.y);
+    ctx.stroke();
+    // 주름 음영
+    ctx.strokeStyle = '#0a0a10';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(hipX + 4, hipY - 6);
+    ctx.lineTo(knee.x + 2, knee.y);
+    ctx.lineTo(foot.x + 1, foot.y);
+    ctx.stroke();
+  }
+}
+
+function drawFoot(ctx, foot, isBack) {
+  ctx.save();
+  // 약간 위에서 내려다보는 시점 — 발등이 보이도록 둥근 타원으로 렌더링
+  // 뒷발: 살짝 작고 약간 어둡게 (원근감)
+  const dy = isBack ? -1.5 : 0;
+  const wx = isBack ? 8.5 : 10;
+  const wy = isBack ? 5 : 6;
+
+  // 발 본체 (버선/맨발)
+  ctx.fillStyle = isBack ? '#d6c4a8' : '#e8d8c0';
+  ctx.strokeStyle = '#3a2a1a';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.ellipse(foot.x, foot.y - wy + 1 + dy, wx, wy, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  // 발등 하이라이트 (위쪽 둥글게 — 입체감)
+  ctx.fillStyle = isBack ? 'rgba(255, 248, 230, 0.18)' : 'rgba(255, 248, 230, 0.28)';
+  ctx.beginPath();
+  ctx.ellipse(foot.x - 1, foot.y - wy - 0.5 + dy, wx * 0.6, wy * 0.45, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 발가락 구분선 (앞쪽 끝, 진행방향 우측)
+  ctx.strokeStyle = '#7a6a5a';
+  ctx.lineWidth = 0.6;
+  ctx.beginPath();
+  ctx.moveTo(foot.x + wx * 0.45, foot.y - wy - 0.5 + dy);
+  ctx.lineTo(foot.x + wx * 0.7, foot.y - wy * 0.3 + dy);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawGi(ctx, pose) {
+  // 상의: 어깨 - 가슴 - 허리 라인
+  const ls = pose.frontShoulder;
+  const rs = pose.backShoulder;
+  const chest = pose.chest;
+  const hip = pose.hip;
+  const hipX = hip.x + pose.leanX;
+  const hipY = hip.y + pose.leanY;
+
+  ctx.fillStyle = '#1f1f28';
+  ctx.beginPath();
+  ctx.moveTo(rs.x - 4, rs.y - 2);    // 뒤어깨 바깥
+  ctx.lineTo(rs.x + 2, rs.y + 4);
+  ctx.lineTo(chest.x - 18, chest.y);  // 가슴 뒤
+  ctx.lineTo(hipX - 22, hipY - 8);   // 허리 뒤
+  ctx.lineTo(hipX + 22, hipY - 8);   // 허리 앞
+  ctx.lineTo(chest.x + 18, chest.y); // 가슴 앞
+  ctx.lineTo(ls.x - 2, ls.y + 4);
+  ctx.lineTo(ls.x + 4, ls.y - 2);    // 앞어깨 바깥
+  ctx.lineTo(ls.x + 2, ls.y + 8);    // 옷깃
+  ctx.lineTo(chest.x + 8, chest.y + 4);
+  ctx.lineTo(chest.x, chest.y + 12);
+  ctx.lineTo(chest.x - 6, chest.y + 4);
+  ctx.lineTo(rs.x - 2, rs.y + 8);
+  ctx.closePath();
+  ctx.fill();
+
+  // 옷깃 (V자 라인)
+  ctx.strokeStyle = '#3a3a48';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(ls.x + 2, ls.y + 8);
+  ctx.lineTo(chest.x, chest.y + 12);
+  ctx.lineTo(rs.x - 2, rs.y + 8);
+  ctx.stroke();
+}
+
+function drawArm(ctx, shoulder, elbow, hand, side) {
+  // 팔: 어깨-팔꿈치-손까지의 굵은 라인 (옷소매)
+  ctx.strokeStyle = side === 'back' ? '#15151c' : '#1f1f28';
+  ctx.lineWidth = 14;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(shoulder.x, shoulder.y);
+  ctx.lineTo(elbow.x, elbow.y);
+  ctx.lineTo(hand.x, hand.y);
+  ctx.stroke();
+
+  // 음영
+  ctx.strokeStyle = '#0a0a12';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(shoulder.x + 1, shoulder.y + 4);
+  ctx.lineTo(elbow.x + 1, elbow.y + 1);
+  ctx.lineTo(hand.x + 1, hand.y - 1);
+  ctx.stroke();
+
+  // 손 (작은 살색 점)
+  ctx.fillStyle = '#e8d8c0';
+  ctx.beginPath();
+  ctx.arc(hand.x, hand.y, 4, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawSword(ctx, pose) {
+  // 칼의 시작점과 각도 결정
+  let gripPoint;
+  if (pose.swordGrip === 'sheath') {
+    // 납검 자세: 왼쪽 옆구리에 꽂힘
+    gripPoint = { x: pose.hip.x + pose.leanX - 18, y: pose.hip.y + pose.leanY - 8 };
+  } else if (pose.swordGrip === 'left-armpit') {
+    // 왼쪽 겨드랑이: 앞손은 자루 끝, 칼은 옆구리 뒤쪽으로
+    gripPoint = pose.frontHand;
+  } else if (pose.swordGrip === 'left-side-low') {
+    // 시작 자세: 왼쪽으로 칼 들음
+    gripPoint = pose.frontHand;
+  } else {
+    // both / right / left: 앞손이 기준
+    gripPoint = pose.frontHand;
+  }
+
+  const angleRad = pose.swordAngle * Math.PI / 180;
+  const len = pose.swordLength;
+  const tipX = gripPoint.x + Math.cos(angleRad) * len;
+  const tipY = gripPoint.y + Math.sin(angleRad) * len;
+  // 자루 끝 (반대 방향으로 약 20px)
+  const pommelX = gripPoint.x - Math.cos(angleRad) * 18;
+  const pommelY = gripPoint.y - Math.sin(angleRad) * 18;
+
+  // 자루 (검은색)
+  ctx.strokeStyle = '#1a1410';
+  ctx.lineWidth = 5;
+  ctx.lineCap = 'square';
+  ctx.beginPath();
+  ctx.moveTo(pommelX, pommelY);
+  ctx.lineTo(gripPoint.x, gripPoint.y);
+  ctx.stroke();
+
+  // 코등이 (tsuba)
+  const tsubaPerpX = -Math.sin(angleRad) * 6;
+  const tsubaPerpY = Math.cos(angleRad) * 6;
+  ctx.fillStyle = '#6a5a40';
+  ctx.beginPath();
+  ctx.ellipse(gripPoint.x, gripPoint.y, 7, 3,
+    Math.atan2(tsubaPerpY, tsubaPerpX), 0, Math.PI * 2);
+  ctx.fill();
+
+  // 칼날 (실검 - 직선)
+  // 본국검법은 직검(直劍)이지만 시각적으로 약간 곡률 줘서 한국 검 느낌
+  ctx.strokeStyle = '#c8c4b8';
+  ctx.lineWidth = 3.5;
+  ctx.lineCap = 'butt';
+  ctx.beginPath();
+  ctx.moveTo(gripPoint.x + Math.cos(angleRad) * 4, gripPoint.y + Math.sin(angleRad) * 4);
+  ctx.lineTo(tipX, tipY);
+  ctx.stroke();
+
+  // 칼날 하이라이트
+  ctx.strokeStyle = '#f5f1e8';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(gripPoint.x + Math.cos(angleRad) * 4 + tsubaPerpX * 0.15,
+            gripPoint.y + Math.sin(angleRad) * 4 + tsubaPerpY * 0.15);
+  ctx.lineTo(tipX + tsubaPerpX * 0.15, tipY + tsubaPerpY * 0.15);
+  ctx.stroke();
+
+  // 칼끝 (kissaki) - 작은 삼각
+  ctx.fillStyle = '#a8a496';
+  ctx.beginPath();
+  ctx.moveTo(tipX, tipY);
+  ctx.lineTo(tipX - Math.cos(angleRad) * 6 + tsubaPerpX * 0.3,
+            tipY - Math.sin(angleRad) * 6 + tsubaPerpY * 0.3);
+  ctx.lineTo(tipX - Math.cos(angleRad) * 6 - tsubaPerpX * 0.3,
+            tipY - Math.sin(angleRad) * 6 - tsubaPerpY * 0.3);
+  ctx.closePath();
+  ctx.fill();
+}
+
+// ----- 무대(stage) 배경 그리기 -----
+function drawStageBackground(ctx, w, h) {
+  // 그라데이션 바닥
+  const grad = ctx.createLinearGradient(0, h * 0.45, 0, h);
+  grad.addColorStop(0, '#1c1c24');
+  grad.addColorStop(1, '#0a0a0c');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, h * 0.45, w, h * 0.55);
+
+  // 위쪽 배경 (벽)
+  ctx.fillStyle = '#131318';
+  ctx.fillRect(0, 0, w, h * 0.45);
+
+  // 바닥선 (마룻바닥 라인)
+  ctx.strokeStyle = '#2a2a32';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 8; i++) {
+    const y = h * 0.45 + (h * 0.55) * (i / 8) * (i / 8);
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
+
+  // 중앙 태극 모티프 (매우 흐릿)
+  ctx.save();
+  ctx.globalAlpha = 0.04;
+  const tcx = w / 2;
+  const tcy = h * 0.28;
+  const tr = Math.min(w, h) * 0.13;
+  ctx.fillStyle = '#c8233a';
+  ctx.beginPath();
+  ctx.arc(tcx, tcy, tr, -Math.PI / 2, Math.PI / 2);
+  ctx.arc(tcx, tcy - tr / 2, tr / 2, Math.PI / 2, -Math.PI / 2, true);
+  ctx.arc(tcx, tcy + tr / 2, tr / 2, -Math.PI / 2, Math.PI / 2);
+  ctx.fill();
+  ctx.fillStyle = '#2a4a8a';
+  ctx.beginPath();
+  ctx.arc(tcx, tcy, tr, Math.PI / 2, -Math.PI / 2);
+  ctx.arc(tcx, tcy + tr / 2, tr / 2, -Math.PI / 2, Math.PI / 2, true);
+  ctx.arc(tcx, tcy - tr / 2, tr / 2, Math.PI / 2, -Math.PI / 2);
+  ctx.fill();
+  ctx.restore();
+
+  // 바닥 중앙 강조 (조명 효과)
+  const spot = ctx.createRadialGradient(w / 2, h * 0.78, 20, w / 2, h * 0.78, w * 0.35);
+  spot.addColorStop(0, 'rgba(212, 184, 122, 0.10)');
+  spot.addColorStop(1, 'rgba(212, 184, 122, 0)');
+  ctx.fillStyle = spot;
+  ctx.fillRect(0, 0, w, h);
+}
+
+// ====================================================================
+// 위치 이동: world 좌표 → canvas 좌표 변환
+// FOOT_TRAIL의 누적 위치(world)를 stage 영역에 맞춰 스케일
+// ====================================================================
+function computeStageBounds() {
+  // FOOT_TRAIL 전체 범위를 한 번만 계산
+  const xs = FOOT_TRAIL.map(p => p.x);
+  const ys = FOOT_TRAIL.map(p => p.y);
+  return {
+    minX: Math.min(...xs), maxX: Math.max(...xs),
+    minY: Math.min(...ys), maxY: Math.max(...ys),
+  };
+}
+const STAGE_BOUNDS = computeStageBounds();
+
+function getCurrentWorldPos(formIdx, formT) {
+  // 동작이 진행되면서 위치도 보간: 시작 위치(FOOT_TRAIL[formIdx]) → 끝 위치(FOOT_TRAIL[formIdx+1])
+  const a = FOOT_TRAIL[formIdx];
+  const b = FOOT_TRAIL[Math.min(formIdx + 1, FOOT_TRAIL.length - 1)];
+  const eased = easeInOutCubic(formT);
+  return {
+    x: lerp(a.x, b.x, eased),
+    y: lerp(a.y, b.y, eased),
+  };
+}
+
+function worldToCanvas(worldX, worldY, frame, figScale) {
+  // 인물이 차지하는 영역(anchor=발 기준 위로 머리까지 165, 옆 30, 아래 발 끝 12)
+  // 이 만큼 frame 안쪽으로 안전 마진을 두고 anchor 가능 영역을 계산
+  const figureTop  = 175 * figScale;
+  const figureBot  = 14  * figScale;
+  const figureSide = 34  * figScale;
+
+  const usableX = frame.x + figureSide;
+  const usableY = frame.y + figureTop;
+  const usableW = Math.max(20, frame.w - figureSide * 2);
+  const usableH = Math.max(20, frame.h - figureTop - figureBot);
+
+  const spanX = (STAGE_BOUNDS.maxX - STAGE_BOUNDS.minX) || 1;
+  const spanY = (STAGE_BOUNDS.maxY - STAGE_BOUNDS.minY) || 1;
+  // 가로세로 비율 유지 (양 축 fit)
+  const scale = Math.min(usableW / spanX, usableH / spanY);
+
+  const centerWorldX = (STAGE_BOUNDS.minX + STAGE_BOUNDS.maxX) / 2;
+  const centerWorldY = (STAGE_BOUNDS.minY + STAGE_BOUNDS.maxY) / 2;
+
+  return {
+    x: usableX + usableW / 2 + (worldX - centerWorldX) * scale,
+    y: usableY + usableH / 2 + (worldY - centerWorldY) * scale,
+    scale: scale,
+  };
+}
+
+// ====================================================================
+// 도장 바닥 — 2:1 letterbox frame 내부에만 그림
+// ====================================================================
+function drawDojangFloor(ctx, frame, fullW, fullH) {
+  // letterbox 영역(프레임 바깥)은 짙은 우드 브라운
+  ctx.fillStyle = '#1a120a';
+  ctx.fillRect(0, 0, fullW, fullH);
+
+  // 도장 frame 내부: 마루바닥 느낌의 노란/황갈색 그라데이션
+  const cxF = frame.x + frame.w / 2;
+  const cyF = frame.y + frame.h * 0.6;
+  const grad = ctx.createRadialGradient(cxF, cyF, 60, cxF, cyF, Math.max(frame.w, frame.h) * 0.7);
+  grad.addColorStop(0, '#e0b870');   // 밝은 원목 (조명 받는 중앙)
+  grad.addColorStop(0.6, '#cba262');  // 중간 원목
+  grad.addColorStop(1, '#a8854e');   // 가장자리 짙은 원목
+  ctx.fillStyle = grad;
+  ctx.fillRect(frame.x, frame.y, frame.w, frame.h);
+
+  // 마루 널판 결 (가로 줄무늬 + 세로 판 구분으로 나무 질감)
+  ctx.strokeStyle = 'rgba(90, 60, 25, 0.18)';
+  ctx.lineWidth = 1;
+  const stepX = frame.w / 8;
+  const stepY = frame.h / 8;
+  for (let i = 1; i < 8; i++) {
+    const x = frame.x + i * stepX;
+    ctx.beginPath();
+    ctx.moveTo(x, frame.y);
+    ctx.lineTo(x, frame.y + frame.h);
+    ctx.stroke();
+  }
+  for (let i = 1; i < 8; i++) {
+    const y = frame.y + i * stepY;
+    ctx.beginPath();
+    ctx.moveTo(frame.x, y);
+    ctx.lineTo(frame.x + frame.w, y);
+    ctx.stroke();
+  }
+  // 널판 사이 잔결(나뭇결 느낌의 가로 미세선)
+  ctx.strokeStyle = 'rgba(70, 45, 18, 0.10)';
+  ctx.lineWidth = 0.6;
+  for (let i = 0; i < 8; i++) {
+    const y = frame.y + i * stepY + stepY * 0.5;
+    ctx.beginPath();
+    ctx.moveTo(frame.x, y);
+    ctx.lineTo(frame.x + frame.w, y);
+    ctx.stroke();
+  }
+
+  // 중앙 십자 (짙은 적갈색으로 또렷하게)
+  ctx.strokeStyle = 'rgba(80, 45, 15, 0.35)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(frame.x + frame.w / 2, frame.y);
+  ctx.lineTo(frame.x + frame.w / 2, frame.y + frame.h);
+  ctx.moveTo(frame.x, frame.y + frame.h / 2);
+  ctx.lineTo(frame.x + frame.w, frame.y + frame.h / 2);
+  ctx.stroke();
+
+  // 프레임 외곽선 (짙은 우드 브라운)
+  ctx.strokeStyle = 'rgba(60, 35, 12, 0.55)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(frame.x, frame.y, frame.w, frame.h);
+
+  // 한자 방위표시 (프레임 바깥쪽 가장자리, 짙은 갈색 배경 위라 밝은 톤 유지)
+  ctx.font = '600 17px "Noto Serif KR", serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = 'rgba(212, 184, 122, 0.5)';
+  ctx.fillText('北', frame.x + frame.w / 2, frame.y - 12);
+  ctx.fillText('南', frame.x + frame.w / 2, frame.y + frame.h + 14);
+  ctx.fillText('西', frame.x - 14, frame.y + frame.h / 2);
+  ctx.fillText('東', frame.x + frame.w + 14, frame.y + frame.h / 2);
+}
+
+function drawTrail(ctx, currentFormIdx, currentT, frame, figScale) {
+  // 지금까지 지나온 발자국 경로를 바닥에 표시
+  const points = [];
+  for (let i = 0; i <= currentFormIdx; i++) {
+    const wp = FOOT_TRAIL[i];
+    const c = worldToCanvas(wp.x, wp.y, frame, figScale);
+    points.push({ x: c.x, y: c.y, idx: i });
+  }
+  // 현재 진행중인 위치
+  if (currentT > 0 && currentFormIdx < FOOT_TRAIL.length - 1) {
+    const cur = getCurrentWorldPos(currentFormIdx, currentT);
+    const c = worldToCanvas(cur.x, cur.y, frame, figScale);
+    points.push({ x: c.x, y: c.y, current: true });
+  }
+
+  if (points.length < 2) return;
+
+  // 트레일 선 (점선) — 밝은 마루바닥 위에서 또렷이 보이는 짙은 적갈색/먹색
+  ctx.strokeStyle = 'rgba(60, 30, 12, 0.55)';
+  ctx.lineWidth = 2.16;
+  ctx.setLineDash([4.8, 4.8]);
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // 지나온 위치 점 + 번호
+  for (let i = 0; i < points.length - 1; i++) {
+    const p = points[i];
+    ctx.fillStyle = 'rgba(60, 30, 12, 0.65)';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 3.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = 'rgba(40, 20, 8, 0.75)';
+    if (i > 0) ctx.fillText(String(i), p.x, p.y + 6);
+  }
+}
+
+// ====================================================================
+// facing 기반 인물 렌더링 분기
+// 0° (동, 우향) / 90° (남, 정면) / 180° (서, 좌향, mirror) / 270° (북, 후면)
+// 사선 각도(45°, 60° 등)는 가까운 4방위 두 개 사이를 보간
+// ====================================================================
+function getFacingView(facing) {
+  // facing을 0~360 정규화
+  let f = ((facing % 360) + 360) % 360;
+  // 4방위 정의: 0=east, 90=south, 180=west, 270=north
+  // 가장 가까운 방위 + 두 방위 사이 가중치
+  if (f <= 45) return { primary: 'east', secondary: 'south', blend: f / 90 };
+  if (f <= 135) return { primary: 'south', secondary: f < 90 ? 'east' : 'west', blend: Math.abs(f - 90) / 90 };
+  if (f <= 225) return { primary: 'west', secondary: f < 180 ? 'south' : 'north', blend: Math.abs(f - 180) / 90 };
+  if (f <= 315) return { primary: 'north', secondary: f < 270 ? 'west' : 'east', blend: Math.abs(f - 270) / 90 };
+  return { primary: 'east', secondary: 'north', blend: (360 - f) / 90 };
+}
+
+// 정면/후면 간략 도식
+function drawFigureFront(ctx, cx, cy, pose, scale, isBack) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(scale, scale);
+
+  // 정면/후면 공통: 대칭 실루엣
+  const hipY = -2;
+  const chestY = -90;
+  const shoulderY = -120;
+  const headY = -150;
+
+  // 하카마 (정면 사다리꼴, 대칭)
+  ctx.fillStyle = '#16161e';
+  ctx.beginPath();
+  ctx.moveTo(-26, hipY - 10);
+  ctx.lineTo(26, hipY - 10);
+  ctx.lineTo(32, 0);
+  ctx.lineTo(-32, 0);
+  ctx.closePath();
+  ctx.fill();
+  // 하카마 음영
+  const grad = ctx.createLinearGradient(-32, 0, 32, 0);
+  grad.addColorStop(0, 'rgba(0,0,0,0.5)');
+  grad.addColorStop(0.5, 'rgba(0,0,0,0)');
+  grad.addColorStop(1, 'rgba(0,0,0,0.5)');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(-26, hipY - 10);
+  ctx.lineTo(26, hipY - 10);
+  ctx.lineTo(32, 0);
+  ctx.lineTo(-32, 0);
+  ctx.closePath();
+  ctx.fill();
+  // 주름
+  ctx.strokeStyle = '#0a0a10';
+  ctx.lineWidth = 1;
+  for (let i = 1; i < 5; i++) {
+    const xTop = -26 + (52 * i / 5);
+    const xBot = -32 + (64 * i / 5);
+    ctx.beginPath();
+    ctx.moveTo(xTop, hipY - 8);
+    ctx.lineTo(xBot, -2);
+    ctx.stroke();
+  }
+  // 허리띠
+  ctx.fillStyle = '#0a0a10';
+  ctx.fillRect(-26, hipY - 14, 52, 5);
+
+  // 두 발 (정면, 둥근 타원)
+  for (const fx of [-12, 12]) {
+    ctx.fillStyle = '#e8d8c0';
+    ctx.strokeStyle = '#3a2a1a';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(fx, -2, 7, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255, 248, 230, 0.22)';
+    ctx.beginPath();
+    ctx.ellipse(fx, -3, 4, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 상의 (정면 대칭, V넥)
+  ctx.fillStyle = '#1f1f28';
+  ctx.beginPath();
+  ctx.moveTo(-22, shoulderY + 2);
+  ctx.lineTo(22, shoulderY + 2);
+  ctx.lineTo(26, chestY);
+  ctx.lineTo(22, hipY - 10);
+  ctx.lineTo(-22, hipY - 10);
+  ctx.lineTo(-26, chestY);
+  ctx.closePath();
+  ctx.fill();
+  // V넥 (정면일 때만)
+  if (!isBack) {
+    ctx.strokeStyle = '#3a3a48';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(-12, shoulderY + 6);
+    ctx.lineTo(0, chestY + 14);
+    ctx.lineTo(12, shoulderY + 6);
+    ctx.stroke();
+  }
+
+  // 두 팔 (정면일 때 검 그립으로 앞에 모음)
+  if (!isBack) {
+    // 양팔 — 검을 가운데로 잡음
+    ctx.strokeStyle = '#1f1f28';
+    ctx.lineCap = 'round';
+    // 왼팔
+    ctx.beginPath();
+    ctx.moveTo(-18, shoulderY + 4);
+    ctx.lineTo(-8, -50);
+    ctx.lineTo(-3, -35);
+    ctx.stroke();
+    // 오른팔
+    ctx.beginPath();
+    ctx.moveTo(18, shoulderY + 4);
+    ctx.lineTo(8, -50);
+    ctx.lineTo(3, -35);
+    ctx.stroke();
+    // 양손
+    ctx.fillStyle = '#e8d8c0';
+    ctx.strokeStyle = '#3a2a1a';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(-3, -35, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(3, -35, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // 검 (정면: 카메라 쪽으로 향해 짧게 보임)
+    // 칼날을 살짝 비스듬하게 (pose의 swordAngle 활용)
+    const ang = (pose.swordAngle || -90) * Math.PI / 180;
+    const swLen = (pose.swordLength || 80) * 0.45; // 단축 표시
+    ctx.save();
+    ctx.translate(0, -35);
+    ctx.rotate(ang);
+    // 칼자루
+    ctx.fillStyle = '#1a1410';
+    ctx.fillRect(-3, -2, 16, 4);
+    // 코등이
+    ctx.fillStyle = '#6a5a40';
+    ctx.beginPath();
+    ctx.ellipse(13, 0, 2, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // 칼날
+    ctx.fillStyle = '#c8c4b8';
+    ctx.fillRect(15, -1.5, swLen, 3);
+    // 칼끝 하이라이트
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.fillRect(15, -1.5, swLen, 1);
+    ctx.restore();
+  }
+
+  // 머리
+  ctx.fillStyle = isBack ? '#1a0f08' : '#e8d8c0';
+  ctx.strokeStyle = '#3a2a1a';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(0, headY, 14, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  // 머리카락
+  ctx.fillStyle = '#1a0f08';
+  ctx.beginPath();
+  ctx.arc(0, headY - 3, 13, Math.PI, 0);
+  ctx.fill();
+
+  if (!isBack) {
+    // 양 눈
+    ctx.fillStyle = '#1a0f08';
+    ctx.beginPath();
+    ctx.arc(-5, headY + 1, 1.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(5, headY + 1, 1.4, 0, Math.PI * 2);
+    ctx.fill();
+    // 입 (희미)
+    ctx.strokeStyle = '#7a5a4a';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(-3, headY + 6);
+    ctx.lineTo(3, headY + 6);
+    ctx.stroke();
+  } else {
+    // 후두부 — 머리카락 전체
+    ctx.fillStyle = '#1a0f08';
+    ctx.beginPath();
+    ctx.arc(0, headY, 14, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+// ====================================================================
+// 메인 인물 렌더 분기: facing 따라 측면 / 정면 / 후면 선택
+// ====================================================================
+function drawFigureFacing(ctx, cx, cy, pose, scale, facing) {
+  const view = getFacingView(facing);
+
+  if (view.primary === 'east') {
+    // 측면 뷰 (기존 그대로) — 가까운 보조 방위에 따라 살짝 압축할 수도 있음
+    const squeeze = view.blend * 0.3; // 0~0.3 (남/북 방향으로 회전 시작 시 압축)
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(1 - squeeze, 1);
+    drawFigure(ctx, 0, 0, pose, scale);
+    ctx.restore();
+  } else if (view.primary === 'west') {
+    // 측면 뷰를 좌우 반전
+    const squeeze = view.blend * 0.3;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(-(1 - squeeze), 1);
+    drawFigure(ctx, 0, 0, pose, scale);
+    ctx.restore();
+  } else if (view.primary === 'south') {
+    // 정면 (카메라 방향) — 사용자가 인물의 얼굴을 봄
+    drawFigureFront(ctx, cx, cy, pose, scale, false);
+  } else {
+    // 후면 (북, 카메라 반대)
+    drawFigureFront(ctx, cx, cy, pose, scale, true);
+  }
+}
+
+// ====================================================================
+// 애니메이션 상태 + 메인 루프
+// ====================================================================
+const state = {
+  formIdx: 0,
+  formT: 0,
+  playing: true,
+  speed: 1,
+  loop: true,
+  lastTime: 0,
+};
+
+function drawScene() {
+  const rect = stageCanvas.getBoundingClientRect();
+  const w = rect.width;
+  const h = rect.height;
+  stageCtx.clearRect(0, 0, w, h);
+
+  // ─── 4:3 letterbox 프레임 영역 계산 ───
+  // 가로 ÷ 세로 = 4/3 가 되는 최대 사각형을 캔버스 중앙에 배치
+  const FRAME_RATIO = 1;
+  let frameW, frameH;
+  if (w / h > FRAME_RATIO) {
+    // 캔버스가 너무 가로로 김 → 높이에 맞춤
+    frameH = h * 0.96; // 약간의 외곽 여유
+    frameW = frameH * FRAME_RATIO;
+  } else {
+    // 캔버스가 정사각 또는 세로형 → 폭에 맞춤
+    frameW = w * 0.96;
+    frameH = frameW / FRAME_RATIO;
+  }
+  const frame = {
+    x: (w - frameW) / 2,
+    y: (h - frameH) / 2,
+    w: frameW,
+    h: frameH,
+  };
+
+  // 인물 스케일: 프레임의 짧은 변 기준 (인물 자연 높이 ~165px)
+  // 기존 비율(45.6%)에서 1.2배 확대 적용, 정사각 프레임이므로 min(w,h) 사용
+  const figScale = (Math.min(frame.w, frame.h) * 0.5472) / 165; // 0.456 × 1.2
+
+  // ─── 1. 도장 바닥 ───
+  drawDojangFloor(stageCtx, frame, w, h);
+
+  // ─── 2. 발자국 트레일 ───
+  drawTrail(stageCtx, state.formIdx, state.formT, frame, figScale);
+
+  // ─── 3. 인물 위치 + 방향 ───
+  const { pose, facing } = getCurrentPose(state.formIdx, state.formT);
+  const worldPos = getCurrentWorldPos(state.formIdx, state.formT);
+  const canvasPos = worldToCanvas(worldPos.x, worldPos.y, frame, figScale);
+
+  // ─── 4. 발 아래 그림자 (먼저, 인물보다 뒤에) ───
+  stageCtx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+  stageCtx.beginPath();
+  stageCtx.ellipse(canvasPos.x, canvasPos.y + 3 * figScale, 30 * figScale, 7 * figScale, 0, 0, Math.PI * 2);
+  stageCtx.fill();
+
+  // ─── 5. 인물 렌더링 (facing 방향 분기) ───
+  drawFigureFacing(stageCtx, canvasPos.x, canvasPos.y, pose, figScale, facing);
+}
+
+function tick(now) {
+  if (!state.lastTime) state.lastTime = now;
+  const dt = now - state.lastTime;
+  state.lastTime = now;
+
+  if (state.playing) {
+    const form = FORMS[state.formIdx];
+    state.formT += (dt / form.duration) * state.speed;
+    if (state.formT >= 1) {
+      if (state.formIdx < FORMS.length - 1) {
+        state.formIdx++;
+        state.formT = 0;
+        updateUI();
+      } else if (state.loop) {
+        state.formIdx = 0;
+        state.formT = 0;
+        updateUI();
+      } else {
+        state.formT = 1;
+        state.playing = false;
+        document.getElementById('btn-play').textContent = '▶';
+      }
+    }
+  }
+
+  drawScene();
+  updateProgress();
+  requestAnimationFrame(tick);
+}
+
+function updateUI() {
+  const form = FORMS[state.formIdx];
+  const isFinish = form.nameKo.includes('마무리');
+  // 마무리 동작은 번호 대신 '畢'(끝날 필) 표기
+  const num = isFinish ? '畢' : String(state.formIdx + 1).padStart(2, '0');
+  document.getElementById('tag-hanja-main').textContent = `${form.nameHj} (${form.nameKo})`;
+  document.getElementById('tag-num').textContent = num;
+  document.getElementById('tag-phase').textContent = form.section;
+  document.getElementById('progress-cur').textContent = num;
+  // 목록 업데이트
+  document.querySelectorAll('.form-list li[data-idx]').forEach(li => {
+    li.classList.toggle('active', parseInt(li.dataset.idx) === state.formIdx);
+  });
+  // 활성 항목 스크롤
+  const active = document.querySelector('.form-list li.active');
+  if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+
+function updateProgress() {
+  const totalForms = FORMS.length;
+  const overall = (state.formIdx + state.formT) / totalForms;
+  document.getElementById('progress-fill').style.width = (overall * 100) + '%';
+}
+
+// ====================================================================
+// UI 초기화
+// ====================================================================
+function buildFormList() {
+  const ul = document.getElementById('form-list');
+  let lastSection = null;
+  FORMS.forEach((f, i) => {
+    if (f.section !== lastSection) {
+      const div = document.createElement('li');
+      div.className = 'section-divider';
+      div.innerHTML = `<span class="label">${f.section}</span>`;
+      ul.appendChild(div);
+      lastSection = f.section;
+    }
+    const li = document.createElement('li');
+    li.dataset.idx = i;
+    if (i === 0) li.classList.add('active');
+    li.innerHTML = `
+      <span class="num">${String(i + 1).padStart(2, '0')}</span>
+      <div class="names">
+        <div class="ko">${f.nameKo}</div>
+        <div class="li-desc">${f.desc}</div>
+      </div>
+    `;
+    li.addEventListener('click', () => {
+      state.formIdx = i;
+      state.formT = 0;
+      updateUI();
+    });
+    ul.appendChild(li);
+  });
+}
+
+function buildProgressMarks() {
+  const marks = document.getElementById('progress-marks');
+  const total = FORMS.length;
+  let lastSection = null;
+  FORMS.forEach((f, i) => {
+    const div = document.createElement('div');
+    div.className = 'mark' + (f.section !== lastSection ? ' section' : '');
+    div.style.left = (i / total * 100) + '%';
+    marks.appendChild(div);
+    lastSection = f.section;
+  });
+}
+
+// ----- 컨트롤 핸들러 -----
+document.getElementById('btn-play').addEventListener('click', () => {
+  state.playing = !state.playing;
+  document.getElementById('btn-play').textContent = state.playing ? '⏸' : '▶';
+});
+document.getElementById('btn-prev').addEventListener('click', () => {
+  state.formIdx = Math.max(0, state.formIdx - 1);
+  state.formT = 0;
+  updateUI();
+});
+document.getElementById('btn-next').addEventListener('click', () => {
+  state.formIdx = Math.min(FORMS.length - 1, state.formIdx + 1);
+  state.formT = 0;
+  updateUI();
+});
+document.getElementById('btn-first').addEventListener('click', () => {
+  state.formIdx = 0;
+  state.formT = 0;
+  updateUI();
+});
+document.getElementById('btn-last').addEventListener('click', () => {
+  state.formIdx = FORMS.length - 1;
+  state.formT = 0;
+  updateUI();
+});
+document.querySelectorAll('.speed-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    state.speed = parseFloat(btn.dataset.speed);
+    document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+document.getElementById('loop-toggle').addEventListener('change', e => {
+  state.loop = e.target.checked;
+});
+document.getElementById('progress-bar').addEventListener('click', e => {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / rect.width;
+  const total = FORMS.length;
+  const target = x * total;
+  state.formIdx = Math.min(FORMS.length - 1, Math.floor(target));
+  state.formT = target - state.formIdx;
+  updateUI();
+});
+
+// 키보드 단축키
+document.addEventListener('keydown', e => {
+  if (e.key === ' ') { e.preventDefault(); document.getElementById('btn-play').click(); }
+  else if (e.key === 'ArrowLeft') document.getElementById('btn-prev').click();
+  else if (e.key === 'ArrowRight') document.getElementById('btn-next').click();
+  else if (e.key === 'Home') document.getElementById('btn-first').click();
+  else if (e.key === 'End') document.getElementById('btn-last').click();
+});
+
+// 초기화
+document.getElementById('tag-total').textContent = FORM_COUNT;
+document.getElementById('progress-total').textContent = FORM_COUNT;
+buildFormList();
+buildProgressMarks();
+updateUI();
+document.getElementById('btn-play').textContent = '⏸';
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
