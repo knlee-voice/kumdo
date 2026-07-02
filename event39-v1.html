@@ -311,8 +311,131 @@ body {
 .sl-sub  { font-size: 13px; color: var(--text2); margin-top: 3px; line-height: 1.45; }
 
 
+/* 경기장 배치도 */
+.vmap-title {
+  font-size: 14px; font-weight: 800; color: #fff;
+  background: #1B3F7A; padding: 8px 14px;
+  border-radius: var(--rad-sm) var(--rad-sm) 0 0;
+  letter-spacing: .02em;
+}
+.vmap-wrap {
+  border: 1.5px solid #1B3F7A;
+  border-top: none;
+  border-radius: 0 0 var(--rad-sm) var(--rad-sm);
+  padding: 10px 10px 12px;
+  background: #f4f7fc;
+}
+.vmap-entrance {
+  text-align: center; font-size: 12px; font-weight: 700;
+  color: #1B3F7A; margin-bottom: 8px; letter-spacing: .04em;
+}
+.vmap-body {
+  display: flex; gap: 8px; align-items: stretch;
+}
+/* 선수대기석 */
+.vmap-side {
+  background: #2a5298; color: #fff;
+  font-size: 12px; font-weight: 700; line-height: 1.4;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
+  border-radius: 6px; padding: 8px 6px; min-width: 36px;
+}
+/* 경기장 중앙 */
+.vmap-courts {
+  display: flex; flex-direction: column; gap: 3px; flex: 1;
+}
+.vmap-row {
+  display: flex; gap: 6px;
+}
+.vmap-court {
+  flex: 1; background: #3466b0; color: #fff;
+  font-size: 24px; font-weight: 800;
+  border-radius: 6px; padding: 14px 6px;
+  text-align: center; line-height: 1;
+}
+.vmap-judge-bar {
+  background: #2a5298; color: #fff;
+  font-size: 11px; font-weight: 600;
+  text-align: center; border-radius: 4px;
+  padding: 5px 0;
+}
+/* 우측 운영석 */
+.vmap-ops {
+  display: flex; flex-direction: column; gap: 4px;
+  min-width: 48px;
+}
+.vmap-med {
+  background: #fff; border: 1.5px solid #2a5298;
+  border-radius: 6px; padding: 5px 4px;
+  text-align: center; color: #c0392b;
+  font-size: 14px; line-height: 1.3;
+}
+.vmap-med span { font-size: 10px; color: #1B3F7A; font-weight: 700; }
+.vmap-op-block {
+  background: #2a5298; color: #fff;
+  font-size: 11px; font-weight: 700; line-height: 1.35;
+  border-radius: 6px; padding: 7px 4px;
+  text-align: center; flex: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+.vmap-hq {
+  background: #f0f4fb; color: #1B3F7A;
+  border: 1.5px solid #2a5298;
+  flex: 2;
+}
+
+/* 경기장 배치도 (구) */
+.venue-label {
+  font-size: 13px; font-weight: 800; color: #fff;
+  background: #2a5298; padding: 7px 12px;
+  border-radius: var(--rad-sm) var(--rad-sm) 0 0;
+  margin-bottom: 0; letter-spacing: .02em;
+}
+
 /* ════════════════════════════════
-   임원 명단 — 통합 테이블 스타일
+   경기 일정표 스타일
+════════════════════════════════ */
+.sched-info {
+  font-size: 13px; color: var(--text2); line-height: 1.6;
+  padding: 10px 16px; background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.sched-group-head {
+  font-size: 13px; font-weight: 800;
+  color: #fff; background: #1B3F7A;
+  padding: 8px 16px; letter-spacing: .02em;
+}
+.sched-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 12px; min-width: 480px;
+}
+.sched-table th {
+  padding: 7px 6px; text-align: center;
+  background: #2a5298; color: #fff;
+  font-size: 11px; font-weight: 700;
+  border: 1px solid rgba(255,255,255,.2);
+  line-height: 1.3; white-space: nowrap;
+}
+.sched-table th small { font-size: 10px; font-weight: 400; opacity:.85; }
+.sched-table td {
+  padding: 8px 6px; text-align: center;
+  border: 1px solid var(--border);
+  color: var(--text); vertical-align: middle;
+  line-height: 1.4; font-size: 12px;
+}
+.sched-table td:nth-child(1),
+.sched-table td:nth-child(2) { text-align: left; padding-left: 10px; }
+.sched-table td.total { font-weight: 800; color: #1B3F7A; background: #eef2f9; }
+.sched-table tr.total-row td { background: #e8e8e6; font-weight: 700; font-size: 12px; }
+.sched-table tr.total-row td.total { background: #2a5298; color: #fff; }
+.sched-table tr:nth-child(even):not(.total-row) td { background: #fafaf8; }
+.sched-note {
+  font-size: 12px; color: var(--red);
+  padding: 10px 16px; background: var(--redbg);
+  border-top: 1px solid #f0c0c0; line-height: 1.5;
+}
+
+
 ════════════════════════════════ */
 
 /* 섹션 구분 그룹 */
@@ -590,11 +713,7 @@ body {
       </div>
     </div>
 
-  </section>
-
-  <!-- ████████ TAB 2: 대회 정보 ████████ -->
-  <section class="panel" id="p2">
-
+    <!-- 대회 기본 정보 (주요 사항 TAB 마지막) -->
     <div class="card">
       <div class="card-head">
         <div class="card-head-icon">■</div>
@@ -624,33 +743,12 @@ body {
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-head">
-        <div class="card-head-icon">■</div>
-        <div class="card-head-title">진행요원 현황</div>
-      </div>
-      <div class="card-body">
-        <div class="stat-grid">
-          <div class="stat-card">
-            <div class="stat-label">1박 인원</div>
-            <div class="stat-val">31<span class="stat-unit">명</span></div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">2박 인원</div>
-            <div class="stat-val">10<span class="stat-unit">명</span></div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">여성</div>
-            <div class="stat-val">33<span class="stat-unit">명</span></div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">남성</div>
-            <div class="stat-val">14<span class="stat-unit">명</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
+  </section>
 
+  <!-- ████████ TAB 2: 대회 정보 ████████ -->
+  <section class="panel" id="p2">
+
+    <!-- 2. 일정표 (2번째 위치) -->
     <div class="card">
       <div class="card-head">
         <div class="card-head-icon">■</div>
@@ -667,10 +765,255 @@ body {
         </div>
         <div class="field" style="border-bottom:none;">
           <div class="field-label">7/12 일</div>
-          <div class="field-val sm">개회식<br>단체전 본경기<br>단체전 시상식 · 폐회식</div>
+          <div class="field-val sm">심판회의 08:40 · 개회식 10:00<br>단체전 본경기<br>단체전 시상식 · 폐회식</div>
         </div>
       </div>
     </div>
+
+    <!-- 3. 경기장 배치도 -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-icon">■</div>
+        <div class="card-head-title">경기장 · INFORMATION · 案內</div>
+      </div>
+      <div class="card-body" style="padding:14px 12px 16px;">
+
+        <!-- ── 한석봉체육관 ── -->
+        <div class="vmap-title">한석봉체육관 &nbsp; 1~8경기장</div>
+        <div class="vmap-wrap">
+
+          <!-- 입구 -->
+          <div class="vmap-entrance">▼ 입구</div>
+
+          <div class="vmap-body">
+            <!-- 왼쪽: 선수대기석 -->
+            <div class="vmap-side">선수<br>대기석</div>
+
+            <!-- 중앙: 경기장 2열 -->
+            <div class="vmap-courts">
+              <div class="vmap-judge-bar">심판석</div>
+              <div class="vmap-row">
+                <div class="vmap-court">3</div>
+                <div class="vmap-court">2</div>
+              </div>
+              <div class="vmap-row">
+                <div class="vmap-court">4</div>
+                <div class="vmap-court">1</div>
+              </div>
+              <div class="vmap-judge-bar">심판석</div>
+              <div class="vmap-judge-bar" style="margin-top:4px;">심판석</div>
+              <div class="vmap-row">
+                <div class="vmap-court">5</div>
+                <div class="vmap-court">8</div>
+              </div>
+              <div class="vmap-row">
+                <div class="vmap-court">6</div>
+                <div class="vmap-court">7</div>
+              </div>
+              <div class="vmap-judge-bar">심판석</div>
+            </div>
+
+            <!-- 오른쪽: 운영석 -->
+            <div class="vmap-ops">
+              <div class="vmap-med">✚<br><span>의료</span></div>
+              <div class="vmap-op-block">대회장</div>
+              <div class="vmap-op-block">심판장</div>
+              <div class="vmap-op-block" style="font-size:11px;">배정<br>위원장</div>
+              <div class="vmap-op-block vmap-hq">본부석<br>통역</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── 가평체육관 ── -->
+        <div class="vmap-title" style="margin-top:18px;">가평체육관 &nbsp; 9~10경기장</div>
+        <div class="vmap-wrap">
+          <div class="vmap-entrance">▼ 입구</div>
+          <div class="vmap-body">
+            <div class="vmap-side">선수<br>대기석</div>
+            <div class="vmap-courts" style="flex:1;">
+              <div class="vmap-row">
+                <div class="vmap-court" style="flex:1;">1<br><small style="font-size:10px;opacity:.8;">(9경기장)</small></div>
+              </div>
+              <div class="vmap-row" style="margin-top:6px;">
+                <div class="vmap-court" style="flex:1;">2<br><small style="font-size:10px;opacity:.8;">(10경기장)</small></div>
+              </div>
+            </div>
+            <div class="vmap-ops">
+              <div class="vmap-med">✚<br><span>의료</span></div>
+              <div class="vmap-op-block">심판석</div>
+              <div class="vmap-op-block">심판석</div>
+              <div class="vmap-op-block vmap-hq">본부석</div>
+            </div>
+          </div>
+          <div style="font-size:13px;font-weight:700;color:var(--text2);padding:8px 0 0;">심판부</div>
+        </div>
+
+        <div style="font-size:12px;color:var(--text3);margin-top:10px;line-height:1.5;">
+          ※ 1~8경기장: 한석봉체육관 &nbsp;/&nbsp; 9~10경기장: 가평체육관
+        </div>
+
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-icon">■</div>
+        <div class="card-head-title">경기 일정표 — 1일차</div>
+        <span class="card-head-badge">7/11 토</span>
+      </div>
+      <div class="card-body" style="padding:0;">
+        <div class="sched-info">심판회의 08:40 &nbsp;|&nbsp; 1~8경기장: 한석봉체육관 / 9~10경기장: 가평체육관</div>
+
+        <!-- 그룹 A: 한석봉 1~4경기장 -->
+        <div class="sched-group-head">한석봉체육관 — 1~4경기장</div>
+        <div style="overflow-x:auto;">
+        <table class="sched-table">
+          <thead>
+            <tr>
+              <th>예정시간</th><th>부별</th><th>총경기</th>
+              <th>1경기장<br><small>128경기</small></th>
+              <th>2경기장<br><small>137경기</small></th>
+              <th>3경기장<br><small>137경기</small></th>
+              <th>4경기장<br><small>133경기</small></th>
+              <th>통합</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>09:00~09:30</td><td>남자 노년부</td><td class="total">43</td><td>A-7 / 6+1</td><td>B-11 / 9+2</td><td>C-11 / 9+2</td><td>D-11 / 9+2</td><td>4강-3경기</td></tr>
+            <tr><td>09:30~10:30</td><td>남자 노장부</td><td class="total">111</td><td>A-27 / 21+6</td><td>B-27 / 21+6</td><td>C-27 / 21+6</td><td>D-27 / 21+6</td><td>4강-3경기</td></tr>
+            <tr><td>10:30~11:45</td><td>여자 청년부</td><td class="total">127</td><td>AB-31 / 24+7</td><td>CD-31 / 24+7</td><td>EF-31 / 24+7</td><td>GH-31 / 24+7</td><td>4강-3경기</td></tr>
+            <tr><td>11:45~12:40</td><td>남자 노장부 단체전</td><td class="total">22</td><td>A-4 / 0+4</td><td>B-5 / 0+5</td><td>C-5 / 0+5</td><td>D-5 / 0+5</td><td>4강-3경기</td></tr>
+            <tr><td>12:40~14:40</td><td>남자 장년부</td><td class="total">247</td><td>A-59 / 45+14</td><td>B-63 / 48+15</td><td>C-63 / 48+15</td><td>D-59 / 45+14</td><td>4강-3경기</td></tr>
+            <tr class="total-row"><td colspan="2">합계</td><td class="total">550</td><td>96+32</td><td>102+35</td><td>102+35</td><td>99+34</td><td>15</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <!-- 그룹 B: 한석봉 5~8경기장 -->
+        <div class="sched-group-head">한석봉체육관 — 5~8경기장</div>
+        <div style="overflow-x:auto;">
+        <table class="sched-table">
+          <thead>
+            <tr>
+              <th>예정시간</th><th>부별</th><th>총경기</th>
+              <th>5경기장<br><small>134경기</small></th>
+              <th>6경기장<br><small>136경기</small></th>
+              <th>7경기장<br><small>138경기</small></th>
+              <th>8경기장<br><small>138경기</small></th>
+              <th>통합</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>09:00~09:10</td><td>여자 특기자부</td><td class="total">11</td><td>A-1 / 3+1</td><td>B-4 / 0+1</td><td>C-3 / 3+0</td><td>D-3 / 3+0</td><td>X</td></tr>
+            <tr><td>09:10~09:30</td><td>남자 특기자부 (46세 이상)</td><td class="total">31</td><td>A-7 / 6+1</td><td>B-7 / 6+1</td><td>C-7 / 6+1</td><td>D-7 / 6+1</td><td>4강-3경기</td></tr>
+            <tr><td>09:30~10:10</td><td>남자 특기자부 (45세 이하)</td><td class="total">63</td><td>A-15 / 12+3</td><td>B-15 / 12+3</td><td>C-15 / 12+3</td><td>D-15 / 12+3</td><td>4강-3경기</td></tr>
+            <tr><td>10:10~10:45</td><td>여자 중년부</td><td class="total">63</td><td>A-15 / 12+3</td><td>B-15 / 12+3</td><td>C-15 / 12+3</td><td>D-15 / 12+3</td><td>4강-3경기</td></tr>
+            <tr><td>10:45~11:30</td><td>여자 장년부</td><td class="total">79</td><td>A-19 / 15+4</td><td>B-19 / 15+4</td><td>C-19 / 15+4</td><td>D-19 / 15+4</td><td>4강-3경기</td></tr>
+            <tr><td>11:30~14:30</td><td>남자 중년부</td><td class="total">315</td><td>A-59 / 57+18</td><td>B-63 / 60+19</td><td>C-63 / 60+19</td><td>D-59 / 60+19</td><td>4강-3경기</td></tr>
+            <tr class="total-row"><td colspan="2">합계</td><td class="total">562</td><td>105+30</td><td>105+31</td><td>108+30</td><td>108+30</td><td>15</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <!-- 그룹 C: 가평체육관 9~10경기장 -->
+        <div class="sched-group-head">가평체육관 — 9~10경기장</div>
+        <div style="overflow-x:auto;">
+        <table class="sched-table">
+          <thead>
+            <tr>
+              <th>예정시간</th><th>부별</th><th>총경기</th>
+              <th>9경기장<br><small>142경기</small></th>
+              <th>10경기장<br><small>148경기</small></th>
+              <th>통합</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>09:00~11:30</td><td>남자 청년부 (20대)</td><td class="total">131</td><td>A-62 / 48+14</td><td>B-66 / 51+15</td><td>4강-3경기</td></tr>
+            <tr><td>11:30~14:30</td><td>남자 청장부 (30대)</td><td class="total">163</td><td>A-78 / 60+18</td><td>B-82 / 63+19</td><td>4강-3경기</td></tr>
+            <tr class="total-row"><td colspan="2">합계</td><td class="total">294</td><td>108+32</td><td>114+34</td><td>6</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <div class="sched-note">※ 통합(준결승·결승) 경기는 경기 진행상황에 따라 경기장 배정 예정</div>
+      </div>
+    </div>
+
+    <!-- 경기 일정표 2일차 -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-icon">■</div>
+        <div class="card-head-title">경기 일정표 — 2일차</div>
+        <span class="card-head-badge">7/12 일</span>
+      </div>
+      <div class="card-body" style="padding:0;">
+        <div class="sched-info">심판회의 08:40 &nbsp;|&nbsp; 개회식 10:00~10:30<br>1~8경기장: 한석봉체육관 / 9~10경기장: 가평체육관</div>
+
+        <!-- 그룹 A: 한석봉 1~4경기장 -->
+        <div class="sched-group-head">한석봉체육관 — 1~4경기장</div>
+        <div style="overflow-x:auto;">
+        <table class="sched-table">
+          <thead>
+            <tr>
+              <th>예정시간</th><th>부별</th><th>팀</th><th>총경기</th>
+              <th>1경기장<br><small>23경기</small></th>
+              <th>2경기장<br><small>24경기</small></th>
+              <th>3경기장<br><small>24경기</small></th>
+              <th>4경기장<br><small>24경기</small></th>
+              <th>통합</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>09:00~11:30</td><td>남자 청장부</td><td>44</td><td class="total">43</td><td>A / 10경기</td><td>B / 10경기</td><td>C / 10경기</td><td>D / 10경기</td><td>4강-3경기</td></tr>
+            <tr><td>11:30~15:00</td><td>남자 장년부</td><td>59</td><td class="total">58</td><td>A / 13경기</td><td>B / 14경기</td><td>C / 14경기</td><td>D / 14경기</td><td>4강-3경기</td></tr>
+            <tr class="total-row"><td colspan="2">합계</td><td>103</td><td class="total">101</td><td>23</td><td>24</td><td>24</td><td>24</td><td>6</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <!-- 그룹 B: 한석봉 5~8경기장 -->
+        <div class="sched-group-head">한석봉체육관 — 5~8경기장</div>
+        <div style="overflow-x:auto;">
+        <table class="sched-table">
+          <thead>
+            <tr>
+              <th>예정시간</th><th>부별</th><th>팀</th><th>총경기</th>
+              <th>5경기장<br><small>24경기</small></th>
+              <th>6경기장<br><small>25경기</small></th>
+              <th>7경기장<br><small>25경기</small></th>
+              <th>8경기장<br><small>25경기</small></th>
+              <th>통합</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>09:00~12:00</td><td>여자 통합부</td><td>52</td><td class="total">51</td><td>A / 12경기</td><td>B / 12경기</td><td>C / 12경기</td><td>D / 12경기</td><td>4강-3경기</td></tr>
+            <tr><td>12:00~15:30</td><td>남자 중년부</td><td>55</td><td class="total">54</td><td>A / 12경기</td><td>B / 13경기</td><td>C / 13경기</td><td>D / 13경기</td><td>4강-3경기</td></tr>
+            <tr class="total-row"><td colspan="2">합계</td><td>107</td><td class="total">105</td><td>24</td><td>25</td><td>25</td><td>25</td><td>6</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <!-- 그룹 C: 가평 9~10경기장 -->
+        <div class="sched-group-head">가평체육관 — 9~10경기장</div>
+        <div style="overflow-x:auto;">
+        <table class="sched-table">
+          <thead>
+            <tr>
+              <th>예정시간</th><th>부별</th><th>팀</th><th>총경기</th>
+              <th>9경기장<br><small>26경기</small></th>
+              <th>10경기장<br><small>26경기</small></th>
+              <th>통합</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>09:00~14:00</td><td>남자 청년부</td><td>56</td><td class="total">55</td><td>A / 26경기</td><td>B / 26경기</td><td>4강-3경기</td></tr>
+            <tr class="total-row"><td colspan="2">합계</td><td>56</td><td class="total">55</td><td>26</td><td>26</td><td>6</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <div class="sched-note">※ 통합(준결승·결승) 경기는 경기 진행상황에 따라 경기장 배정 예정</div>
+      </div>
+    </div>
+
 
   </section>
 
