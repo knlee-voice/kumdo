@@ -284,6 +284,110 @@ body {
 .sec-label:first-child { margin-top: 0; }
 
 /* ════════════════════════════════
+   단순 리스트 (체크박스만, 레이블 없음)
+════════════════════════════════ */
+.simple-list { display: flex; flex-direction: column; }
+.sl-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer; user-select: none;
+  transition: background .12s;
+}
+.sl-item:active { background: var(--bg); }
+.sl-item.done { background: #edf6f1; }
+.sl-box {
+  width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0;
+  border: 2px solid var(--border);
+  background: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: #fff;
+  margin-top: 1px; transition: all .13s;
+}
+.sl-item.done .sl-box { background: var(--green); border-color: var(--green); }
+.sl-text { flex: 1; }
+.sl-main { font-size: 16px; font-weight: 600; color: var(--text); line-height: 1.4; }
+.sl-item.done .sl-main { color: var(--text3); text-decoration: line-through; }
+.sl-sub  { font-size: 13px; color: var(--text2); margin-top: 3px; line-height: 1.45; }
+
+
+/* ════════════════════════════════
+   임원 명단 — 통합 테이블 스타일
+════════════════════════════════ */
+
+/* 섹션 구분 그룹 */
+.roster-group {
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+
+/* 섹션 제목 헤더 바 */
+.sec-head {
+  font-size: 14px; font-weight: 800;
+  letter-spacing: .03em;
+  padding: 9px 14px;
+  margin: 0 -16px 10px;   /* 카드 좌우 여백 밖으로 꽉 채움 */
+  border-left: 4px solid transparent;
+}
+/* 슬레이트 — 전 섹션 통일 */
+.sec-head-slate {
+  background: #eef2f9;
+  color: #1B3F7A;
+  border-left-color: #1B3F7A;
+}
+
+/* 통합 테이블 */
+.unified-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 15px;
+}
+.unified-table thead tr {
+  background: var(--bg);
+}
+.unified-table th {
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 12px; font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase; letter-spacing: .04em;
+  border-bottom: 1.5px solid var(--border);
+}
+.unified-table td {
+  padding: 10px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text); vertical-align: middle;
+  line-height: 1.5;
+}
+.unified-table tr:last-child td { border-bottom: none; }
+
+/* 일반 행 */
+.unified-table td:first-child {
+  color: var(--text2); font-weight: 700;
+  font-size: 13px; white-space: nowrap;
+}
+.unified-table td:nth-child(2) { font-weight: 600; }
+
+/* 이름 그리드 (자문·협력위원 4열) */
+.name-grid td {
+  text-align: center; width: 25%;
+  font-weight: 500; font-size: 15px;
+  border: 1px solid var(--border);
+  padding: 10px 6px;
+}
+.name-grid tr:first-child td { border-top: none; }
+.name-grid td:first-child { border-left: none; color: var(--text); font-size: 15px; }
+.name-grid td:last-child  { border-right: none; }
+
+/* 의무부장 노트 */
+.dept-note {
+  margin-top: 8px; font-size: 13px; color: var(--text2);
+  background: var(--bg); border-left: 3px solid #1B3F7A;
+  padding: 6px 10px; border-radius: 0 6px 6px 0; line-height: 1.5;
+}
+
+
+/* ════════════════════════════════
    하단 범례
 ════════════════════════════════ */
 .legend {
@@ -331,6 +435,80 @@ body {
 
   <!-- ████████ TAB 1: 주요 사항 ████████ -->
   <section class="panel active" id="p1">
+
+    <!-- 임원 및 위원 명단 -->
+    <div class="card">
+      <button class="accordion-btn" onclick="toggleAcc(this)">
+        임원 및 위원 명단
+        <span class="acc-arrow">▼</span>
+      </button>
+      <div class="accordion-body">
+
+        <!-- 핵심 임원 -->
+        <div class="roster-group">
+          <div class="sec-head sec-head-slate">핵심 임원</div>
+          <table class="unified-table">
+            <thead><tr><th>직책</th><th>성명</th></tr></thead>
+            <tbody>
+              <tr><td>고문</td><td>김영기</td></tr>
+              <tr><td>대회장</td><td>김성철</td></tr>
+              <tr><td>감사</td><td>김정국</td></tr>
+              <tr><td>실무부회장</td><td>신용만</td></tr>
+              <tr><td>부대회장</td><td>박경옥 · 구광모 · 김석 · 장지영 · 이수안</td></tr>
+              <tr><td>임원장</td><td>이형우</td></tr>
+              <tr><td>본부임원</td><td>강병규 · 김준성 · 김현진 · 박동우 · 박찬민 · 손진선 · 석재윤 · 윤정하 · 이영수 · 이태훈 · 정만영 · 최병권</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 부서별 부장 -->
+        <div class="roster-group">
+          <div class="sec-head sec-head-slate">부서별 부장</div>
+          <table class="unified-table">
+            <thead><tr><th>부서</th><th>부장</th><th>차장</th></tr></thead>
+            <tbody>
+              <tr><td>경기부장</td><td>김상인</td><td>장현우</td></tr>
+              <tr><td>기획부장</td><td>정세준</td><td>곽효준</td></tr>
+              <tr><td>재무부장</td><td>김주희</td><td>김현숙</td></tr>
+              <tr><td>국제부장</td><td>김종대</td><td>이정행</td></tr>
+              <tr><td>시설부장</td><td>박찬보</td><td>이상철</td></tr>
+              <tr><td>정보부장</td><td>송중원</td><td>김지선</td></tr>
+              <tr><td>홍보부장</td><td>유수진</td><td>김다미</td></tr>
+              <tr><td>의전부장</td><td>연준석</td><td>이은정</td></tr>
+              <tr><td>안전부장</td><td>최홍현</td><td>김철희</td></tr>
+              <tr><td>기록부장</td><td>최지영</td><td>김종욱</td></tr>
+              <tr><td>의무부장</td><td>김영수</td><td>강기만</td></tr>
+            </tbody>
+          </table>
+          <div class="dept-note">에이치드림정형외과 의료팀 3명 파견 · 특수구급차 · 구급대원 1 · 응급구조사 1</div>
+        </div>
+
+        <!-- 자문위원 -->
+        <div class="roster-group">
+          <div class="sec-head sec-head-slate">자문위원</div>
+          <table class="unified-table name-grid">
+            <tbody>
+              <tr><td>강기만</td><td>김신성</td><td>김정규</td><td>김형섭</td></tr>
+              <tr><td>박명운</td><td>변종혁</td><td>서용원</td><td>성기익</td></tr>
+              <tr><td>손문성</td><td>신현욱</td><td>유재봉</td><td>윤강훈</td></tr>
+              <tr><td>이성근</td><td>이훈호</td><td>주재승</td><td>최중섭</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 협력위원 -->
+        <div class="roster-group" style="border-bottom:none; margin-bottom:0; padding-bottom:4px;">
+          <div class="sec-head sec-head-slate">협력위원</div>
+          <table class="unified-table name-grid">
+            <tbody>
+              <tr><td>고영미</td><td>김순화</td><td>김재열</td><td>김지선</td></tr>
+              <tr><td>송호석</td><td>주정신</td><td>지현정</td><td>황지훈</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
 
     <!-- 진행요원 명단 -->
     <div class="card">
@@ -579,65 +757,69 @@ body {
     </div>
 
     <div class="card">
-      <div class="card-head">
-        <div class="card-head-icon">■</div>
+      <div class="card-head" id="ckDinnerHead" onclick="toggleCardCheck2()" style="cursor:pointer;">
+        <div id="ckDinnerBox" style="
+          width:28px; height:28px; border-radius:7px; flex-shrink:0;
+          border:2.5px solid var(--border); background:var(--white);
+          display:flex; align-items:center; justify-content:center;
+          font-size:16px; font-weight:700; color:#fff;
+          transition:all .15s;
+        "></div>
         <div class="card-head-title">만찬 준비 체크리스트</div>
+        <span id="ckDinnerStatus" style="
+          font-size:13px; font-weight:700; padding:3px 10px;
+          border-radius:999px; background:#ebebeb; color:var(--text3);
+          white-space:nowrap;
+        ">예정</span>
       </div>
-      <div class="card-body">
-        <div class="checklist">
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">좌석 배치도 최종 확인</div>
-              <div class="ck-sub">국가별 / VIP구역 / 임원(부회장·이사·자문위원) / 8단 / 통역</div>
+      <div class="card-body" style="padding: 6px 0;">
+        <div class="simple-list" id="dinnerChecklist">
+          <div class="sl-item" onclick="toggleSl2(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text">
+              <div class="sl-main">좌석 배치도 최종 확인</div>
+              <div class="sl-sub">국가별 / VIP구역 / 임원(부회장·이사·자문위원) / 8단 / 통역</div>
             </div>
-            <span class="ck-status">예정</span>
           </div>
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">영상 · 음향 장비 리허설</div>
-              <div class="ck-sub">영상 재생 테스트 · 마이크 확인</div>
+          <div class="sl-item" onclick="toggleSl2(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text">
+              <div class="sl-main">영상 · 음향 장비 리허설</div>
+              <div class="sl-sub">영상 재생 테스트 · 마이크 확인</div>
             </div>
-            <span class="ck-status">예정</span>
           </div>
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">통역 인력 배치</div>
-              <div class="ck-sub">언어별 통역사 사전 배정 — 영어 / 중국어 / 일어</div>
+          <div class="sl-item" onclick="toggleSl2(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text">
+              <div class="sl-main">통역 인력 배치</div>
+              <div class="sl-sub">언어별 통역사 사전 배정 — 영어 / 중국어 / 일어</div>
             </div>
-            <span class="ck-status">예정</span>
           </div>
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">식사 메뉴 확정</div>
+          <div class="sl-item" onclick="toggleSl2(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text">
+              <div class="sl-main">식사 메뉴 확정</div>
             </div>
-            <span class="ck-status">예정</span>
           </div>
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">명찰 제작</div>
-              <div class="ck-sub">디자인 · 패용형태 · 대상리스트 · 수량 · 배부장소 · 인원</div>
+          <div class="sl-item" onclick="toggleSl2(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text">
+              <div class="sl-main">명찰 제작</div>
+              <div class="sl-sub">디자인 · 패용형태 · 대상리스트 · 수량 · 배부장소 · 인원</div>
             </div>
-            <span class="ck-status">예정</span>
           </div>
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">기념품 준비</div>
+          <div class="sl-item" onclick="toggleSl2(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text">
+              <div class="sl-main">기념품 준비</div>
             </div>
-            <span class="ck-status">예정</span>
           </div>
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">안내 책자</div>
-              <div class="ck-sub">내용 편집 · 수량 확인</div>
+          <div class="sl-item" onclick="toggleSl2(this)" style="border-bottom:none;">
+            <div class="sl-box"></div>
+            <div class="sl-text">
+              <div class="sl-main">안내 책자</div>
+              <div class="sl-sub">내용 편집 · 수량 확인</div>
             </div>
-            <span class="ck-status">예정</span>
           </div>
         </div>
       </div>
@@ -673,179 +855,80 @@ body {
 
     <!-- 개인전 체크리스트 -->
     <div class="card">
-      <div class="card-head">
-        <div class="card-head-icon">■</div>
+      <!-- 헤더 자체가 체크박스 역할 — 클릭 시 전체 완료 토글 -->
+      <div class="card-head" id="ckListHead" onclick="toggleCardCheck()" style="cursor:pointer;">
+        <div id="ckHeadBox" style="
+          width:28px; height:28px; border-radius:7px; flex-shrink:0;
+          border:2.5px solid var(--border); background:var(--white);
+          display:flex; align-items:center; justify-content:center;
+          font-size:16px; font-weight:700; color:#fff;
+          transition:all .15s;
+        "></div>
         <div class="card-head-title">개인전 준비 체크리스트</div>
+        <span id="ckHeadStatus" style="
+          font-size:13px; font-weight:700; padding:3px 10px;
+          border-radius:999px; background:#ebebeb; color:var(--text3);
+          white-space:nowrap;
+        ">예정</span>
       </div>
-      <div class="card-body">
-        <div class="checklist">
+      <div class="card-body" style="padding: 6px 0;">
 
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">경기장 세팅 확인</div>
-              <div class="ck-sub">죽도검량(저울)구역 · 심판석 · 기록석 · 본부석 · 의료석 · 시상석 · 물품보관</div>
+        <div class="simple-list" id="simpleChecklist">
+          <div class="sl-item" onclick="toggleSl(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text">
+              <div class="sl-main">경기장 세팅 확인</div>
+              <div class="sl-sub">죽도검량(저울)구역 · 심판석 · 기록석 · 본부석 · 의료석 · 시상석 · 물품보관</div>
             </div>
-            <span class="ck-status">예정</span>
           </div>
-
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">외국팀 지정 장소 안내</div>
+          <div class="sl-item" onclick="toggleSl(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text">
+              <div class="sl-main">외국팀 지정 장소 안내</div>
             </div>
-            <span class="ck-status">예정</span>
           </div>
-
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">시상 물품 준비 · 관리</div>
-              <div class="ck-sub">담당자 · 보관장소 · 반출확인자료</div>
+          <div class="sl-item" onclick="toggleSl(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text">
+              <div class="sl-main">시상 물품 준비 · 관리</div>
+              <div class="sl-sub">담당자 · 보관장소 · 반출확인자료</div>
             </div>
-            <span class="ck-status">예정</span>
           </div>
-
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">트로피 · 메달 · 부상품 수량 확인</div>
+          <div class="sl-item" onclick="toggleSl(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text">
+              <div class="sl-main">트로피 · 메달 · 부상품 수량 확인</div>
             </div>
-            <span class="ck-status">예정</span>
           </div>
-
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">상장 출력</div>
-              <div class="ck-sub">출력담당자 · A4 · 디자인 확인 · 부별/순위 엑셀 정리 · 외국인명단 사전 작성</div>
+          <div class="sl-item" onclick="toggleSl(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text">
+              <div class="sl-main">상장 출력</div>
+              <div class="sl-sub">출력담당자 · A4 · 디자인 확인 · 부별/순위 엑셀 정리 · 외국인명단 사전 작성</div>
             </div>
-            <span class="ck-status">예정</span>
           </div>
-
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">시상식 임원 배치</div>
-              <div class="ck-sub">회장 · 부회장 · 자문위원</div>
+          <div class="sl-item" onclick="toggleSl(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text">
+              <div class="sl-main">시상식 임원 배치</div>
+              <div class="sl-sub">회장 · 부회장 · 자문위원</div>
             </div>
-            <span class="ck-status">예정</span>
           </div>
-
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">촬영 담당</div>
-              <div class="ck-sub">경기사진 · 시상식 · 기념촬영</div>
+          <div class="sl-item" onclick="toggleSl(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text">
+              <div class="sl-main">인쇄물 배포</div>
+              <div class="sl-sub">심판 · 운영요원 · 임원 / 탁상명패 · 목걸이명패 · 대진표책자</div>
             </div>
-            <span class="ck-status">예정</span>
           </div>
-
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">통역 담당자 배치</div>
-              <div class="ck-sub">영어 · 중국어 · 일어</div>
+          <div class="sl-item" onclick="toggleSl(this)" style="border-bottom:none;">
+            <div class="sl-box"></div>
+            <div class="sl-text">
+              <div class="sl-main">전광판 홍보 문구 확인</div>
             </div>
-            <span class="ck-status">예정</span>
           </div>
-
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">안내방송 담당</div>
-              <div class="ck-sub">영어 · 중국어 · 일어</div>
-            </div>
-            <span class="ck-status">예정</span>
-          </div>
-
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">의료팀 담당자 확인</div>
-            </div>
-            <span class="ck-status">예정</span>
-          </div>
-
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">점심 식사 담당</div>
-              <div class="ck-sub">심판 · 운영요원 · 임원</div>
-            </div>
-            <span class="ck-status">예정</span>
-          </div>
-
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">외국팀 이동 담당자</div>
-            </div>
-            <span class="ck-status">예정</span>
-          </div>
-
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">숙소 이동 담당</div>
-              <div class="ck-sub">심판 숙소 · 운영요원 숙소</div>
-            </div>
-            <span class="ck-status">예정</span>
-          </div>
-
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">식당 이동 담당</div>
-              <div class="ck-sub">심판 · 운영요원 · 임원</div>
-            </div>
-            <span class="ck-status">예정</span>
-          </div>
-
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">휴게실 음료 · 다과 · 간식 담당</div>
-            </div>
-            <span class="ck-status">예정</span>
-          </div>
-
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">대진표 책자 배부</div>
-              <div class="ck-sub">담당자 · 단체당 2권 배부</div>
-            </div>
-            <span class="ck-status">예정</span>
-          </div>
-
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">기념품 판매 담당</div>
-              <div class="ck-sub">티셔츠 · 면수건</div>
-            </div>
-            <span class="ck-status">예정</span>
-          </div>
-
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">인쇄물 배포</div>
-              <div class="ck-sub">심판 · 운영요원 · 임원 / 탁상명패 · 목걸이명패 · 대진표책자</div>
-            </div>
-            <span class="ck-status">예정</span>
-          </div>
-
-          <div class="ck-item todo" onclick="toggleCk(this)">
-            <div class="ck-box"></div>
-            <div class="ck-text">
-              <div class="ck-main">전광판 홍보 문구 확인</div>
-            </div>
-            <span class="ck-status">예정</span>
-          </div>
-
         </div>
+
       </div>
     </div>
 
@@ -856,10 +939,7 @@ body {
 <!-- ════════ 범례 (하단 고정) ════════ -->
 <div class="legend">
   <div class="lg-item"><span class="lg-dot" style="background:#1a5e38;"></span>완료</div>
-  <div class="lg-item"><span class="lg-dot" style="background:#8a5e00;"></span>점검</div>
-  <div class="lg-item"><span class="lg-dot" style="background:#1B3F7A;"></span>진행</div>
   <div class="lg-item"><span class="lg-dot" style="background:#c8c7c0;"></span>예정</div>
-  <div class="lg-item" style="margin-left:auto; font-size:12px; color:var(--text3);">탭 클릭으로 상태 변경</div>
 </div>
 
 <script>
@@ -886,19 +966,103 @@ function toggleAcc(btn) {
   body.classList.toggle('open');
 }
 
-/* ── 체크리스트 토글 ── */
+/* ── 만찬 체크리스트 ── */
+function toggleSl2(item) {
+  item.classList.toggle('done');
+  item.querySelector('.sl-box').textContent = item.classList.contains('done') ? '✓' : '';
+  updateDinnerHead();
+}
+function updateDinnerHead() {
+  const items  = document.querySelectorAll('#dinnerChecklist .sl-item');
+  const total  = items.length;
+  const done   = document.querySelectorAll('#dinnerChecklist .sl-item.done').length;
+  const box    = document.getElementById('ckDinnerBox');
+  const status = document.getElementById('ckDinnerStatus');
+  if (done === 0) {
+    box.style.background = 'var(--white)'; box.style.borderColor = 'var(--border)'; box.textContent = '';
+    status.style.background = '#ebebeb'; status.style.color = 'var(--text3)'; status.textContent = '예정';
+  } else if (done === total) {
+    box.style.background = 'var(--green)'; box.style.borderColor = 'var(--green)'; box.textContent = '✓';
+    status.style.background = '#d0eedd'; status.style.color = 'var(--green)'; status.textContent = '완료';
+  } else {
+    box.style.background = 'var(--navy)'; box.style.borderColor = 'var(--navy)'; box.textContent = '→';
+    status.style.background = '#d6e3f5'; status.style.color = 'var(--navy)'; status.textContent = `${done}/${total}`;
+  }
+}
+function toggleCardCheck2() {
+  const items   = document.querySelectorAll('#dinnerChecklist .sl-item');
+  const allDone = document.querySelectorAll('#dinnerChecklist .sl-item.done').length === items.length;
+  items.forEach(item => {
+    const box = item.querySelector('.sl-box');
+    if (allDone) { item.classList.remove('done'); box.textContent = ''; }
+    else         { item.classList.add('done');    box.textContent = '✓'; }
+  });
+  updateDinnerHead();
+}
+
+/* ── 단순 리스트 아이템 토글 ── */
+function toggleSl(item) {
+  item.classList.toggle('done');
+  const box = item.querySelector('.sl-box');
+  box.textContent = item.classList.contains('done') ? '✓' : '';
+  updateCardHead();
+}
+
+/* ── 카드 헤더 체크박스 상태 업데이트 ── */
+function updateCardHead() {
+  const items = document.querySelectorAll('#simpleChecklist .sl-item');
+  const total = items.length;
+  const done  = document.querySelectorAll('#simpleChecklist .sl-item.done').length;
+  const box    = document.getElementById('ckHeadBox');
+  const status = document.getElementById('ckHeadStatus');
+  if (done === 0) {
+    box.style.background = 'var(--white)';
+    box.style.borderColor = 'var(--border)';
+    box.textContent = '';
+    status.style.background = '#ebebeb';
+    status.style.color = 'var(--text3)';
+    status.textContent = '예정';
+  } else if (done === total) {
+    box.style.background = 'var(--green)';
+    box.style.borderColor = 'var(--green)';
+    box.textContent = '✓';
+    status.style.background = '#d0eedd';
+    status.style.color = 'var(--green)';
+    status.textContent = '완료';
+  } else {
+    box.style.background = 'var(--navy)';
+    box.style.borderColor = 'var(--navy)';
+    box.textContent = '→';
+    status.style.background = '#d6e3f5';
+    status.style.color = 'var(--navy)';
+    status.textContent = `${done}/${total}`;
+  }
+}
+
+/* ── 헤더 클릭 시 전체 토글 ── */
+function toggleCardCheck() {
+  const items = document.querySelectorAll('#simpleChecklist .sl-item');
+  const allDone = document.querySelectorAll('#simpleChecklist .sl-item.done').length === items.length;
+  items.forEach(item => {
+    const box = item.querySelector('.sl-box');
+    if (allDone) {
+      item.classList.remove('done');
+      box.textContent = '';
+    } else {
+      item.classList.add('done');
+      box.textContent = '✓';
+    }
+  });
+  updateCardHead();
+}
 function toggleCk(item) {
-  const states = ['todo','progress','check','done'];
-  const cur = states.find(s => item.classList.contains(s)) || 'todo';
-  const next = states[(states.indexOf(cur) + 1) % states.length];
-  states.forEach(s => item.classList.remove(s));
-  item.classList.add(next);
-  const box = item.querySelector('.ck-box');
+  const isDone = item.classList.contains('done');
+  item.classList.remove('todo','progress','check','done');
+  item.classList.add(isDone ? 'todo' : 'done');
+  const box    = item.querySelector('.ck-box');
   const status = item.querySelector('.ck-status');
-  const labels = { todo:'예정', progress:'진행', check:'점검', done:'완료' };
-  const icons  = { todo:'', progress:'→', check:'!', done:'✓' };
-  box.textContent = icons[next];
-  status.textContent = labels[next];
+  box.textContent    = isDone ? '' : '✓';
+  status.textContent = isDone ? '예정' : '완료';
 }
 </script>
 </body>
