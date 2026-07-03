@@ -1730,7 +1730,7 @@ body {
       </div>
     </div>
 
-    <!-- 개회식 체크리스트 -->
+    <!-- 개회식 체크리스트 (폐회식 항목 포함) -->
     <div class="card">
       <div class="card-head" id="ckTeamHead" onclick="toggleCardCheck3()" style="cursor:pointer;">
         <div id="ckTeamBox" style="
@@ -1788,59 +1788,38 @@ body {
             <div class="sl-box"></div>
             <div class="sl-text"><div class="sl-main">성적 발표</div></div>
           </div>
-          <div class="sl-item" onclick="toggleSl3(this)" style="border-bottom:none;">
+          <div class="sl-item" onclick="toggleSl3(this)">
             <div class="sl-box"></div>
             <div class="sl-text"><div class="sl-main">시상식</div></div>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 폐회식 체크리스트 -->
-    <div class="card">
-      <div class="card-head" id="ckClosingHead" onclick="toggleCardCheck4()" style="cursor:pointer;">
-        <div id="ckClosingBox" style="
-          width:28px; height:28px; border-radius:7px; flex-shrink:0;
-          border:2.5px solid var(--border); background:var(--white);
-          display:flex; align-items:center; justify-content:center;
-          font-size:16px; font-weight:700; color:#fff; transition:all .15s;
-        "></div>
-        <div class="card-head-title">폐회식 체크리스트</div>
-        <span id="ckClosingStatus" style="
-          font-size:13px; font-weight:700; padding:3px 10px;
-          border-radius:999px; background:#ebebeb; color:var(--text3);
-          white-space:nowrap;
-        ">예정</span>
-      </div>
-      <div class="card-body" style="padding:6px 0;">
-        <div class="simple-list" id="closingChecklist">
-          <div class="sl-item" onclick="toggleSl4(this)">
+          <!-- 이하 폐회식 항목 (헤더 없이 이어짐) -->
+          <div class="sl-item" onclick="toggleSl3(this)">
             <div class="sl-box"></div>
             <div class="sl-text">
               <div class="sl-main">선수단 입장 · 정렬 안내</div>
             </div>
           </div>
-          <div class="sl-item" onclick="toggleSl4(this)">
+          <div class="sl-item" onclick="toggleSl3(this)">
             <div class="sl-box"></div>
             <div class="sl-text">
               <div class="sl-main">개회식 물품</div>
               <div class="sl-sub">방명록 · 코사지 · 사방화</div>
             </div>
           </div>
-          <div class="sl-item" onclick="toggleSl4(this)">
+          <div class="sl-item" onclick="toggleSl3(this)">
             <div class="sl-box"></div>
             <div class="sl-text">
               <div class="sl-main">내 · 외빈 관리</div>
               <div class="sl-sub">기념품 (책자 · 면수건) / 좌석 배치 · 방명록 · 코사지</div>
             </div>
           </div>
-          <div class="sl-item" onclick="toggleSl4(this)">
+          <div class="sl-item" onclick="toggleSl3(this)">
             <div class="sl-box"></div>
             <div class="sl-text">
               <div class="sl-main">의전용 주차 공간 확보</div>
             </div>
           </div>
-          <div class="sl-item" onclick="toggleSl4(this)" style="border-bottom:none;">
+          <div class="sl-item" onclick="toggleSl3(this)" style="border-bottom:none;">
             <div class="sl-box"></div>
             <div class="sl-text">
               <div class="sl-main">경기장 입장 안내</div>
