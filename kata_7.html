@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>대한검도 본 · 대도 7본 연무 시뮬레이터</title>
+<style>
+  :root{
+    --bg-top:#141824; --bg-bot:#0A0C12;
+    --ink:#E8E6DF; --ink-dim:#9AA0AE;
+    --sen:#6E92D8; --sen-deep:#3D5A98;
+    --hu:#D7647A;  --hu-deep:#A8324A;
+    --gold:#C8A24B; --gold-soft:#E0C079;
+    --line:#262C3A; --panel:#171C28; --panel-2:#10141E;
+    --floor:#322A20; --floor-line:#5A4A33;
+    --center:#C8A24B;
+    --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+    --kr:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:var(--kr);
+    background:linear-gradient(170deg,var(--bg-top),var(--bg-bot) 70%);
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;flex-direction:column;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;width:100%;margin:0 auto;padding:18px 18px 30px;display:flex;flex-direction:column;gap:10px}
+
+  /* Header */
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .title-block{display:flex;flex-direction:column;gap:3px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.32em;color:var(--gold);text-transform:uppercase}
+  h1{font-size:25px;font-weight:800;letter-spacing:-.01em;line-height:1.1}
+  h1 .light{font-weight:400;color:var(--ink-dim)}
+  .legend{display:flex;gap:14px;align-items:center;font-size:12px;color:var(--ink-dim)}
+  .legend .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  .legend .sen .dot{background:var(--sen)}
+  .legend .hu .dot{background:var(--hu)}
+
+  /* form tabs */
+  .forms{display:flex;gap:3px;flex-wrap:wrap}
+  .form-tab{
+    font-family:var(--mono);font-size:13px;font-weight:600;
+    background:var(--panel);color:var(--ink-dim);
+    border:1px solid var(--line);border-radius:7px;
+    padding:7px 8px;cursor:pointer;transition:all .15s;
+    letter-spacing:.02em;
+  }
+  .form-tab:hover{border-color:var(--gold);color:var(--ink)}
+  .form-tab.active{background:var(--gold);color:#1a1408;border-color:var(--gold);font-weight:700}
+  .form-tab.iphoe{border-color:rgba(200,162,75,.5);color:var(--gold-soft)}
+  .form-tab.iphoe:hover{border-color:var(--gold);color:var(--gold)}
+  .form-tab.iphoe.active{background:linear-gradient(135deg,#8B6914,var(--gold));color:#1a1408;border-color:var(--gold)}
+
+  /* info strip */
+  .info{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+    background:var(--line);border:1px solid var(--line);border-radius:9px;overflow:hidden;
+  }
+  .info > div{background:var(--panel-2);padding:9px 13px}
+  .info .k{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;margin-bottom:3px}
+  .info .v{font-size:13.5px;color:var(--ink);line-height:1.35}
+
+  /* stage */
+  .stage-wrap{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0c0f17}
+  canvas{display:block;width:100%;height:auto}
+  .badge-step{
+    position:absolute;top:11px;left:13px;font-family:var(--mono);font-size:14px;
+    color:var(--gold);background:rgba(10,12,18,.7);border:1px solid var(--line);
+    border-radius:6px;padding:4px 9px;letter-spacing:.05em;backdrop-filter:blur(4px);
+  }
+  .badge-sen, .badge-hu{
+    position:absolute;top:11px;font-family:var(--mono);font-size:11px;font-weight:600;
+    padding:4px 9px;border-radius:6px;letter-spacing:.06em;backdrop-filter:blur(4px);
+  }
+  .badge-sen{left:50%;transform:translateX(-118px);color:var(--sen);background:rgba(61,90,152,.15);border:1px solid rgba(110,146,216,.4)}
+  .badge-hu{right:50%;transform:translateX(118px);color:var(--hu);background:rgba(168,50,74,.15);border:1px solid rgba(215,100,122,.4)}
+
+  /* caption */
+  .caption{
+    display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;min-height:78px;
+  }
+  .cap{background:var(--panel);padding:2px 10px;position:relative}
+  .cap .role{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:7px}
+  .cap.sen .role{color:var(--sen)}
+  .cap.hu .role{color:var(--hu)}
+  .cap .role .swatch{width:8px;height:8px;border-radius:2px}
+  .cap.sen .role .swatch{background:var(--sen)}
+  .cap.hu .role .swatch{background:var(--hu)}
+  .cap .txt{font-size:14px;line-height:1.5;color:var(--ink)}
+  .cap .kiai{color:var(--gold);font-weight:800;font-family:var(--mono);font-style:normal;padding:0 2px}
+
+  /* controls */
+  .controls{display:flex;flex-direction:column;gap:5px}
+  .scrub-row{display:flex;align-items:center;gap:12px}
+  .scrub{flex:1;position:relative;height:30px;display:flex;align-items:center;cursor:pointer}
+  .scrub-track{position:absolute;left:0;right:0;height:4px;background:var(--line);border-radius:3px}
+  .scrub-fill{position:absolute;left:0;height:4px;background:linear-gradient(90deg,var(--sen),var(--gold));border-radius:3px;width:0%}
+  .scrub-ticks{position:absolute;left:0;right:0;display:flex;justify-content:space-between;pointer-events:none}
+  .tick{width:2px;height:11px;background:var(--line);border-radius:2px}
+  .tick.done{background:var(--gold)}
+  .stepcount{font-family:var(--mono);font-size:14px;color:var(--ink-dim);white-space:nowrap;min-width:74px;text-align:right}
+  .stepcount b{color:var(--gold);font-size:14px;}
+
+  .btn-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+  button.ctrl{
+    font-family:var(--mono);background:var(--panel);color:var(--ink);
+    border:1px solid var(--line);border-radius:8px;padding:9px 8px;cursor:pointer;
+    font-size:14px;transition:all .14s;display:flex;align-items:center;gap:4px;
+  }
+  button.ctrl:hover{border-color:var(--gold);color:var(--gold)}
+  button.ctrl.play{background:var(--gold);color:#1a1408;border-color:var(--gold);font-weight:700;min-width:104px;justify-content:center}
+  button.ctrl.play:hover{background:var(--gold-soft);color:#1a1408}
+  button.ctrl:focus-visible{outline:2px solid var(--gold-soft);outline-offset:2px}
+  .speed{display:flex;gap:0;margin-left:auto;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .speed button{font-family:var(--mono);background:var(--panel);color:var(--ink-dim);border:none;padding:9px 11px;cursor:pointer;font-size:12.5px;transition:all .14s}
+  .speed button:hover{color:var(--ink)}
+  .speed button.active{background:var(--sen-deep);color:#fff}
+
+  .hint{font-family:var(--mono);font-size:11px;color:var(--ink-dim);letter-spacing:.03em;text-align:center;opacity:.7}
+  .hint b{color:var(--gold-soft)}
+
+  /* ── 동작 해설 패널 ── */
+  .steplist-section{
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;
+    background:var(--panel-2);
+  }
+  .steplist-header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 14px;cursor:pointer;user-select:none;
+    border-bottom:1px solid transparent;transition:border-color .15s;
+  }
+  .steplist-header:hover{border-bottom-color:var(--line)}
+  .steplist-header.open{border-bottom-color:var(--line)}
+  .steplist-header .htitle{
+    font-family:var(--kr);font-size:13px;font-weight:700;color:var(--gold);
+    display:flex;align-items:center;gap:8px;
+  }
+  .steplist-header .htitle .badge{
+    font-family:var(--mono);font-size:10px;background:rgba(200,162,75,.14);
+    border:1px solid rgba(200,162,75,.35);color:var(--gold);border-radius:5px;padding:2px 8px;
+  }
+  .steplist-header .chevron{
+    font-size:12px;color:var(--ink-dim);transition:transform .2s;
+  }
+  .steplist-header.open .chevron{transform:rotate(180deg);}
+
+  .steplist-body{
+    display:none;max-height:140px;overflow-y:auto;padding:10px 10px 12px;
+    scrollbar-width:thin;scrollbar-color:var(--line) transparent;
+  }
+  .steplist-body.open{display:block}
+  .steplist-body::-webkit-scrollbar{width:4px}
+  .steplist-body::-webkit-scrollbar-track{background:transparent}
+  .steplist-body::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px}
+
+  .step-row{
+    display:grid;grid-template-columns:auto 1fr;gap:0 10px;
+    padding:6px 8px;border-radius:8px;border:1px solid transparent;
+    margin-bottom:4px;transition:all .15s;cursor:default;
+  }
+  .step-row:hover{background:rgba(255,255,255,.03)}
+  .step-row.active{
+    background:rgba(200,162,75,.07);border-color:rgba(200,162,75,.4);
+  }
+  .step-num{
+    font-family:var(--mono);font-size:11px;color:var(--gold-soft);
+    padding-top:1px;white-space:nowrap;letter-spacing:.05em;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+  }
+  .step-num .ndot{
+    width:8px;height:8px;border-radius:50%;border:1.5px solid var(--line);
+    background:transparent;transition:all .15s;flex-shrink:0;
+  }
+  .step-row.active .step-num .ndot{background:var(--gold);border-color:var(--gold);}
+  .step-row.done .step-num .ndot{background:rgba(200,162,75,.3);border-color:rgba(200,162,75,.4);}
+
+  .step-content{}
+  .step-title{
+    font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:4px;line-height:1.3;
+  }
+  .step-row.active .step-title{color:var(--gold-soft)}
+  .step-desc-row{display:flex;gap:6px;align-items:baseline;margin-bottom:2px}
+  .step-desc-row:last-child{margin-bottom:0}
+  .drole{
+    font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;
+    white-space:nowrap;padding-top:1px;flex-shrink:0;
+  }
+  .drole.sen{color:var(--sen)}
+  .drole.hu{color:var(--hu)}
+  .dtxt{font-size:12px;color:var(--ink-dim);line-height:1.5;}
+  .step-row.active .dtxt{color:var(--ink)}
+  .dtxt .kw{color:var(--gold);font-weight:700}
+
+  @media (max-width:680px){
+    .steplist-body{max-height:260px}
+  }
+
+  @media (max-width:680px){
+    h1{font-size:20px}
+    .info{grid-template-columns:1fr}
+    .caption{grid-template-columns:1fr}
+    .badge-sen{transform:translateX(-95px)} .badge-hu{transform:translateX(95px)}
+    .stepcount{min-width:62px}
+    .speed{margin-left:0}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="title-block">
+      <div class="eyebrow">KENDO KATA · 大刀 7本 + 入會</div>
+      <h1>대한검도 본 <span class="light">/ 입회 + 대도 7본 연무</span></h1>
+    </div>
+    <div class="legend">
+      <span class="sen"><span class="dot"></span>선도 先刀</span>
+      <span class="hu"><span class="dot"></span>후도 後刀</span>
+    </div>
+  </header>
+
+  <div class="forms" id="forms"></div>
+
+  <div class="info" id="info"></div>
+
+  <div class="stage-wrap">
+    <canvas id="stage"></canvas>
+    <div class="badge-step" id="badgeStep">STEP 1 / 7</div>
+    <div class="badge-sen">선도</div>
+    <div class="badge-hu">후도</div>
+  </div>
+
+  <div class="caption">
+    <div class="cap sen">
+      <div class="role"><span class="swatch"></span>선도 SENDO</div>
+      <div class="txt" id="capSen">—</div>
+    </div>
+    <div class="cap hu">
+      <div class="role"><span class="swatch"></span>후도 HUDO</div>
+      <div class="txt" id="capHu">—</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="scrub-row">
+      <div class="scrub" id="scrub">
+        <div class="scrub-track"></div>
+        <div class="scrub-fill" id="scrubFill"></div>
+        <div class="scrub-ticks" id="scrubTicks"></div>
+      </div>
+      <div class="stepcount"><b id="curStep">1</b> / <span id="totStep">7</span></div>
+    </div>
+    <div class="btn-row">
+      <button class="ctrl" id="btnFirst" title="처음으로">⏮</button>
+      <button class="ctrl" id="btnPrev" title="이전 동작 (←)">◀</button>
+      <button class="ctrl play" id="btnPlay" title="재생/정지 (Space)">▶ 재생</button>
+      <button class="ctrl" id="btnNext" title="다음 동작 (→)">▶</button>
+      <button class="ctrl" id="btnLast" title="마지막으로">⏭</button>
+      <div class="speed" id="speed">
+        <button data-s="0.5">0.5×</button>
+        <button data-s="1" class="active">1×</button>
+        <button data-s="2">2×</button>
+      </div>
+    </div>
+    <div class="hint"><b>Space</b> 재생 · <b>← →</b> 동작 이동 · <b>0</b> 입회 · <b>1–7</b> 본 선택</div>
+  </div>
+
+  <div class="steplist-section" id="steplistSection">
+    <div class="steplist-header" id="steplistHeader" onclick="toggleSteplist()">
+      <div class="htitle">
+        📋 동작 해설
+        <span class="badge" id="slBadge">1본</span>
+      </div>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="steplist-body" id="steplistBody"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   대한검도 본 데이터 (대도 7본) — 대한검도회 검도교본 기준
+   x: 0=원위치, 1=입회선(맞선위치). posture로 자세 결정.
+   action: ready/advance/strike_men/strike_kote/strike_do/thrust/
+           parry/recover/retreat/zanshin/raise/kneel
+   ============================================================ */
+const POSTURES = {
+  // [handFwd, handY, tipFwd, tipY]  (forward+ = toward 상대, Y- = 위; hipY 기준)
+  // 목검 기준: tip[0]=82 = centerGap → 맞닿을 때 칼끝이 정중선에서 정확히 만남
+  '중단':   {hand:[22,-22], tip:[82,-56],  foot:30,  lean:0,  arms:'fwd'},
+  '좌상단': {hand:[-2,-114],tip:[-42,-178], foot:34,  lean:6,  arms:'up'},
+  '우상단': {hand:[-2,-114],tip:[-42,-178], foot:-34, lean:6,  arms:'up'},
+  '하단':   {hand:[22,-14], tip:[82,18],   foot:30,  lean:0,  arms:'fwd'},
+  '어깨칼': {hand:[-16,-88],tip:[-16,-172],foot:34,  lean:0,  arms:'up'},
+  '허리칼': {hand:[-26,-18],tip:[-76,6],   foot:-28, lean:4,  arms:'back'},
+  '잔심':   {hand:[22,-22], tip:[88,-62],  foot:26,  lean:0,  arms:'fwd'},
+  '납도':   {hand:[16,-24], tip:[16,-6],   foot:22,  lean:0,  arms:'side'},
+};
+// 격자 프리셋: tip[0]=96 → gap=82 기준 칼끝이 상대 몸쪽으로 14px 들어감 (타격 표현)
+// 면(men): 본 연습은 머리를 가르지 않고 정수리 위 약 5cm(≈13px) 공간에서 멈춤.
+//   상대 머리 중심 ≈ 상대 hipY-78, 정수리 ≈ -90 → 칼끝은 그보다 위(-103)에서 멈춤
+const STRIKE = {
+  men:  {hand:[54,-30], tip:[96,-103]},  // 면: 칼끝이 상대 정수리 위 5cm 공간에서 멈춤
+  kote: {hand:[50,-28], tip:[96,-80]},   // 손목
+  do:   {hand:[50,-24], tip:[96,-36]},   // 허리
+  tsuki:{hand:[56,-28], tip:[96,-56]},   // 찌름
+};
+
+// 목검(木劍) 고정 렌더 길이 (픽셀). 인물 위치·간합(gap)에 관계없이 항상 이 길이로 렌더.
+// 실제 검도 목검 기준 약 102cm → 화면 비율 환산값.
+const BOKKEN_LEN = 110;
+
+// ※ TIP_HOLD 상수 및 원위치 복귀 tipOvr 패턴은 제거됨.
+//   목검 길이가 고정되므로, 원위치 복귀 시에도 POSTURES 중단 기본 tip 방향각을 그대로 사용.
+
+const KATA = [
+/* ── 입회 ── */
+{ id:0, name:"입회",
+  start:{sen:"납도",hu:"납도"}, sen_rel:"—", cut:"—",
+  steps:[
+    {d:1000, gap:280, title:"정렬: 시작 위치 · 서로 마주 보고 선다", ls:"칼날을 위로, 칼자루를 앞으로 하고, 오른손에 부드럽게 허리 칼을 차고, 약 9보 거리에서 마주 본다", lh:"칼날을 위로, 칼자루를 앞으로 하여 오른손에 부드럽게 허리 칼을 차고, 약 9보 거리에서 마주 본다", s:{p:"납도", x:0, a:"ready", handOvr:[-10,-18], tipOvr:[-80,-5]}, h:{p:"납도", x:0, a:"ready", handOvr:[-10,-18], tipOvr:[-80,-5]}},
+    {d:1000, gap:280, title:"심사위원께 경례 (약 30도)", caption:"심사위원 인사", ls:"좌우향우, 태극기를 향해 허리를 약 30도 정도 숙여 인사합니다", lh:"좌우향우, 태극기를 향해 허리를 약 30도 정도 숙여 인사합니다", s:{p:"납도", x:0, a:"bow", lean:30, handOvr:[-10,-18], tipOvr:[-80,-5]}, h:{p:"납도", x:0, a:"bow", lean:30, handOvr:[-10,-18], tipOvr:[-80,-5]}},
+    {d:1000, gap:280, title:"정면 바라보기", ls:"칼을 왼허리에 꽂고, 왼손의 엄지손가락을 코등이에 걸친다", lh:"칼을 왼허리에 꽂고, 왼손의 엄지손가락을 코등이에 걸친다", s:{p:"납도", x:0, a:"ready", handOvr:[-10,-18], tipOvr:[-80,-5]}, h:{p:"납도", x:0, a:"ready", handOvr:[-10,-18], tipOvr:[-80,-5]}},
+    {d:1000, gap:280, title:"상호 인사 (약 15도)", caption:"상호 인사", ls:"약 15도 각도로 서로 마주 보며 약 15도로 상호 인사", lh:"약 15도 각도로 서로 마주 보며 약 15도로 상호 인사", s:{p:"납도", x:0, a:"bow", lean:15, handOvr:[-10,-18], tipOvr:[-80,-5]}, h:{p:"납도", x:0, a:"bow", lean:15, handOvr:[-10,-18], tipOvr:[-80,-5]}},
+    {d:1000, gap:280, title:"납도: 왼손 엄지를 코등이에 두고 칼 빼기", ls:"칼을 왼허리에 꽂고, 왼손의 엄지손가락을 코등이에 걸친다", lh:"칼을 왼허리에 꽂고, 왼손의 엄지손가락을 코등이에 걸친다", s:{p:"납도", x:0, a:"ready", handOvr:[-10,-18], tipOvr:[-80,-5]}, h:{p:"납도", x:0, a:"ready", handOvr:[-10,-18], tipOvr:[-80,-5]}},
+    {d:1800, gap:120, title:"왼발부터 3보 전진 · 다리 모음", counts:["1","2","3"], ls:"왼발부터 크게 3보 나아가 다리를 모은다", lh:"왼발부터 크게 3보 나아가 다리를 모은다", s:{p:"납도", x:0.6, a:"advance", handOvr:[-10,-18], tipOvr:[-80,-5]}, h:{p:"납도", x:0.6, a:"advance", handOvr:[-10,-18], tipOvr:[-80,-5]}},
+    {d:600, gap:100, title:"왼손 코등이 잡고 발도 시작", counts:["4","5"], ls:"왼손으로 코등이를 잡으며 오른발 내디디고 칼을 뽑기 시작한다", lh:"선도에 맞춰 오른발 내디디고 칼을 뽑기 시작한다", s:{p:"납도", x:0.7, a:"advance", handOvr:[-14,-22], tipOvr:[-60,-22]}, h:{p:"납도", x:0.7, a:"advance", handOvr:[-14,-22], tipOvr:[-60,-22]}},
+    {d:1000, gap:82, title:"발도 완료 · 중단세", ls:"오른발을 앞으로 내면서 칼을 뽑아 중단세를 취한다 — 칼끝이 상대 목(喉) 중심을 겨눈다", lh:"오른발을 앞으로 내면서 칼을 뽑아 중단세를 취한다 — 칼끝이 상대 목(喉) 중심을 겨눈다", s:{p:"중단", x:0.82, a:"advance"}, h:{p:"중단", x:0.82, a:"advance"}},
+    {d:1400, gap:82, title:"칼날 45도 내려 틀어 상단 준비", ls:"칼날을 왼쪽 45도 정도 아래로 틀면서 칼을 푼다 — 칼끝 수평선상이 상대 무릎 우측 3~6cm", lh:"칼날을 왼쪽 45도 정도 아래로 틀면서 칼을 푼다 — 칼끝 수평선상이 상대 무릎 우측 3~6cm", s:{p:"하단", x:0.82, a:"recover", handOvr:[20,-14], tipOvr:[78,28]}, h:{p:"하단", x:0.82, a:"recover", handOvr:[20,-14], tipOvr:[78,28]}},
+    {d:2000, gap:280, title:"왼발부터 5보 물러나 입회 거리로, 각 본 시작 준비", counts:["1","2","3","4","5"], ls:"왼발부터 작게 5보 물러나 입회의 거리로 간다", lh:"왼발부터 작게 5보 물러나 입회의 거리로 간다", s:{p:"납도", x:0, a:"retreat", handOvr:[20,-14], tipOvr:[78,28]}, h:{p:"납도", x:0, a:"retreat", handOvr:[20,-14], tipOvr:[78,28]}}
+  ]},
+
+/* ── 대도 1본 ── */
+{ id:1, name:"대도 1본",
+  start:{sen:"좌상단",hu:"우상단"}, sen_rel:"선선의 선 · 후도 승", cut:"후도가 선도의 정면(머리)을 침",
+  steps:[
+    {d:1200, title:"준비 자세", ls:"왼발 앞, 좌상단을 취한다", lh:"(오른발 앞) 선도에 맞추어 우상단을 취한다", s:{p:"좌상단", x:0, a:"ready", foot:"L"}, h:{p:"우상단", x:0, a:"ready"}},
+    {d:1600, title:"3보 전진 · 하나·둘·셋", counts:["1","2","3"], ls:"앞발부터 3보 — 일족일도의 거리로 나아간다", lh:"앞발부터 3보 — 일족일도의 거리로 나아간다", s:{p:"좌상단", x:0.82, a:"advance", foot:"L"}, h:{p:"우상단", x:0.82, a:"advance"}},
+    {d:700, gap:25, title:"격자 준비 — 선도 한발 전진 · 후도 반보 물러남", ls:"기회를 보아 오른발 내디디며 한 발 나아간다", lh:"선도의 기미를 살피며 왼발 반보 물러난다", s:{p:"좌상단", x:0.8, a:"advance", foot:"L"}, h:{p:"우상단", x:0.76, a:"retreat"}},
+    {d:450, gap:55, title:"아크 — 목검 앞으로 크게 휩쓸어", ls:"칼을 앞으로 크게 원의 궤적으로 휩쓸어 내려치기 시작한다", lh:"선도의 기미를 살피며 한 발 나아간다", s:{p:"좌상단", x:0.9, a:"advance", lean:8}, h:{p:"우상단", x:0.76, a:"advance"}},
+    {d:1500, gap:55, seqOffset:0.5, title:"격자 · 얍~ → 도~", ls:"오른발 더 내디디며 「<k>얍~</k>」 칼자루와 함께 후도의 정면을 배꼽·무릎까지 크게 내려친다", lh:"한 보 앞으로 나오며 「<k>도~</k>」 선도의 머리 위로 크게 내려친다", s:{p:"중단", x:0.9, a:"strike_men", t:"men", lean:14, kiai:"얍~", handOvr:[22,-14], tipOvr:[82,35]}, h:{p:"중단", x:0.9, a:"strike_men", t:"men", lean:10, kiai:"도~", handOvr:[58,-40], tipOvr:[98,-74]}},
+    {d:1200, gap:72, title:"압박 겨눔 — 선도 반보 후퇴 · 후도 오른발 전진 미간 겨눔", ls:"다시 반보 더 물러난다", lh:"오른발 더 앞으로 나오며 미간을 겨누며 압박한다", s:{p:"하단", x:0.8, a:"retreat"}, h:{p:"잔심", x:1.05, a:"advance", lean:6, handOvr:[28,-30], tipOvr:[88,-65]}},
+    {d:1200, gap:86, title:"잔심 — 선도 반보 후퇴 · 후도 반보 따라와 좌상단 겨눔", ls:"선 칼 하단, 반보 물러난다", lh:"반보 따라 들어가며 좌상단으로 선도의 미간을 압박한다", s:{p:"하단", x:0.68, a:"retreat", lean:3}, h:{p:"좌상단", x:1.2, a:"advance", lean:4, foot:"L"}},
+    {d:1100, gap:82, title:"중단 복귀 — 선도 제자리, 후도 한 걸음 물러나 오른발 앞", ls:"제자리에서 상체를 일으키며 중단으로 돌아간다", lh:"오른발 앞으로 한 걸음 물러나며 중단으로 돌아간다", s:{p:"중단", x:0.88, a:"recover"}, h:{p:"중단", x:0.88, a:"recover"}},
+    {d:700, gap:112, title:"상호 맞섬 — 중앙선에서 목검 맞춤", ls:"상호 중단으로 맞선다 — 이어서 하단세를 취하고 원위치로", lh:"상호 중단으로 맞선다 — 이어서 하단세를 취하고 원위치로", s:{p:"중단", x:1, a:"ready"}, h:{p:"중단", x:1, a:"ready"}},
+    {d:800, title:"하단세 — 원위치 복귀 준비", ls:"칼끝을 내려 하단세를 취한다", lh:"칼끝을 내려 하단세를 취한다", s:{p:"하단", x:0.8, a:"recover"}, h:{p:"하단", x:0.8, a:"recover"}},
+    {d:2400, title:"원위치 복귀 · 하나~다섯", counts:["1","2","3","4","5"], ls:"왼발부터 먼저 하단세를 취하고, 보통걸음 5보 물러나 원위치로 돌아간다 — 칼끝은 하단세 유지", lh:"왼발부터 먼저 하단세를 취하고, 보통걸음 5보 물러나 원위치로 돌아간다 — 칼끝은 하단세 유지", s:{p:"하단", x:0, a:"retreat"}, h:{p:"하단", x:0, a:"retreat"}}
+  ]},
+
+/* ── 대도 2본 ── */
+{ id:2, name:"대도 2본",
+  start:{sen:"중단",hu:"중단"}, sen_rel:"선선의 선 · 후도 승", cut:"후도가 선도의 오른손목을 침 (무형의 잔심)",
+  steps:[
+    {d:800, ls:"상호 중단세를 취한다", lh:"상호 중단세를 취한다", s:{p:"중단", x:0, a:"ready"}, h:{p:"중단", x:0, a:"ready"}},
+    {d:1600, counts:["1","2","3"], ls:"중단세로 3보 — 일족일도의 거리로 나아간다", lh:"중단세로 3보 — 일족일도의 거리로 나아간다", s:{p:"중단", x:0.82, a:"advance"}, h:{p:"중단", x:0.82, a:"advance"}},
+    {d:700, gap:44, title:"거검 — 선도 목검을 머리 위로 들어올림", ls:"오른발 내디디며 목검을 머리 위까지 높이 들어올린다", lh:"선도의 기미를 살피며 중단을 유지한다", s:{p:"좌상단", x:0.94, a:"ready", lean:4}, h:{p:"중단", x:0.82, a:"ready"}},
+    {d:1000, gap:47, title:"격자 · 얍~ — 선도 손목치기 · 후도 즉시 반보 후퇴", ls:"한 걸음 크게 앞으로 나오며 「<k>얍~</k>」 목검 1/4 부위로 후도의 손목을 내려친다", lh:"선도의 손목치기를 받고 즉시 반보 뒤로 물러난다", s:{p:"중단", x:1, a:"strike_kote", t:"kote", lean:14, kiai:"얍~", handOvr:[38,-22], tipOvr:[82,-22]}, h:{p:"중단", x:0.62, a:"retreat"}},
+    {d:1200, gap:83, title:"도~ — 후도 앞으로 나오며 손목 반격", ls:"잔심 — 손목을 제압한 채 후도의 반격을 맞받아 전진 압박한다", lh:"오른발 앞으로 크게 나오며 「<k>도~</k>」 목검 1/4 부위로 선도의 손목을 반격한다", s:{p:"중단", x:1, a:"zanshin", lean:8, handOvr:[38,-22], tipOvr:[72,-22]}, h:{p:"중단", x:0.92, a:"strike_kote", t:"kote", lean:8, kiai:"도~", handOvr:[38,-22], tipOvr:[82,-22]}},
+    {d:900, ls:"왼발부터 물러나 중단으로 맞선위치로 돌아온다", lh:"무형의 잔심 후 오른발부터 맞선위치로 돌아온다 — 이어서 하단세를 취하고 원위치로", s:{p:"중단", x:0.8, a:"recover"}, h:{p:"중단", x:0.8, a:"zanshin"}},
+    {d:800, title:"하단세 — 원위치 복귀 준비", ls:"칼끝을 내려 하단세를 취한다", lh:"칼끝을 내려 하단세를 취한다", s:{p:"하단", x:0.8, a:"recover"}, h:{p:"하단", x:0.8, a:"recover"}},
+    {d:2400, counts:["1","2","3","4","5"], ls:"왼발부터 먼저 하단세를 취하고, 보통걸음 5보 물러나 원위치로 돌아간다 — 칼끝은 하단세 유지", lh:"왼발부터 먼저 하단세를 취하고, 보통걸음 5보 물러나 원위치로 돌아간다 — 칼끝은 하단세 유지", s:{p:"하단", x:0, a:"retreat"}, h:{p:"하단", x:0, a:"retreat"}}
+  ]},
+
+/* ── 대도 3본 ── */
+{ id:3, name:"대도 3본",
+  start:{sen:"하단",hu:"하단"}, sen_rel:"선선의 선 · 후도 승", cut:"후도가 선도의 가슴을 되찌름 (찌름→되찌름)",
+  steps:[
+    {d:800, ls:"상호 하단세를 취한다", lh:"상호 하단세를 취한다", s:{p:"하단", x:0, a:"ready"}, h:{p:"하단", x:0, a:"ready"}},
+    {d:900, counts:["1","2","3"], ls:"거리에 접하며 겨눔 후 중단이 된다", lh:"거리에 접하며 겨눔 후 중단이 된다", s:{p:"중단", x:0.8, a:"advance"}, h:{p:"중단", x:0.8, a:"advance"}},
+    {d:950, ls:"오른발 내디디며 「<k>얍~</k>」 후도의 명치를 찌른다", lh:"왼발 물러나 격자부 좌측호로 받아 흘리고 「<k>도~</k>」 선도의 가슴을 되찌른다", s:{p:"중단", x:0.95, a:"thrust", t:"tsuki", lean:8, kiai:"얍~"}, h:{p:"중단", x:0.78, a:"parry", lean:3}},
+    {d:900, ls:"오른발 빼며 후도의 칼을 우측호로 누른다", lh:"되찌름의 기세로 나아간다", s:{p:"중단", x:0.82, a:"recover", lean:2}, h:{p:"중단", x:0.98, a:"thrust", t:"tsuki", lean:7}},
+    {d:900, ls:"왼발 빼며 좌측호로 누른다", lh:"기세로 3보 나아간다", s:{p:"중단", x:0.7, a:"retreat"}, h:{p:"중단", x:1.02, a:"thrust", t:"tsuki", lean:6}},
+    {d:950, ls:"칼을 내리며 왼발부터 3보 물러난다", lh:"칼끝을 선도의 얼굴 중심에 댄다", s:{p:"중단", x:0.6, a:"retreat"}, h:{p:"잔심", x:0.92, a:"zanshin", t:"tsuki"}},
+    {d:900, ls:"칼을 올려 상호 중단이 된다 — 이어서 하단세를 취하고 원위치로", lh:"왼발·오른발 빼며 상호 중단이 된다 — 이어서 하단세를 취하고 원위치로", s:{p:"중단", x:0.78, a:"recover"}, h:{p:"중단", x:0.82, a:"recover"}},
+    {d:800, title:"하단세 — 원위치 복귀 준비", ls:"칼끝을 내려 하단세를 취한다", lh:"칼끝을 내려 하단세를 취한다", s:{p:"하단", x:0.8, a:"recover"}, h:{p:"하단", x:0.8, a:"recover"}},
+    {d:2400, counts:["1","2","3","4","5"], ls:"왼발부터 먼저 하단세를 취하고, 보통걸음 5보 물러나 원위치로 돌아간다 — 칼끝은 하단세 유지", lh:"왼발부터 먼저 하단세를 취하고, 보통걸음 5보 물러나 원위치로 돌아간다 — 칼끝은 하단세 유지", s:{p:"하단", x:0, a:"retreat"}, h:{p:"하단", x:0, a:"retreat"}}
+  ]},
+
+/* ── 대도 4본 ── */
+{ id:4, name:"대도 4본",
+  start:{sen:"어깨칼",hu:"허리칼"}, sen_rel:"후의 선 · 후도 승", cut:"상호 정면 상격(相擊) 후 후도가 우측 허리를 침",
+  steps:[
+    {d:800, ls:"왼발 앞, 어깨칼(八相)을 취한다", lh:"오른발 뒤, 허리칼(脇勢)을 취한다", s:{p:"어깨칼", x:0, a:"ready", foot:"L"}, h:{p:"허리칼", x:0, a:"ready", foot:"L"}},
+    {d:950, counts:["1","2","3"], ls:"거리로 나아간다", lh:"거리로 나아간다", s:{p:"어깨칼", x:0.78, a:"advance", foot:"L"}, h:{p:"허리칼", x:0.78, a:"advance", foot:"L"}},
+    {d:950, ls:"좌상단으로 변화, 오른발 내디디며 정면을 친다", lh:"좌상단으로 변화, 오른발 내디디며 정면을 친다", s:{p:"중단", x:0.95, a:"strike_men", t:"men", lean:8}, h:{p:"중단", x:0.95, a:"strike_men", t:"men", lean:8}},
+    {d:700, ls:"쌍방 정중선에서 상격(相擊) — 순간 멈춤", lh:"쌍방 정중선에서 상격(相擊) — 순간 멈춤", s:{p:"중단", x:0.95, a:"clash", t:"men"}, h:{p:"중단", x:0.95, a:"clash", t:"men"}},
+    {d:900, ls:"칼 호를 깎으며 상호 중단이 된다", lh:"칼 호를 깎으며 상호 중단이 된다", s:{p:"중단", x:0.85, a:"recover"}, h:{p:"중단", x:0.85, a:"recover"}},
+    {d:1500, seqOffset:0.4, ls:"칼을 약간 우측으로 「<k>얍~</k>」 후도의 우측 허리를 친다", lh:"감아 누르며 스쳐 들어가 「<k>도~</k>」 선도의 정면을 친다", s:{p:"중단", x:0.97, a:"strike_do", t:"do", lean:7, kiai:"얍~"}, h:{p:"중단", x:1.1, a:"strike_men", t:"men", lean:8, foot:"L", kiai:"도~"}},
+    {d:900, ls:"상호 중단으로 맞선위치로 돌아온다 — 이어서 하단세를 취하고 원위치로", lh:"상호 중단으로 맞선위치로 돌아온다 — 이어서 하단세를 취하고 원위치로", s:{p:"중단", x:0.8, a:"recover"}, h:{p:"중단", x:0.8, a:"recover"}},
+    {d:800, title:"하단세 — 원위치 복귀 준비", ls:"칼끝을 내려 하단세를 취한다", lh:"칼끝을 내려 하단세를 취한다", s:{p:"하단", x:0.8, a:"recover"}, h:{p:"하단", x:0.8, a:"recover"}},
+    {d:2400, counts:["1","2","3","4","5"], ls:"왼발부터 먼저 하단세를 취하고, 보통걸음 5보 물러나 원위치로 돌아간다 — 칼끝은 하단세 유지", lh:"왼발부터 먼저 하단세를 취하고, 보통걸음 5보 물러나 원위치로 돌아간다 — 칼끝은 하단세 유지", s:{p:"하단", x:0, a:"retreat"}, h:{p:"하단", x:0, a:"retreat"}}
+  ]},
+
+/* ── 대도 5본 ── */
+{ id:5, name:"대도 5본",
+  start:{sen:"좌상단",hu:"중단"}, sen_rel:"선선의 선 · 후도 승", cut:"후도가 칼을 스쳐 올려 선도의 정면을 침",
+  steps:[
+    {d:800, ls:"좌상단세를 취한다", lh:"칼끝을 선도의 왼주먹을 향해 중단을 취한다", s:{p:"좌상단", x:0, a:"ready"}, h:{p:"중단", x:0, a:"ready"}},
+    {d:950, counts:["1","2","3"], ls:"거리로 나아간다", lh:"거리로 나아간다", s:{p:"좌상단", x:0.8, a:"advance"}, h:{p:"중단", x:0.8, a:"advance"}},
+    {d:1500, ls:"오른발 내디디며 좌상단에서 「<k>얍~</k>」 후도의 정면을 친다", lh:"왼발 빼며 좌측호로 스쳐 올려 오른발 「<k>도~</k>」 선도의 정면을 친다", s:{p:"중단", x:0.96, a:"strike_men", t:"men", lean:9, kiai:"얍~"}, h:{p:"중단", x:0.92, a:"strike_men", t:"men", lean:7, kiai:"도~"}},
+    {d:1000, ls:"칼끝이 얼굴 중심으로 흐른다", lh:"칼끝을 얼굴 중심에 대고 오른발 빼 좌상단으로 잔심", s:{p:"중단", x:0.78, a:"recover"}, h:{p:"좌상단", x:0.88, a:"zanshin"}},
+    {d:900, ls:"칼을 올려 상호 중단이 된다 — 이어서 하단세를 취하고 원위치로", lh:"왼발 빼며 칼 내려 상호 중단이 된다 — 이어서 하단세를 취하고 원위치로", s:{p:"중단", x:0.8, a:"recover"}, h:{p:"중단", x:0.82, a:"recover"}},
+    {d:800, title:"하단세 — 원위치 복귀 준비", ls:"칼끝을 내려 하단세를 취한다", lh:"칼끝을 내려 하단세를 취한다", s:{p:"하단", x:0.8, a:"recover"}, h:{p:"하단", x:0.8, a:"recover"}},
+    {d:2400, counts:["1","2","3","4","5"], ls:"왼발부터 먼저 하단세를 취하고, 보통걸음 5보 물러나 원위치로 돌아간다 — 칼끝은 하단세 유지", lh:"왼발부터 먼저 하단세를 취하고, 보통걸음 5보 물러나 원위치로 돌아간다 — 칼끝은 하단세 유지", s:{p:"하단", x:0, a:"retreat"}, h:{p:"하단", x:0, a:"retreat"}}
+  ]},
+
+/* ── 대도 6본 ── */
+{ id:6, name:"대도 6본",
+  start:{sen:"중단",hu:"하단"}, sen_rel:"후의 선 · 후도 승 · 후도가 먼저 움직임", cut:"후도가 선도의 오른손목을 침",
+  steps:[
+    {d:800, ls:"중단세를 취한다", lh:"하단세를 취한다", s:{p:"중단", x:0, a:"ready"}, h:{p:"하단", x:0, a:"ready"}},
+    {d:950, counts:["1","2","3"], ls:"거리로 나아간다", lh:"거리로 나아간다", s:{p:"중단", x:0.8, a:"advance"}, h:{p:"하단", x:0.8, a:"advance"}},
+    {d:1000, ls:"후도의 올림에 거의 동시에 칼끝을 내리기 시작한다", lh:"칼끝을 중단으로 들어올리기 시작한다 (먼저 움직임)", s:{p:"중단", x:0.8, a:"recover"}, h:{p:"중단", x:0.8, a:"raise"}},
+    {d:900, ls:"오른발 빼며 좌상단이 된다", lh:"오른발부터 1보 공세로 나아간다", s:{p:"좌상단", x:0.74, a:"recover", lean:5}, h:{p:"중단", x:0.9, a:"advance"}},
+    {d:1500, ls:"왼발 빼 중단, 「<k>얍~</k>」 후도의 오른손목을 작은 기술로 친다", lh:"작은 반원 스쳐 올려 오른발 「<k>도~</k>」 선도의 오른손목을 친다", s:{p:"중단", x:0.82, a:"strike_kote", t:"kote", lean:5, kiai:"얍~"}, h:{p:"중단", x:0.95, a:"strike_kote", t:"kote", lean:6, kiai:"도~"}},
+    {d:900, ls:"칼을 내리고 왼발부터 좌측으로 물러난다", lh:"왼발 내디디며 좌상단으로 잔심을 나타낸다", s:{p:"하단", x:0.66, a:"retreat"}, h:{p:"좌상단", x:0.9, a:"zanshin"}},
+    {d:900, ls:"오른발부터 상호 중단으로 맞선위치로 돌아온다 — 이어서 하단세를 취하고 원위치로", lh:"오른발부터 상호 중단으로 맞선위치로 돌아온다 — 이어서 하단세를 취하고 원위치로", s:{p:"중단", x:0.8, a:"recover"}, h:{p:"중단", x:0.8, a:"recover"}},
+    {d:800, title:"하단세 — 원위치 복귀 준비", ls:"칼끝을 내려 하단세를 취한다", lh:"칼끝을 내려 하단세를 취한다", s:{p:"하단", x:0.8, a:"recover"}, h:{p:"하단", x:0.8, a:"recover"}},
+    {d:2400, counts:["1","2","3","4","5"], ls:"왼발부터 먼저 하단세를 취하고, 보통걸음 5보 물러나 원위치로 돌아간다 — 칼끝은 하단세 유지", lh:"왼발부터 먼저 하단세를 취하고, 보통걸음 5보 물러나 원위치로 돌아간다 — 칼끝은 하단세 유지", s:{p:"하단", x:0, a:"retreat"}, h:{p:"하단", x:0, a:"retreat"}}
+  ]},
+
+/* ── 대도 7본 ── */
+{ id:7, name:"대도 7본",
+  start:{sen:"중단",hu:"중단"}, sen_rel:"후의 선 · 후도 승 · 2족1도 · 납도·입례로 종료", cut:"상호 상격 후 후도가 우측 허리를 치고 무릎 꿇어 잔심",
+  steps:[
+    {d:1000, ls:"상호 중단세를 취한다", lh:"상호 중단세를 취한다", s:{p:"중단", x:0, a:"ready"}, h:{p:"중단", x:0, a:"ready"}},
+    {d:1400, counts:["1","2","3"], ls:"거리로 나아간다", lh:"거리로 나아간다", s:{p:"중단", x:0.82, a:"advance"}, h:{p:"중단", x:0.82, a:"advance"}},
+    {d:900, seqOffset:0.1, ls:"오른발 1보 가볍고 빠르게 — 후도의 가슴을 찌른다(氣當)", lh:"왼발부터 빼며 격자부 좌측호로 선도의 칼을 떠받으며, 칼끝을 선도의 눈을 향해 쭉 밀어 겨눈다", s:{p:"중단", x:0.95, a:"thrust", t:"tsuki", lean:7, handOvr:[50,-28], tipOvr:[110,-55]}, h:{p:"중단", x:0.79, a:"thrust", t:"tsuki", lean:3, handOvr:[45,-28], tipOvr:[110,-55]}},
+    {d:500, ls:"중단", lh:"중단", s:{p:"중단", x:0.95, a:"advance"}, h:{p:"중단", x:0.79, a:"advance"}},
+    {d:2500, ls:"왼발·오른발 내디디며 「<k>얍~</k>」 몸을 던지듯 정면 큰머리를 친다 (2족1도)", lh:"오른발 우측 앞, 왼발 내디뎌 스쳐지나며 「<k>도~</k>」 선도의 우측 허리를 친다", s:{p:"중단", x:1, a:"strike_men", t:"men", lean:13, kiai:"얍~", headDrop:1, handOvr:[54,-20], tipOvr:[96,15]}, h:{p:"중단", x:1, a:"strike_do", t:"do", lean:6, kiai:"도~"}},
+    {d:1100, ls:"상체 세워 칼 크게 들며 오른발 축으로 돌아 후도를 마주본다", lh:"오른무릎 꿇고 허리칼 자세로 잔심을 나타낸다", s:{p:"중단", x:0.84, a:"recover", lean:2}, h:{p:"허리칼", x:0.96, a:"kneel", kneel:1}},
+    {d:1100, ls:"왼발부터 1보 물러난 뒤 오른발 내디디며 일어나 상호 중단", lh:"칼을 들어 올리며 일어나 선도와 마주보고 중단", s:{p:"중단", x:0.8, a:"recover"}, h:{p:"중단", x:0.84, a:"recover"}},
+    {d:1800, title:"꼽아칼 — 목검을 왼쪽 허리로 접어 끝내기", caption:"검도의 본 - 대도 7본 최종 종료", ls:"오른손을 놓고 왼손으로 목검을 왼쪽 허리 쪽으로 접는다 — 꼽아칼로 본 연무 종료", lh:"오른손을 놓고 왼손으로 목검을 왼쪽 허리 쪽으로 접는다 — 꼽아칼로 본 연무 종료", s:{p:"납도", x:0.84, a:"ready", handOvr:[-10,-18], tipOvr:[-80,-5]}, h:{p:"납도", x:0.84, a:"ready", handOvr:[-10,-18], tipOvr:[-80,-5]}}
+  ]}
+];
+
+/* ============================================================ */
+const cv = document.getElementById('stage');
+const ctx = cv.getContext('2d');
+let DPR = Math.min(window.devicePixelRatio||1, 2);
+let W=0, Hh=0;
+
+function resize(){
+  const cssW = cv.parentElement.clientWidth;
+  const cssH = Math.round(Math.min(Math.max(cssW*0.52, 320), 460));
+  cv.style.height = cssH+'px';
+  cv.width = Math.round(cssW*DPR);
+  cv.height= Math.round(cssH*DPR);
+  W = cssW; Hh = cssH;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener('resize', ()=>{resize();draw();});
+
+/* state */
+let formIdx = 0;
+let stepIdx = 0;      // current step index (target)
+let _activeCountFoot = null; // (하위 호환 유지용)
+let t = 0;            // 0..1 progress within current step transition
+let playing = false;
+let speed = 1.0;
+let lastTime = 0;
+
+function curForm(){return KATA[formIdx];}
+function steps(){return curForm().steps;}
+
+/* interpolate effective params for an actor at a given step */
+function effParams(actor){ // actor state object {p,a,t,lean,...}
+  const base = POSTURES[actor.p] || POSTURES['중단'];
+  let hand=[...base.hand], tip=[...base.tip], foot=base.foot, lean=actor.lean||base.lean||0;
+  const isStrike = ['strike_men','strike_kote','strike_do','thrust','clash'].includes(actor.a);
+  if(isStrike && actor.t && STRIKE[actor.t]){
+    hand=[...STRIKE[actor.t].hand]; tip=[...STRIKE[actor.t].tip];
+  }
+  // step-level 오버라이드 (특정 본의 고유 자세 표현용)
+  if(actor.tipOvr)  tip  = [...actor.tipOvr];
+  if(actor.handOvr) hand = [...actor.handOvr];
+  return {hand,tip,foot,lean,kneel:actor.kneel?1:0,headDrop:actor.headDrop?1:0};
+}
+
+function lerp(a,b,k){return a+(b-a)*k;}
+function lerpArr(a,b,k){return [lerp(a[0],b[0],k),lerp(a[1],b[1],k)];}
+function easeStrike(x){return 1-Math.pow(1-x,3.2);}      // fast accel
+function easeSmooth(x){return x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2;}
+
+/* draw a single figure */
+function drawFigure(px, eff, facing, color, deep, xnorm, actor){
+  const groundY = Hh - 46;
+  const kneelAmt = eff.kneel;
+  const hipY = groundY - (78 - kneelAmt*38);
+  const lean = eff.lean * facing; // px lean toward opponent
+  const shoulderY = hipY - 56;
+  const sx = px + lean;                       // shoulder x
+  // actor.foot 문자열("R"/"L"/"RL"/"NONE") — eff.foot(숫자)과 분리해 명시적으로 추출
+  const footLabel = (actor && actor.foot) ? String(actor.foot).toUpperCase() : null;
+  // headDrop: 0=직립, 1=30도 고개 숙임
+  // 30도 숙임 → 앞으로 약 11px(sin30°×22), 아래로 약 19px(1-cos30°×22 + 추가)
+  const headDropAmt = eff.headDrop || 0;
+  const headCx = sx + lean*0.4 + facing * headDropAmt * 11;
+  const headCy = shoulderY - 22 + headDropAmt * 19;
+
+  ctx.lineCap='round'; ctx.lineJoin='round';
+
+  const footF = facing*eff.foot*0.82, footB = -facing*eff.foot*0.6;
+
+  // 오른발(화면에서 오른쪽 발) 항상 찐하게 표현
+  // facing=+1(선도): frontHem(+방향) = 오른발  |  facing=-1(후도): backHem(+방향) = 오른발
+  const hakamaRight = shade(deep,-26);   // 오른발 — 찐하게
+  const hakamaLeft  = shade(deep, -2);   // 왼발  — 보통
+  const hakamaFront = facing>0 ? hakamaRight : hakamaLeft;
+  const hakamaBack  = facing>0 ? hakamaLeft  : hakamaRight;
+
+  // ---- HAKAMA (넓은 바지) : 좌우 다리를 명도 차이로 입체 구분 ----
+  const waistY = hipY - 6;
+  const hemY = groundY - 6;            // hakama hem (ankle)
+  const waistHalf = 14;
+  const frontHemX = px + footF*0.92;
+  const backHemX  = px + footB*0.92;
+  const legW = 12;                     // half-width of each trouser leg at hem
+  const kneeF = (waistY+hemY)/2;       // front knee height
+
+  function trouser(hemX, topOffX, fill, knee){
+    ctx.fillStyle=fill;
+    ctx.beginPath();
+    ctx.moveTo(px+topOffX-3, waistY);
+    ctx.lineTo(px+topOffX+5, waistY-1);
+    ctx.lineTo((px+topOffX+hemX)/2+facing*legW*0.7, knee);
+    ctx.lineTo(hemX+facing*legW, hemY);
+    ctx.lineTo(hemX-facing*legW, hemY);
+    ctx.lineTo((px+topOffX+hemX)/2-facing*legW*0.5, knee);
+    ctx.closePath(); ctx.fill();
+  }
+
+  function footMark(hemX, fill, isRight){
+    // 발 타원
+    ctx.fillStyle = fill;
+    ctx.beginPath();
+    ctx.ellipse(hemX+facing*5, groundY-1, 12, 5, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // actor.foot 필드로 표시 여부 결정 — foot 명시한 경우에만 표시
+    // foot=R → 오른발(isRight)만, foot=L → 왼발(!isRight)만
+    // foot=RL → 양발, foot=none → 숨김
+    // 미지정 → 아무것도 표시 안 함
+    const footSpec = footLabel;
+    if (!footSpec || footSpec === 'NONE') return;   // 미지정/none → 숨김
+    let showLabel;
+    if (footSpec === 'RL') showLabel = true;
+    else if (footSpec === 'R')  showLabel = isRight;
+    else if (footSpec === 'L')  showLabel = !isRight;
+    else return;   // 알 수 없는 값 → 숨김
+    if (!showLabel) return;
+
+    // 표시할 레이블 결정 — R발=R, L발=L
+    const isRightFoot = isRight;
+    const lbl  = isRightFoot ? 'R' : 'L';
+    const lcol = isRightFoot ? '#FFD040' : '#88C4FF';  // R=노란색(기본), L=하늘색
+    const labelX = hemX + facing*22;
+    const labelY = groundY - 2;
+    ctx.save();
+    ctx.font='bold 14px monospace';
+    ctx.textAlign='center'; ctx.textBaseline='bottom';
+    ctx.strokeStyle='rgba(0,0,0,0.85)'; ctx.lineWidth=4;
+    ctx.strokeText(lbl, labelX, labelY);
+    ctx.fillStyle=lcol;
+    ctx.fillText(lbl, labelX, labelY);
+    ctx.restore();
+  }
+
+  if(kneelAmt>0.4){
+    ctx.fillStyle=hakamaBack;
+    ctx.beginPath();
+    ctx.moveTo(px-4, waistY); ctx.lineTo(px+6, waistY);
+    ctx.lineTo(px+footB*0.5, hipY+28);
+    ctx.lineTo(px+footB-facing*8, groundY);
+    ctx.lineTo(px+footB-facing*20, groundY);
+    ctx.closePath(); ctx.fill();
+    footMark(px+footB-facing*6, shade(deep,-18), facing<0);
+    ctx.fillStyle=hakamaFront;
+    ctx.beginPath();
+    ctx.moveTo(px-2, waistY); ctx.lineTo(px+8, waistY);
+    ctx.lineTo(px+footF+facing*14, groundY);
+    ctx.lineTo(px+footF-facing*8, groundY);
+    ctx.closePath(); ctx.fill();
+    footMark(px+footF, shade(deep,4), facing>0);
+  } else {
+    footMark(backHemX,  hakamaBack,  facing<0);
+    trouser(backHemX,  footB>0?2:-2, hakamaBack,  kneeF);
+    footMark(frontHemX, hakamaFront, facing>0);
+    trouser(frontHemX, footF>0?2:-2, hakamaFront, kneeF);
+    ctx.strokeStyle=shade(deep,-26); ctx.lineWidth=1.3;
+    ctx.beginPath();ctx.moveTo(px+footF*0.3,waistY+4);ctx.lineTo(frontHemX,hemY-2);ctx.stroke();
+  }
+
+  // hakama waist band (himo)
+  ctx.fillStyle=shade(deep,12);
+  roundRect(px-waistHalf-1, waistY-3, (waistHalf+1)*2, 8, 2); ctx.fill();
+
+  // ---- DOGI top (상의/기) : torso block with lapel + shading ----
+  const chestTopY = shoulderY+2;
+  const torsoHalf = 13;
+  const torsoGrad = ctx.createLinearGradient(sx-torsoHalf,0,sx+torsoHalf,0);
+  // shade so the far side (away from light) is darker → 입체감
+  torsoGrad.addColorStop(0, facing>0?shade(color,-14):shade(color,12));
+  torsoGrad.addColorStop(1, facing>0?shade(color,12):shade(color,-14));
+  ctx.fillStyle=torsoGrad;
+  ctx.beginPath();
+  ctx.moveTo(sx-torsoHalf, chestTopY);
+  ctx.lineTo(sx+torsoHalf, chestTopY);
+  ctx.lineTo(px+waistHalf-2, waistY+1);
+  ctx.lineTo(px-waistHalf+2, waistY+1);
+  ctx.closePath(); ctx.fill();
+  // lapel (V crossover) toward facing
+  ctx.strokeStyle=shade(color,22); ctx.lineWidth=3;
+  ctx.beginPath();
+  ctx.moveTo(sx - facing*2, chestTopY+1);
+  ctx.lineTo(sx + facing*8, (chestTopY+waistY)/2);
+  ctx.lineTo(px + facing*4, waistY);
+  ctx.stroke();
+  // shoulders rounded
+  ctx.fillStyle=color;
+  ctx.beginPath();ctx.arc(sx-torsoHalf+1,chestTopY+1,4,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(sx+torsoHalf-1,chestTopY+1,4,0,Math.PI*2);ctx.fill();
+
+  // ---- head + men ----
+  const handX = px + facing*eff.hand[0];
+  const handY = hipY + eff.hand[1];
+  const tipX  = px + facing*eff.tip[0];
+  const tipY  = hipY + eff.tip[1];
+
+  // ── ARMS with ELBOW JOINT ──────────────────────────────────
+  // 팔꿈치를 어깨→손 방향 벡터 기준으로 기하학적으로 계산.
+  // 위팔(UPPER)·아래팔(FORE) 고정 길이로 삼각형을 풀어 팔꿈치 위치를 구함.
+  // handOvr나 자세에 따라 자동으로 자연스러운 팔꿈치 각도가 결정됨.
+  const UPPER=26, FORE=23;
+
+  const shBX = sx - facing*3, shBY = chestTopY+9;   // 뒷어깨
+  const shFX = sx + facing*5, shFY = chestTopY+3;   // 앞어깨
+
+  // 팔꿈치 위치 계산: 두 점(어깨·손) + 두 길이(위팔·아래팔) → 삼각형 IK
+  // 팔꿈치 굴곡 방향: facing 방향 바깥쪽(검도 양수 그립 특성)
+  function solveElbowPos(shX, shY, hX, hY, upper, fore, bendDir){
+    const dx=hX-shX, dy=hY-shY;
+    let dist=Math.hypot(dx,dy);
+    const maxR=upper+fore-1;
+    if(dist<0.1) dist=0.1;
+    if(dist>maxR) dist=maxR;
+    // 코사인 법칙으로 위팔과 sh→hand 사이 각도 계산
+    let cosA=(upper*upper+dist*dist-fore*fore)/(2*upper*dist);
+    cosA=Math.max(-1,Math.min(1,cosA));
+    const angA=Math.acos(cosA);
+    const base=Math.atan2(dy,dx);
+    // bendDir: +1=오른쪽(시계방향), -1=왼쪽(반시계방향)
+    const ea=base + bendDir*angA;
+    return {ex:shX+upper*Math.cos(ea), ey:shY+upper*Math.sin(ea)};
+  }
+
+  // 검도 그립: 팔꿈치가 facing 방향으로 약간 벌어지는 방향
+  // facing=+1(선도): bend=+1(아래로), facing=-1(후도): bend=-1(아래로)
+  const bendB = facing>0 ? 1 : -1;   // 뒷팔 굴곡 방향
+  const bendF = facing>0 ? 1 : -1;   // 앞팔 굴곡 방향
+
+  const {ex:eBx, ey:eBy} = solveElbowPos(shBX, shBY, handX-facing*4, handY+3, UPPER, FORE, bendB);
+  const {ex:eFx, ey:eFy} = solveElbowPos(shFX, shFY, handX, handY, UPPER, FORE, bendF);
+
+  // 뒷팔: 어깨→팔꿈치→손  (어둡게, 베지어 곡선)
+  const handHighFactor = Math.max(0, (chestTopY - handY) / 60);
+  const elbFwdB = facing * (14 + handHighFactor * 18);
+  const cpBx = (shBX + handX-facing*4)*0.5 + elbFwdB;
+  const cpBy = (shBY + handY+3)*0.5 + (eBy - (shBY+handY+3)*0.5)*0.5;
+
+  ctx.strokeStyle=shade(deep,-28); ctx.lineWidth=10; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath();
+  ctx.moveTo(shBX, shBY);
+  ctx.quadraticCurveTo(cpBx, cpBy, eBx, eBy);
+  ctx.lineTo(handX-facing*4, handY+3);
+  ctx.stroke();
+  // 뒷팔 팔꿈치 마디
+  ctx.fillStyle=shade(deep,-34);
+  ctx.beginPath();ctx.arc(eBx,eBy,5.5,0,Math.PI*2);ctx.fill();
+
+  // 앞팔: 어깨→팔꿈치→손  (밝게, 베지어 곡선)
+  const elbFwdF = facing * (16 + handHighFactor * 22);
+  const cpFx = (shFX + handX)*0.5 + elbFwdF;
+  const cpFy = (shFY + handY)*0.5 + (eFy - (shFY+handY)*0.5)*0.5;
+
+  ctx.strokeStyle=shade(deep,-10); ctx.lineWidth=11; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath();
+  ctx.moveTo(shFX, shFY);
+  ctx.quadraticCurveTo(cpFx, cpFy, eFx, eFy);
+  ctx.lineTo(handX, handY);
+  ctx.stroke();
+  // 앞팔 팔꿈치 마디
+  ctx.fillStyle=shade(deep,-16);
+  ctx.beginPath();ctx.arc(eFx,eFy,6,0,Math.PI*2);ctx.fill();
+
+  // 손(호완/장갑) — 양손 그립
+  ctx.fillStyle=shade(deep,14);ctx.beginPath();ctx.arc(handX,handY,5.5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=shade(deep,2);ctx.beginPath();ctx.arc(handX-facing*1,handY+6,5,0,Math.PI*2);ctx.fill();
+
+  // head
+  const headGrad=ctx.createLinearGradient(headCx-12,0,headCx+12,0);
+  headGrad.addColorStop(0,facing>0?shade(color,-12):shade(color,10));
+  headGrad.addColorStop(1,facing>0?shade(color,10):shade(color,-12));
+  ctx.fillStyle=headGrad;
+  ctx.beginPath();ctx.arc(headCx,headCy,12,0,Math.PI*2);ctx.fill();
+  // men grille (면) bars — headDrop 시 아래를 향하도록 기울어짐
+  const grilleTilt = headDropAmt * 8;  // 최대 8px 아래로 기울어짐
+  ctx.strokeStyle=shade(deep,-5);ctx.lineWidth=1.4;
+  for(let i=-2;i<=2;i++){
+    ctx.beginPath();
+    ctx.moveTo(headCx+facing*4,  headCy+i*3.2);
+    ctx.lineTo(headCx+facing*13, headCy+i*2.4 + grilleTilt);
+    ctx.stroke();
+  }
+  // men frame
+  ctx.strokeStyle=deep;ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.arc(headCx,headCy,12,facing>0?-1.0:Math.PI-1.0, facing>0?1.1:Math.PI+1.1);ctx.stroke();
+
+  // ---- BOKKEN (목검) ----
+  drawBokken(handX, handY, tipX, tipY);
+
+  return {tipX,tipY,headCx,headCy,handX,handY,hipY};
+}
+
+/* 죽도 렌더링: 자루(가죽) → 코등이 → 대나무 몸통(연한 노랑) → 중결(가죽끈) → 선혁(칼끝) */
+function drawShinai(hx, hy, tx, ty, deep){
+  const dx = tx-hx, dy = ty-hy;
+  const len = Math.hypot(dx,dy) || 1;
+  const ux = dx/len, uy = dy/len;          // unit along blade
+  const gripLen = Math.min(len*0.26, 30);  // 자루 길이
+  // points
+  const tsubaX = hx+ux*gripLen, tsubaY = hy+uy*gripLen;          // 코등이 위치
+  const nakaX = hx+ux*(gripLen+(len-gripLen)*0.62);              // 중결 (선혁 가까이)
+  const nakaY = hy+uy*(gripLen+(len-gripLen)*0.62);
+
+  // grip (자루) - dark leather
+  ctx.strokeStyle='#5a4632'; ctx.lineCap='round'; ctx.lineWidth=6;
+  ctx.beginPath();ctx.moveTo(hx,hy);ctx.lineTo(tsubaX,tsubaY);ctx.stroke();
+  // grip wrap lines
+  ctx.strokeStyle='#3a2c1c'; ctx.lineWidth=1.2;
+  for(let i=1;i<4;i++){const gx=hx+ux*gripLen*i/4, gy=hy+uy*gripLen*i/4;
+    ctx.beginPath();ctx.moveTo(gx-uy*4,gy+ux*4);ctx.lineTo(gx+uy*4,gy-ux*4);ctx.stroke();}
+
+  // bamboo body (대나무) - warm pale shaft with gradient
+  const bg = ctx.createLinearGradient(tsubaX,tsubaY,tx,ty);
+  bg.addColorStop(0,'#d8b878'); bg.addColorStop(.5,'#e8d29a'); bg.addColorStop(1,'#d2ae6e');
+  ctx.strokeStyle=bg; ctx.lineCap='round'; ctx.lineWidth=5;
+  ctx.beginPath();ctx.moveTo(tsubaX,tsubaY);ctx.lineTo(tx,ty);ctx.stroke();
+  // bamboo highlight stripe
+  ctx.strokeStyle='rgba(255,248,225,.5)'; ctx.lineWidth=1.4;
+  ctx.beginPath();ctx.moveTo(tsubaX-uy*1.4,tsubaY+ux*1.4);ctx.lineTo(tx-uy*1.4,ty+ux*1.4);ctx.stroke();
+
+  // tsuba (코등이) - guard disc
+  ctx.fillStyle='#2b2b33';ctx.beginPath();ctx.arc(tsubaX,tsubaY,5.5,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#454552';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(tsubaX,tsubaY,5.5,0,Math.PI*2);ctx.stroke();
+
+  // nakayui (중결) - leather tie band near tip
+  ctx.strokeStyle='#8a5a32'; ctx.lineWidth=6.5;
+  ctx.beginPath();ctx.moveTo(nakaX-uy*3.2,nakaY+ux*3.2);ctx.lineTo(nakaX+uy*3.2,nakaY-ux*3.2);ctx.stroke();
+
+  // sakigawa (선혁) - leather cap at tip
+  ctx.fillStyle='#caa05a';ctx.beginPath();ctx.arc(tx,ty,3.2,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fff7e0';ctx.beginPath();ctx.arc(tx,ty,1.5,0,Math.PI*2);ctx.fill();
+}
+
+/* color shade helper: hex +/- lightness */
+function shade(hex,amt){
+  hex=hex.replace('#','');
+  if(hex.length===3)hex=hex.split('').map(c=>c+c).join('');
+  let r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
+  r=Math.max(0,Math.min(255,r+amt));g=Math.max(0,Math.min(255,g+amt));b=Math.max(0,Math.min(255,b+amt));
+  return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+
+/* kiai bubble — 크게, 임팩트 있게 */
+function drawKiai(x,y,txt,facing){
+  ctx.save();
+  const FONT = '900 30px "Malgun Gothic","Noto Sans KR",sans-serif';
+  ctx.font = FONT;
+  const tw = ctx.measureText(txt).width;
+  const pw = tw + 34, ph = 46, pr = 10;
+  const bx = x + facing*14 - (facing<0 ? pw : 0);
+  const by = y - 62;
+
+  // 글로우 배경
+  ctx.shadowColor='rgba(220,170,60,0.7)'; ctx.shadowBlur=16;
+  ctx.fillStyle='rgba(180,130,30,.28)';
+  roundRect(bx,by,pw,ph,pr); ctx.fill();
+  ctx.shadowBlur=0;
+
+  // 테두리
+  ctx.strokeStyle='#E8C040'; ctx.lineWidth=2.2;
+  roundRect(bx,by,pw,ph,pr); ctx.stroke();
+
+  // 텍스트
+  ctx.fillStyle='#FFE060';
+  ctx.textBaseline='middle'; ctx.textAlign='center';
+  ctx.shadowColor='rgba(255,220,80,0.9)'; ctx.shadowBlur=10;
+  ctx.fillText(txt, bx+pw/2, by+ph/2+1);
+  ctx.restore();
+}
+
+function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+/* 구호 표시 — 숫자만 */
+function drawCount(txt, tInSlot){
+  let alpha = 1;
+  if(tInSlot < 0.15) alpha = tInSlot/0.15;
+  else if(tInSlot > 0.54) alpha = Math.max(0, 1-(tInSlot-0.54)/0.18);
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  const cx2 = W/2, cy2 = Hh * 0.18;
+
+  ctx.font = '800 26px "Malgun Gothic","Noto Sans KR",sans-serif';
+  const nw = ctx.measureText(txt).width;
+  const pw = nw + 32, ph = 40, pr = 9;
+  const px2 = cx2 - pw/2, py2 = cy2 - ph/2;
+
+  ctx.fillStyle = 'rgba(8,12,24,0.65)';
+  roundRect(px2, py2, pw, ph, pr); ctx.fill();
+  ctx.strokeStyle = 'rgba(200,162,75,0.7)'; ctx.lineWidth = 1.6;
+  roundRect(px2, py2, pw, ph, pr); ctx.stroke();
+
+  ctx.fillStyle = '#E8CC60';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(txt, cx2, cy2 + 1);
+  ctx.restore();
+}
+
+/* 자막(caption) 렌더 — 화면 하단 자막 스타일
+   counts와 구분: 숫자 구호는 가운데 상단, caption은 하단 자막 위치 */
+function drawCaption(txt, t){
+  // fade in 0~15%, 유지 15~80%, fade out 80~100%
+  let alpha = 1;
+  if(t < 0.15) alpha = t/0.15;
+  else if(t > 0.80) alpha = Math.max(0, 1-(t-0.80)/0.20);
+  ctx.save();
+  ctx.globalAlpha = alpha;
+
+  const cx2 = W/2;
+  const cy2 = Hh - 28;  // 하단 자막 위치
+
+  ctx.font = '600 15px "Malgun Gothic","Noto Sans KR",sans-serif';
+  const nw = ctx.measureText(txt).width;
+  const pw = nw + 28, ph = 28, pr = 6;
+  const px2 = cx2 - pw/2, py2 = cy2 - ph/2;
+
+  // 배경 — 반투명 다크
+  ctx.fillStyle = 'rgba(8,12,24,0.72)';
+  roundRect(px2, py2, pw, ph, pr); ctx.fill();
+  // 테두리 — 은은한 흰색
+  ctx.strokeStyle = 'rgba(232,230,223,0.25)'; ctx.lineWidth = 1.0;
+  roundRect(px2, py2, pw, ph, pr); ctx.stroke();
+
+  // 텍스트 — 밝은 흰색
+  ctx.fillStyle = '#E8E6DF';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(txt, cx2, cy2 + 1);
+  ctx.restore();
+}
+
+/* 목검(木劍 bokken) 렌더링 — 고정 길이(BOKKEN_LEN)
+   hx,hy: 손(자루 끝) 위치.  tx,ty: POSTURES/tipOvr 기준 방향 포인트.
+   방향각만 추출하고, 실제 렌더 길이는 BOKKEN_LEN 픽셀로 고정.
+   → 인물이 원위치든 정중선이든 목검 길이가 항상 동일하게 유지됨.
+*/
+function drawBokken(hx, hy, tx, ty){
+  // 방향벡터만 추출 (길이는 버림)
+  const dx0 = tx-hx, dy0 = ty-hy;
+  const d0 = Math.hypot(dx0,dy0) || 1;
+  const ux = dx0/d0, uy = dy0/d0;   // 칼 방향 단위벡터
+
+  // 고정 길이로 실제 칼끝 좌표 계산
+  tx = hx + ux * BOKKEN_LEN;
+  ty = hy + uy * BOKKEN_LEN;
+
+  const nx=-uy, ny=ux;               // 법선 (칼날 두께 방향)
+  const len = BOKKEN_LEN;
+
+  const gripFrac = 0.26;             // 자루 = 전체 26%
+  const gripLen  = len * gripFrac;
+  const tsubaX   = hx+ux*gripLen,  tsubaY=hy+uy*gripLen;  // 코등이 위치
+
+  // ── 자루(柄 tsuka) : 어두운 나무 색 직사각형 ──
+  const gW = 4.8;                    // 자루 두께 반폭
+  ctx.fillStyle='#23150A';
+  ctx.beginPath();
+  ctx.moveTo(hx+nx*gW,          hy+ny*gW);
+  ctx.lineTo(tsubaX+nx*(gW+1),  tsubaY+ny*(gW+1));
+  ctx.lineTo(tsubaX-nx*(gW+1),  tsubaY-ny*(gW+1));
+  ctx.lineTo(hx-nx*gW,          hy-ny*gW);
+  ctx.closePath(); ctx.fill();
+
+  // 자루 끝(석) 캡
+  ctx.fillStyle='#1a0e06';
+  ctx.beginPath();
+  ctx.ellipse(hx-ux*3, hy-uy*3, gW+1, 3.2, Math.atan2(dy0,dx0), 0, Math.PI*2);
+  ctx.fill();
+
+  // 자루 감기(이토 ito) 대각선 선
+  ctx.strokeStyle='rgba(80,50,20,0.8)'; ctx.lineWidth=1.4;
+  for(let i=1;i<5;i++){
+    const p=i/5;
+    const wx=hx+ux*gripLen*p, wy=hy+uy*gripLen*p;
+    ctx.beginPath();
+    ctx.moveTo(wx+nx*(gW+1), wy+ny*(gW+1));
+    ctx.lineTo(wx-nx*(gW+1), wy-ny*(gW+1));
+    ctx.stroke();
+  }
+
+  // ── 코등이(鍔 tsuba) : 작은 타원형 가드 ──
+  ctx.fillStyle='#2e1e10';
+  ctx.strokeStyle='#4a2e16'; ctx.lineWidth=1.2;
+  ctx.beginPath();
+  ctx.ellipse(tsubaX, tsubaY, 7.5, 5.2, Math.atan2(dy0,dx0), 0, Math.PI*2);
+  ctx.fill(); ctx.stroke();
+
+  // ── 도신(刀身 toshin) : 테이퍼 사각형 + 나뭇결 ──
+  const bladeLen = len - gripLen;
+  const baseHW   = 5.0;   // 코등이 쪽 반폭
+  const tipHW    = 1.2;   // 칼끝 반폭 (키사키 향해 좁아짐)
+
+  // 외곽 4점
+  const b0x=tsubaX+nx*baseHW, b0y=tsubaY+ny*baseHW;
+  const b1x=tsubaX-nx*baseHW, b1y=tsubaY-ny*baseHW;
+  const t0x=tx+nx*tipHW,       t0y=ty+ny*tipHW;
+  const t1x=tx-nx*tipHW,       t1y=ty-ny*tipHW;
+
+  // 나무 그라데이션 — 칼 측면 방향
+  const bladeGrad=ctx.createLinearGradient(
+    tsubaX-nx*baseHW, tsubaY-ny*baseHW,
+    tsubaX+nx*baseHW, tsubaY+ny*baseHW
+  );
+  bladeGrad.addColorStop(0,   '#5C3218');
+  bladeGrad.addColorStop(0.22,'#A0622A');
+  bladeGrad.addColorStop(0.5, '#D4935A');
+  bladeGrad.addColorStop(0.78,'#A0622A');
+  bladeGrad.addColorStop(1,   '#5C3218');
+
+  ctx.fillStyle=bladeGrad;
+  ctx.beginPath();
+  ctx.moveTo(b0x,b0y);
+  ctx.lineTo(t0x,t0y);
+  ctx.lineTo(tx, ty);
+  ctx.lineTo(t1x,t1y);
+  ctx.lineTo(b1x,b1y);
+  ctx.closePath(); ctx.fill();
+
+  // 나뭇결 선 (도신 세로 결)
+  ctx.strokeStyle='rgba(50,22,8,0.22)'; ctx.lineWidth=0.9;
+  for(let i=0;i<3;i++){
+    const frac=(i+1)/4;
+    const hw=lerp(baseHW,tipHW,0.35)*frac*0.8;
+    const sx2=tsubaX+ux*(bladeLen*0.05)+nx*hw*Math.sign(frac-0.5+0.01);
+    const sy2=tsubaY+uy*(bladeLen*0.05)+ny*hw*Math.sign(frac-0.5+0.01);
+    const ex2=tx-ux*2+nx*hw*Math.sign(frac-0.5+0.01);
+    const ey2=ty-uy*2+ny*hw*Math.sign(frac-0.5+0.01);
+    ctx.beginPath(); ctx.moveTo(sx2,sy2); ctx.lineTo(ex2,ey2); ctx.stroke();
+  }
+
+  // 하이라이트 스트라이프 (칼 앞면 광택)
+  ctx.strokeStyle='rgba(255,230,200,0.30)'; ctx.lineWidth=1.0;
+  const hlx1=tsubaX+nx*1.2, hly1=tsubaY+ny*1.2;
+  const hlx2=tx+nx*0.5,     hly2=ty+ny*0.5;
+  ctx.beginPath(); ctx.moveTo(hlx1,hly1); ctx.lineTo(hlx2,hly2); ctx.stroke();
+
+  // ── 키사키(切先 kissaki) : 칼끝 ──
+  ctx.fillStyle='#8B4A1E';
+  ctx.beginPath(); ctx.arc(tx,ty,2.8,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='rgba(255,210,170,0.6)';
+  ctx.beginPath(); ctx.arc(tx-ux*1,ty-uy*1,1.1,0,Math.PI*2); ctx.fill();
+}
+
+/* impact spark */
+function drawImpact(x,y,k){
+  ctx.save();
+  const r = 6+k*16; ctx.globalAlpha=1-k;
+  ctx.strokeStyle='#E0C079';ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.stroke();
+  ctx.restore();
+}
+
+/* draw stage scene */
+function draw(){
+  ctx.clearRect(0,0,W,Hh);
+  // floor
+  const groundY = Hh-46;
+  const fg = ctx.createLinearGradient(0,groundY-10,0,Hh);
+  fg.addColorStop(0,'#3A2F22'); fg.addColorStop(1,'#241D14');
+  ctx.fillStyle=fg; ctx.fillRect(0,groundY,W,Hh-groundY);
+  // plank lines
+  ctx.strokeStyle='rgba(90,74,51,.5)';ctx.lineWidth=1;
+  for(let i=1;i<7;i++){const x=W*i/7;ctx.beginPath();ctx.moveTo(x,groundY);ctx.lineTo(x+ (x-W/2)*0.18, Hh);ctx.stroke();}
+  // ground line
+  ctx.strokeStyle='#5A4A33';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(0,groundY);ctx.lineTo(W,groundY);ctx.stroke();
+
+  // center line 정중선 (glowing)
+  const cx=W/2;
+  ctx.save();
+  ctx.strokeStyle='rgba(200,162,75,.55)';ctx.lineWidth=2;ctx.setLineDash([5,6]);
+  ctx.shadowColor='rgba(200,162,75,.7)';ctx.shadowBlur=8;
+  ctx.beginPath();ctx.moveTo(cx,28);ctx.lineTo(cx,groundY);ctx.stroke();
+  ctx.restore();
+  ctx.fillStyle='rgba(200,162,75,.7)';ctx.font='10px '+getComputedStyle(document.body).getPropertyValue('--mono');
+  ctx.textAlign='center';ctx.fillText('정중선',cx,22);
+
+  // origin marks — 세로 점선 + 텍스트 진하게
+  const originL = W*0.12, originR=W*0.88;
+  ctx.save();
+  ctx.strokeStyle='rgba(154,160,174,.55)';ctx.lineWidth=1.2;ctx.setLineDash([3,5]);
+  ctx.beginPath();ctx.moveTo(originL,groundY-60);ctx.lineTo(originL,groundY);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(originR,groundY-60);ctx.lineTo(originR,groundY);ctx.stroke();
+  ctx.restore();
+  // 원위치 텍스트 + 삼각 마커
+  ctx.fillStyle='rgba(180,186,198,.85)';ctx.font='bold 9.5px '+getComputedStyle(document.body).getPropertyValue('--mono');
+  ctx.textAlign='center';
+  ctx.fillText('원위치',originL,groundY+15);ctx.fillText('원위치',originR,groundY+15);
+  // 삼각형 마커
+  ctx.fillStyle='rgba(180,186,198,.7)';
+  [[originL],[originR]].forEach(([ox])=>{
+    ctx.beginPath();ctx.moveTo(ox-5,groundY+18);ctx.lineTo(ox+5,groundY+18);ctx.lineTo(ox,groundY+26);ctx.closePath();ctx.fill();
+  });
+
+  // compute interpolated state
+  const ss=steps();
+  const prev = stepIdx>0 ? ss[stepIdx-1] : ss[0];
+  const cur = ss[stepIdx];
+
+  // ── seqOffset: 후도를 선도보다 늦게 시작시키는 순차 동작 제어 ──
+  // seqOffset=0 → 동시. seqOffset=0.42 → 후도는 t=0.42부터 시작
+  const seqOffset = cur.seqOffset || 0;
+  const ease = easeForStep(cur);
+  const kS = ease(Math.min(1, t));                          // 선도 k (정상)
+  const kH = seqOffset > 0
+    ? ease(Math.max(0, Math.min(1, (t - seqOffset) / (1 - seqOffset))))
+    : kS;                                                    // 후도 k (지연)
+  const k = kS;  // gap 계산은 선도 기준
+
+  // ── 거리(間合): gap=82 고정 → tip[0]=82(중단) or 96(격자)로 칼끝이 정중선에서 만남
+  const STRIKE_ACTS=['strike_men','strike_kote','strike_do','thrust','clash'];
+  function centerGap(stp){
+    // step 단위 gap 오버라이드 (예: 1본 격자처럼 특별히 가까워야 하는 경우)
+    if(stp.gap !== undefined) return stp.gap;
+    const sA=stp.s.a, hA=stp.h.a;
+    if(sA==='ready'&&hA==='ready') return 44;
+    return 82;
+  }
+  const gapPrev = centerGap(prev), gapCur = centerGap(cur);
+  const gap = lerp(gapPrev, gapCur, k);
+  const centerL = cx-gap, centerR=cx+gap;
+
+  // 선도/후도 위치: kS/kH 각각 적용
+  const senX = lerp(mapX(prev.s.x,'s',originL,centerL,originR,centerR), mapX(cur.s.x,'s',originL,centerL,originR,centerR), kS);
+  const huX  = lerp(mapX(prev.h.x,'h',originL,centerL,originR,centerR), mapX(cur.h.x,'h',originL,centerL,originR,centerR), kH);
+
+  const ep0=effParams(prev.s), ep1=effParams(cur.s);
+  const hp0=effParams(prev.h), hp1=effParams(cur.h);
+
+  // ── 격자 내려치기 tip 호 보간 ──────────────────────────────
+  // 상단 → 격자(men/kote/do) 전이 시 칼끝이 직선이 아닌 호를 그리도록.
+  // 경유점: 상단 tip에서 약 45도 앞으로 내린 중간 위치를 거쳐 최종 격자 위치로.
+  // t=0~0.5: 상단 → 경유점(45도 앞쪽), t=0.5~1: 경유점 → 격자 타격점
+  function tipArc(p0, p1, k, isStrike, wasHigh){
+    if(!isStrike || !wasHigh) return lerpArr(p0, p1, k);
+    // 경유점: x는 절반쯤 앞으로, y는 상단에서 45도 내린 위치
+    const midX = p0[0] + (p1[0]-p0[0])*0.35 + 18;  // 앞으로 치우침
+    const midY = p0[1] + (p1[1]-p0[1])*0.25;         // 아직 높이 있음
+    if(k <= 0.5){
+      const k2 = k*2;
+      return lerpArr(p0, [midX,midY], k2);
+    } else {
+      const k2 = (k-0.5)*2;
+      return lerpArr([midX,midY], p1, k2);
+    }
+  }
+
+  function isStrikeAct(a){ return ['strike_men','strike_kote','strike_do'].includes(a); }
+  function wasHighPosture(p){ return ['좌상단','우상단','어깨칼'].includes(p); }
+
+  const senTip = tipArc(ep0.tip, ep1.tip, kS,
+    isStrikeAct(cur.s.a), wasHighPosture(prev.s.p));
+  const huTip  = tipArc(hp0.tip, hp1.tip, kH,
+    isStrikeAct(cur.h.a), wasHighPosture(prev.h.p));
+
+  const senEff={hand:lerpArr(ep0.hand,ep1.hand,kS), tip:senTip, foot:lerp(ep0.foot,ep1.foot,kS),lean:lerp(ep0.lean,ep1.lean,kS),kneel:lerp(ep0.kneel,ep1.kneel,kS),headDrop:lerp(ep0.headDrop,ep1.headDrop,kS)};
+  const huEff ={hand:lerpArr(hp0.hand,hp1.hand,kH), tip:huTip,  foot:lerp(hp0.foot,hp1.foot,kH),lean:lerp(hp0.lean,hp1.lean,kH),kneel:lerp(hp0.kneel,hp1.kneel,kH),headDrop:lerp(hp0.headDrop,hp1.headDrop,kH)};
+
+  const senR=drawFigure(senX, senEff, 1, '#6E92D8', '#2C4374', cur.s.x, cur.s);
+  const huR =drawFigure(huX,  huEff, -1, '#D7647A', '#7C2238', cur.h.x, cur.h);
+
+  // ── 구호 숫자 표시 ──
+  if(cur.counts){
+    const n = cur.counts.length;
+    const idx = Math.min(n-1, Math.floor(t * n));
+    const tInSlot = t * n - idx;
+    if(tInSlot < 0.72) drawCount(cur.counts[idx], tInSlot);
+  }
+
+  // ── 자막(caption) 표시 — 하단 자막 스타일 ──
+  if(cur.caption) drawCaption(cur.caption, t);
+
+  // ── 기합: seqOffset 기반으로 선도/후도 타이밍 분리 ──
+  if(seqOffset > 0){
+    // 순차 동작: 선도는 전반(0~seqOffset+0.1), 후도는 후반(seqOffset~끝)
+    if(cur.s.kiai && t < seqOffset + 0.12) drawKiai(senR.headCx,senR.headCy,cur.s.kiai,1);
+    if(cur.h.kiai && t >= seqOffset && t < seqOffset + 0.44) drawKiai(huR.headCx,huR.headCy,cur.h.kiai,-1);
+  } else {
+    const bothKiai = cur.s.kiai && cur.h.kiai;
+    if(cur.s.kiai){ if(bothKiai?(t<0.5):(t<0.55)) drawKiai(senR.headCx,senR.headCy,cur.s.kiai,1); }
+    if(cur.h.kiai){ if(bothKiai?(t>=0.5):(t<0.55)) drawKiai(huR.headCx,huR.headCy,cur.h.kiai,-1); }
+  }
+
+  // ── 임팩트 스파크 ──
+  const strikeS=['strike_men','strike_kote','strike_do','thrust','clash'].includes(cur.s.a);
+  const strikeH=['strike_men','strike_kote','strike_do','thrust','clash'].includes(cur.h.a);
+  if(seqOffset > 0){
+    // 선도 임팩트: 선도가 동작하는 전반
+    if(strikeS && t > 0.22 && t < seqOffset-0.02){
+      const kk=(t-0.22)/(seqOffset-0.24);
+      drawImpact(huR.headCx+(cur.s.t==='kote'?20:0), cur.s.t==='do'?huR.hipY-30:(cur.s.t==='kote'?huR.handY:huR.headCy), Math.min(1,kk));
+    }
+    // 후도 임팩트: 후도가 동작하는 후반
+    if(strikeH && t > seqOffset+0.22 && t < seqOffset+0.62){
+      const kk=(t-seqOffset-0.22)/0.4;
+      drawImpact(senR.headCx+(cur.h.t==='kote'?-20:0), cur.h.t==='do'?senR.hipY-30:(cur.h.t==='kote'?senR.handY:senR.headCy), Math.min(1,kk));
+    }
+  } else if((strikeS||strikeH) && t>0.55 && t<0.95){
+    const kk=(t-0.55)/0.4;
+    if(strikeH) drawImpact(senR.headCx+(cur.h.t==='kote'?-20:0), cur.h.t==='do'?senR.hipY-30:(cur.h.t==='kote'?senR.handY:senR.headCy), kk);
+    if(strikeS) drawImpact(huR.headCx+(cur.s.t==='kote'?20:0), cur.s.t==='do'?huR.hipY-30:(cur.s.t==='kote'?huR.handY:huR.headCy), kk);
+  }
+}
+
+// map normalized x to screen, side-aware
+function mapX(xn,side,oL,cL,oR,cR){
+  if(side==='s') return lerp(oL,cL,xn);
+  return lerp(oR,cR,xn);
+}
+// fix CSS var colors -> actual
+function colorVar(v){
+  if(v==='var-sen')return getComputedStyle(document.body).getPropertyValue('--sen').trim();
+  if(v==='var-hu')return getComputedStyle(document.body).getPropertyValue('--hu').trim();
+  return v;
+}
+// patch drawFigure stroke color resolution
+const _origFill=ctx.fill;
+
+function easeForStep(step){
+  const strike=['strike_men','strike_kote','strike_do','thrust','clash'].includes(step.s.a)||['strike_men','strike_kote','strike_do','thrust','clash'].includes(step.h.a);
+  return strike?easeStrike:easeSmooth;
+}
+
+/* ---- animation loop ---- */
+function tick(now){
+  if(!lastTime) lastTime=now;
+  const dt=now-lastTime; lastTime=now;
+  if(playing){
+    const dur=steps()[stepIdx].d/speed;
+    t += dt/dur;
+    if(t>=1){
+      t=0;
+      if(stepIdx<steps().length-1){ stepIdx++; }
+      else { playing=false; t=1; stepIdx=steps().length-1; setPlayBtn(); }
+      syncUI();
+    }
+    draw();
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ---- UI sync ---- */
+function syncUI(){
+  const ss=steps();const cur=ss[stepIdx];
+  document.getElementById('capSen').innerHTML=cur.ls.replace(/<k>/g,'<span class="kiai">').replace(/<\/k>/g,'</span>');
+  document.getElementById('capHu').innerHTML=cur.lh.replace(/<k>/g,'<span class="kiai">').replace(/<\/k>/g,'</span>');
+  document.getElementById('badgeStep').textContent=`STEP ${stepIdx+1} / ${ss.length}`;
+  document.getElementById('curStep').textContent=stepIdx+1;
+  document.getElementById('totStep').textContent=ss.length;
+  const pct=(stepIdx/(ss.length-1))*100;
+  document.getElementById('scrubFill').style.width=pct+'%';
+  document.querySelectorAll('#scrubTicks .tick').forEach((el,i)=>el.classList.toggle('done',i<=stepIdx));
+  renderSteplist();
+}
+function setPlayBtn(){document.getElementById('btnPlay').innerHTML=playing?'❚❚ 정지':'▶ 재생';}
+
+/* ── 동작 해설 패널 ── */
+let steplistOpen = true;   // 기본 열림
+
+function toggleSteplist(){
+  steplistOpen = !steplistOpen;
+  document.getElementById('steplistBody').classList.toggle('open', steplistOpen);
+  document.getElementById('steplistHeader').classList.toggle('open', steplistOpen);
+}
+
+function fmtText(raw){
+  // <k>...</k> → 강조 span, 「」안 기합 → kw 강조
+  return raw
+    .replace(/<k>(.*?)<\/k>/g,'<span class="kw">$1</span>')
+    .replace(/「([^」]+)」/g,'「<span class="kw">$1</span>」');
+}
+
+function renderSteplist(){
+  const ss = steps();
+  const form = curForm();
+  document.getElementById('slBadge').textContent = form.name;
+
+  const body = document.getElementById('steplistBody');
+  body.innerHTML = ss.map((step, i)=>{
+    const done    = i < stepIdx;
+    const active  = i === stepIdx;
+    const cls     = `step-row${active?' active':done?' done':''}`;
+    const title   = step.title || `STEP ${i+1}`;
+    // 선도와 후도 텍스트가 같으면 하나만 표시
+    const sameTxt = step.ls === step.lh;
+    const lsHtml  = fmtText(step.ls);
+    const lhHtml  = fmtText(step.lh);
+    const descHtml = sameTxt
+      ? `<div class="step-desc-row">
+           <span class="drole sen">선·후</span>
+           <span class="dtxt">${lsHtml}</span>
+         </div>`
+      : `<div class="step-desc-row">
+           <span class="drole sen">선도</span>
+           <span class="dtxt">${lsHtml}</span>
+         </div>
+         <div class="step-desc-row">
+           <span class="drole hu">후도</span>
+           <span class="dtxt">${lhHtml}</span>
+         </div>`;
+    return `<div class="${cls}" id="sr-${i}" onclick="jumpStep(${i})">
+      <div class="step-num">
+        <span style="font-size:9px">${i+1}</span>
+        <span class="ndot"></span>
+      </div>
+      <div class="step-content">
+        <div class="step-title">${title}</div>
+        ${descHtml}
+      </div>
+    </div>`;
+  }).join('');
+
+  // 현재 step이 보이도록 스크롤
+  if(steplistOpen){
+    const el = document.getElementById(`sr-${stepIdx}`);
+    if(el) el.scrollIntoView({block:'nearest',behavior:'smooth'});
+  }
+  // 열림 상태 유지
+  body.classList.toggle('open', steplistOpen);
+  document.getElementById('steplistHeader').classList.toggle('open', steplistOpen);
+}
+
+function jumpStep(i){
+  playing=false; setPlayBtn();
+  stepIdx=i; t=0;
+  syncUI(); draw();
+}
+
+function buildTicks(){
+  const c=document.getElementById('scrubTicks');c.innerHTML='';
+  steps().forEach(()=>{const d=document.createElement('div');d.className='tick';c.appendChild(d);});
+}
+
+function loadForm(i){
+  formIdx=i;stepIdx=0;t=0;playing=false;setPlayBtn();
+  document.querySelectorAll('.form-tab').forEach((el,idx)=>el.classList.toggle('active',idx===i));
+  const f=curForm();
+  document.getElementById('info').innerHTML=
+    `<div><div class="k">시작 자세</div><div class="v">선도 ${f.start.sen} · 후도 ${f.start.hu}</div></div>`+
+    `<div><div class="k">${f.id===0?'구분':'선(先)의 관계'}</div><div class="v">${f.id===0?'본 연무 전 공통 의식':''+f.sen_rel}</div></div>`+
+    `<div><div class="k">${f.id===0?'단계':'결정 동작'}</div><div class="v">${f.id===0?`총 ${f.steps.length}단계`:f.cut}</div></div>`;
+  buildTicks();syncUI();draw();
+}
+
+/* ---- build form tabs ---- */
+const formsEl=document.getElementById('forms');
+KATA.forEach((f,i)=>{
+  const b=document.createElement('button');
+  b.className='form-tab'+(f.id===0?' iphoe':'')+(i===0?' active':'');
+  b.textContent=f.id===0?'입회':`${f.id}본`;
+  b.onclick=()=>loadForm(i);
+  formsEl.appendChild(b);
+});
+
+/* ---- controls ---- */
+document.getElementById('btnPlay').onclick=()=>{
+  if(stepIdx>=steps().length-1 && t>=1){stepIdx=0;t=0;syncUI();}
+  playing=!playing;lastTime=0;setPlayBtn();
+};
+document.getElementById('btnNext').onclick=()=>{playing=false;setPlayBtn();if(stepIdx<steps().length-1){stepIdx++;t=0;syncUI();draw();}};
+document.getElementById('btnPrev').onclick=()=>{playing=false;setPlayBtn();if(stepIdx>0){stepIdx--;t=0;syncUI();draw();}};
+document.getElementById('btnFirst').onclick=()=>{playing=false;setPlayBtn();stepIdx=0;t=0;syncUI();draw();};
+document.getElementById('btnLast').onclick=()=>{playing=false;setPlayBtn();stepIdx=steps().length-1;t=1;syncUI();draw();};
+document.getElementById('speed').onclick=(e)=>{
+  if(e.target.dataset.s){speed=parseFloat(e.target.dataset.s);
+    document.querySelectorAll('#speed button').forEach(b=>b.classList.toggle('active',b===e.target));}
+};
+// scrub click
+document.getElementById('scrub').onclick=(e)=>{
+  const r=e.currentTarget.getBoundingClientRect();
+  const p=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));
+  playing=false;setPlayBtn();
+  stepIdx=Math.round(p*(steps().length-1));t=0;syncUI();draw();
+};
+// keyboard
+window.addEventListener('keydown',(e)=>{
+  if(e.code==='Space'){e.preventDefault();document.getElementById('btnPlay').click();}
+  else if(e.code==='ArrowRight'){document.getElementById('btnNext').click();}
+  else if(e.code==='ArrowLeft'){document.getElementById('btnPrev').click();}
+  else if(e.code==='Digit0'){loadForm(0);}
+  else if(/^Digit[1-7]$/.test(e.code)){const n=+e.code.slice(5);if(n<KATA.length)loadForm(n);}
+});
+
+/* patch: drawFigure uses colorVar — wrap stroke/fill color assignment.
+   Simpler: monkeypatch by resolving 'var-sen'/'var-hu' inside drawFigure. */
+// Re-implement color resolution: override by intercepting strokeStyle setter is complex;
+// instead the figure colors were passed as 'var-sen'/'var-hu'; resolve here.
+(function(){
+  const realDraw=drawFigure;
+})();
+
+/* boot */
+resize();
+loadForm(0);
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
