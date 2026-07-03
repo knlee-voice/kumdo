@@ -377,6 +377,31 @@ body {
 }
 
 
+/* 심판부 명단 테이블 */
+.judge-table {
+  width: 100%; border-collapse: collapse;
+  table-layout: fixed;
+}
+.judge-table th {
+  background: #2a5298; color: #fff;
+  font-size: 11px; font-weight: 700;
+  padding: 7px 4px; text-align: center;
+  border: 1px solid rgba(255,255,255,.2);
+}
+.judge-table td {
+  padding: 7px 4px; text-align: center;
+  border: 1px solid var(--border);
+  font-size: 13px; font-weight: 700;
+  color: var(--text); line-height: 1.3;
+  vertical-align: middle;
+}
+.judge-table td span {
+  display: block;
+  font-size: 10px; font-weight: 400;
+  color: var(--text3); margin-top: 2px;
+}
+.judge-table tr:nth-child(even) td { background: var(--bg); }
+
 .country-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -849,6 +874,69 @@ body {
       </div>
     </div>
 
+    <!-- 심판부 명단 -->
+    <div class="card">
+      <button class="accordion-btn" onclick="toggleAcc(this)">
+        심판부 명단
+        <span class="acc-arrow">▼</span>
+      </button>
+      <div class="accordion-body">
+
+        <!-- 심판 임원 -->
+        <div class="roster-group">
+          <div class="sec-head sec-head-slate">심판 임원</div>
+          <table class="unified-table">
+            <tbody>
+              <tr><td style="white-space:nowrap;">심판장</td><td>장홍균 &nbsp;<span style="font-size:12px;color:var(--text3);">範士8段</span></td></tr>
+              <tr><td style="white-space:nowrap;">심판배정위원장</td><td>정성대 &nbsp;<span style="font-size:12px;color:var(--text3);">範士8段</span></td></tr>
+              <tr><td style="white-space:nowrap;">심판배정위원</td><td>김재곤 &nbsp;<span style="font-size:12px;color:var(--text3);">範士8段</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 경기장 1~5 -->
+        <div class="roster-group">
+          <div class="sec-head sec-head-slate">경기장 1~5 &nbsp; 주임심판</div>
+          <table class="judge-table">
+            <thead><tr><th>1경기장</th><th>2경기장</th><th>3경기장</th><th>4경기장</th><th>5경기장</th></tr></thead>
+            <tbody>
+              <tr><td>이명곽<span>8/인천</span></td><td>강진현<span>8/서울</span></td><td>이원홍<span>8/경기</span></td><td>김정국<span>8/대구</span></td><td>이춘형<span>8/대전</span></td></tr>
+              <tr><td>임근배<span>8/충남</span></td><td>추관호<span>8/울산</span></td><td>김영규<span>8/경기</span></td><td>김종호<span>7/경기</span></td><td>안윤기<span>7/서울</span></td></tr>
+              <tr><td>김규식<span>7/서울</span></td><td>백경화<span>7/충남</span></td><td>윤성식<span>7/서울</span></td><td>김동완<span>7/서울</span></td><td>박정훈<span>7/경기</span></td></tr>
+              <tr><td>이려성<span>7/서울</span></td><td>박성갑<span>7/경기</span></td><td>이항수<span>7/경기</span></td><td>신영수<span>7/서울</span></td><td>이홍점<span>7/서울</span></td></tr>
+              <tr><td>조영진<span>7/충북</span></td><td>안현균<span>7/서울</span></td><td>김태현<span>7/서울</span></td><td>이승민<span>7/전북</span></td><td>구평회<span>7/인천</span></td></tr>
+              <tr><td>유지희<span>7/경기</span></td><td>박상섭<span>7/충남</span></td><td>박은정<span>7/울산</span></td><td>홍성호<span>7/경남</span></td><td>신현승<span>7/서울</span></td></tr>
+              <tr><td>장시성<span>7/경기</span></td><td>임광환<span>7/경기</span></td><td>차동균<span>7/서울</span></td><td>박혜연<span>7/서울</span></td><td>김용우<span>7/서울</span></td></tr>
+              <tr><td>심영효<span>7/서울</span></td><td>김영철<span>7/서울</span></td><td>이영우<span>7/서울</span></td><td>양성국<span>7/경기</span></td><td>한현욱<span>7/경남</span></td></tr>
+              <tr><td>허윤석<span>6/경기</span></td><td>황지훈<span>7/서울</span></td><td>최종익<span>7/서울</span></td><td>이재혁<span>6/서울</span></td><td>권혁준<span>6/강원</span></td></tr>
+              <tr><td>김&nbsp;&nbsp;웅<span>6/서울</span></td><td>장승호<span>6/경기</span></td><td>임정호<span>6/경기</span></td><td>홍준표<span>6/경기</span></td><td>나은권<span>6/경기</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 경기장 6~10 -->
+        <div class="roster-group" style="border-bottom:none;margin-bottom:0;padding-bottom:4px;">
+          <div class="sec-head sec-head-slate">경기장 6~10 &nbsp; 주임심판</div>
+          <table class="judge-table">
+            <thead><tr><th>6경기장</th><th>7경기장</th><th>8경기장</th><th>9경기장</th><th>10경기장</th></tr></thead>
+            <tbody>
+              <tr><td>신모철<span>8/인천</span></td><td>배명환<span>8/서울</span></td><td>이민배<span>8/대전</span></td><td>박경옥<span>8/경남</span></td><td>전홍철<span>8/경북</span></td></tr>
+              <tr><td>조재성<span>7/충북</span></td><td>고명섭<span>7/서울</span></td><td>이춘산<span>7/서울</span></td><td>김치만<span>8/서울</span></td><td>김진하<span>8/경남</span></td></tr>
+              <tr><td>박준곤<span>7/경남</span></td><td>서범상<span>7/경기</span></td><td>정종성<span>7/경기</span></td><td>김윤석<span>7/서울</span></td><td>이길수<span>7/서울</span></td></tr>
+              <tr><td>현경몽<span>7/서울</span></td><td>정희관<span>7/강원</span></td><td>전수환<span>7/경기</span></td><td>정재익<span>7/강원</span></td><td>양금호<span>7/전북</span></td></tr>
+              <tr><td>최갑동<span>7/서울</span></td><td>김동규<span>7/서울</span></td><td>홍성호<span>7/경남</span></td><td>이지혁<span>7/서울</span></td><td>김병규<span>7/서울</span></td></tr>
+              <tr><td>박승욱<span>7/경기</span></td><td>서영준<span>7/서울</span></td><td>박현규<span>7/서울</span></td><td>이훈희<span>7/경기</span></td><td>이영찬<span>7/서울</span></td></tr>
+              <tr><td>최총영<span>7/충남</span></td><td>조중재<span>7/경기</span></td><td>최응환<span>7/서울</span></td><td>조문식<span>7/충북</span></td><td>이동섭<span>7/충남</span></td></tr>
+              <tr><td>성용은<span>6/경기</span></td><td>임종길<span>7/인천</span></td><td>이문화<span>7/충북</span></td><td>강준호<span>7/서울</span></td><td>박성용<span>7/경기</span></td></tr>
+              <tr><td>이진홍<span>6/세종</span></td><td>이태승<span>7/경기</span></td><td>안병립<span>7/대전</span></td><td>김성주<span>7/제주</span></td><td>홍용화<span>6/서울</span></td></tr>
+              <tr><td>소재우<span>5/서울</span></td><td>한현승<span>6/서울</span></td><td>허명진<span>6/서울</span></td><td>백기환<span>6/경기</span></td><td>김성갑<span>6/대전</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
     <!-- 진행요원 명단 -->
     <div class="card">
       <button class="accordion-btn" onclick="toggleAcc(this)">
@@ -864,7 +952,7 @@ body {
 
         <!-- Tournament STAFF -->
         <div class="roster-group" style="margin-top:10px;">
-          <div class="sec-head sec-head-slate">Tournament STAFF &nbsp;— 44명</div>
+          <div class="sec-head sec-head-slate">Tournament STAFF</div>
           <table class="unified-table">
             <tbody>
               <tr><td>김은강  강연우  고은빈  김가현  김도언  김민서  김민지  김서울  김예림  김정해  김지우  김지유  남서현  노예림  박서윤  박서준  박지수  박지호  성우재  신가연  양희원  오지수  유가연  유현정  윤가람  윤경하  이동건  이서윤  이서윤  이아름  이유빈  이은솔  임혜숙  정승민  정인호  조강민  주윤건  최수민  최인화  최치민  한동재  홍민영  황윤하  황준산</td></tr>
@@ -874,7 +962,7 @@ body {
 
         <!-- Broadcast / Interpreter STAFF -->
         <div class="roster-group" style="border-bottom:none; margin-bottom:0; padding-bottom:4px;">
-          <div class="sec-head sec-head-slate">Broadcast / Interpreter STAFF &nbsp;— 3명</div>
+          <div class="sec-head sec-head-slate">Broadcast / Interpreter STAFF</div>
           <table class="unified-table">
             <tbody>
               <tr>
