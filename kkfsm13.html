@@ -401,6 +401,16 @@ body {
   color: var(--text3); margin-top: 2px;
 }
 .judge-table tr:nth-child(even) td { background: var(--bg); }
+/* 첫 번째 행 강조 */
+.judge-table tbody tr:first-child td {
+  background: #1B3F7A;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+}
+.judge-table tbody tr:first-child td span {
+  color: rgba(255,255,255,.7);
+}
 
 .country-grid {
   display: grid;
@@ -900,7 +910,7 @@ body {
           <table class="judge-table">
             <thead><tr><th>1경기장</th><th>2경기장</th><th>3경기장</th><th>4경기장</th><th>5경기장</th></tr></thead>
             <tbody>
-              <tr><td>이명곽<span>8/인천</span></td><td>강진현<span>8/서울</span></td><td>이원홍<span>8/경기</span></td><td>김정국<span>8/대구</span></td><td>이춘형<span>8/대전</span></td></tr>
+              <tr><td>이명광<span>8/인천</span></td><td>강진형<span>8/서울</span></td><td>이원홍<span>8/경기</span></td><td>김정국<span>8/대구</span></td><td>이춘형<span>8/대전</span></td></tr>
               <tr><td>임근배<span>8/충남</span></td><td>추관호<span>8/울산</span></td><td>김영규<span>8/경기</span></td><td>김종호<span>7/경기</span></td><td>안윤기<span>7/서울</span></td></tr>
               <tr><td>김규식<span>7/서울</span></td><td>백경화<span>7/충남</span></td><td>윤성식<span>7/서울</span></td><td>김동완<span>7/서울</span></td><td>박정훈<span>7/경기</span></td></tr>
               <tr><td>이려성<span>7/서울</span></td><td>박성갑<span>7/경기</span></td><td>이항수<span>7/경기</span></td><td>신영수<span>7/서울</span></td><td>이홍점<span>7/서울</span></td></tr>
@@ -923,7 +933,7 @@ body {
               <tr><td>신모철<span>8/인천</span></td><td>배명환<span>8/서울</span></td><td>이민배<span>8/대전</span></td><td>박경옥<span>8/경남</span></td><td>전홍철<span>8/경북</span></td></tr>
               <tr><td>조재성<span>7/충북</span></td><td>고명섭<span>7/서울</span></td><td>이춘산<span>7/서울</span></td><td>김치만<span>8/서울</span></td><td>김진하<span>8/경남</span></td></tr>
               <tr><td>박준곤<span>7/경남</span></td><td>서범상<span>7/경기</span></td><td>정종성<span>7/경기</span></td><td>김윤석<span>7/서울</span></td><td>이길수<span>7/서울</span></td></tr>
-              <tr><td>현경몽<span>7/서울</span></td><td>정희관<span>7/강원</span></td><td>전수환<span>7/경기</span></td><td>정재익<span>7/강원</span></td><td>양금호<span>7/전북</span></td></tr>
+              <tr><td>현경용<span>7/서울</span></td><td>정희관<span>7/강원</span></td><td>전수환<span>7/경기</span></td><td>정재익<span>7/강원</span></td><td>양금호<span>7/전북</span></td></tr>
               <tr><td>최갑동<span>7/서울</span></td><td>김동규<span>7/서울</span></td><td>홍성호<span>7/경남</span></td><td>이지혁<span>7/서울</span></td><td>김병규<span>7/서울</span></td></tr>
               <tr><td>박승욱<span>7/경기</span></td><td>서영준<span>7/서울</span></td><td>박현규<span>7/서울</span></td><td>이훈희<span>7/경기</span></td><td>이영찬<span>7/서울</span></td></tr>
               <tr><td>최총영<span>7/충남</span></td><td>조중재<span>7/경기</span></td><td>최응환<span>7/서울</span></td><td>조문식<span>7/충북</span></td><td>이동섭<span>7/충남</span></td></tr>
@@ -1683,7 +1693,7 @@ body {
             <div class="sl-box"></div>
             <div class="sl-text">
               <div class="sl-main">인쇄물 배포</div>
-              <div class="sl-sub">심판 · 운영요원 · 임원 / 탁상명패 · 목걸이명패 · 대진표책자</div>
+              <div class="sl-sub">심판 · 운영요원 · 임원 / 탁상명패 · 목걸이명패 · 대진표책자 / STAFF 기념품</div>
             </div>
           </div>
           <div class="sl-item" onclick="toggleSl(this)">
