@@ -1157,12 +1157,301 @@ body {
           </div>
           <div class="field" style="border-bottom:none;">
             <div class="field-label">채점 방법</div>
-            <div class="field-val sm">참가팀 수 + 단체전 입상점수 + 개인전 입상점수</div>
+            <div class="field-val sm">
+              참가팀 수 + 단체전 입상점수 + 개인전 입상점수<br>
+              <span style="font-size:12px;color:var(--text3);">동점 시: 참가인원 → 다수 우승 → 준우승 → 3위 순</span>
+            </div>
           </div>
         </div>
-        
-        <! -- 추가 예정 -->
-        추가 항목 업데이트 예정
+
+        <!-- 성적별 배점표 -->
+        <table class="yogan-table" style="margin-top:10px;">
+          <thead>
+            <tr style="background:var(--bg);">
+              <th style="padding:8px 6px;font-size:12px;color:var(--text3);border:1px solid var(--border);">성적</th>
+              <th style="padding:8px 6px;font-size:12px;color:var(--text3);border:1px solid var(--border);">단체전 5인조</th>
+              <th style="padding:8px 6px;font-size:12px;color:var(--text3);border:1px solid var(--border);">단체전 3인조</th>
+              <th style="padding:8px 6px;font-size:12px;color:var(--text3);border:1px solid var(--border);">개인전</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="yogan-cat">우승</td><td style="text-align:center;">10점</td><td style="text-align:center;">6점</td><td style="text-align:center;">3점</td></tr>
+            <tr><td class="yogan-cat">준우승</td><td style="text-align:center;">5점</td><td style="text-align:center;">4점</td><td style="text-align:center;">2점</td></tr>
+            <tr><td class="yogan-cat">3위</td><td style="text-align:center;">3점</td><td style="text-align:center;">2점</td><td style="text-align:center;">1점</td></tr>
+            <tr><td class="yogan-cat">참가팀</td><td colspan="3" style="text-align:center;">1점 &nbsp;<span style="font-size:12px;color:var(--text3);">(개인전은 참가점수 없음)</span></td></tr>
+          </tbody>
+        </table>
+        <div class="yogan-notice" style="border-left-color:var(--navy);">
+          <div>· 개인전/단체전 우승팀: 우승기 수여</div>
+          <div>· 개인전/단체전 우승자: 국제대회 참가 자격 부여</div>
+        </div>
+
+        <!-- 3. 대회 운영 -->
+        <div class="yogan-section" style="margin-top:14px;">
+          <div class="yogan-title">3. 대회 운영</div>
+          <div class="field" style="border-bottom:none;">
+            <div class="field-label">경기 방법</div>
+            <div class="field-val sm">리그전 / 토너먼트, 경기 시간 3분</div>
+          </div>
+        </div>
+
+        <table class="yogan-table" style="margin-top:8px;">
+          <thead>
+            <tr style="background:var(--bg);">
+              <th style="padding:8px 6px;font-size:12px;color:var(--text3);border:1px solid var(--border);width:52px;">구분</th>
+              <th style="padding:8px 6px;font-size:12px;color:var(--text3);border:1px solid var(--border);">경기 운영 방법</th>
+              <th style="padding:8px 6px;font-size:12px;color:var(--text3);border:1px solid var(--border);">비고</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="yogan-cat">단체전</td>
+              <td>
+                5인조: 장년부 / 중년부 (후보 2인)<br>
+                3인조: 청년부 / 청장부 / 노장부 / 여자부 (후보 1인)
+              </td>
+              <td style="font-size:12px;line-height:1.6;">
+                선수 부족 시 순위 구성<br>
+                5인조: 선봉–중견–주장<br>
+                3인조: 선봉–주장 반드시 출전<br>
+                ※ 순위 변동 불가, 후보 교체는 가능<br>
+                <b style="color:#c0392b;">※ 특기자는 '중견'에만 가능, 대표전 출전 불가</b>
+              </td>
+            </tr>
+            <tr>
+              <td class="yogan-cat">개인전</td>
+              <td>무승부 시 1분 연장 후 판정<br><span style="font-size:12px;color:var(--text3);">(판정 시, 반칙–기능–태도 순 반영)</span></td>
+              <td style="font-size:12px;line-height:1.6;">
+                1회전 리그전 → 2회전부터 토너먼트<br>
+                8강 / 4강 / 결승: 연장 시 무제한 단판 승부<br>
+                ※ 세부사항 홈페이지 참조
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="yogan-section" style="margin-top:10px;">
+          <div class="field">
+            <div class="field-label">심판 규칙</div>
+            <div class="field-val sm">대한검도회 경기 및 심판 규칙 준용, 공인심판 담당</div>
+          </div>
+          <div class="field" style="border-bottom:none;">
+            <div class="field-label">참가 자격</div>
+            <div class="field-val sm">
+              소속단체 6개월 이상 수련자 (도장팀·단체등록 동호인 팀·학교동아리 OB)<br>
+              지도자는 지도하는 단체로 출전 (직장팀은 재직증명서 제출)<br>
+              각 시·도 검도회에 단체 등록된 동호인 팀<br>
+              <span style="font-size:12px;color:var(--text3);">(단, 광역시·도 단위 지역을 대표하는 단체는 출전 불가)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="yogan-notice">
+          <div class="yogan-notice-title">※ 선수 출신의 경우 <span style="font-weight:400;font-size:12px;">(2016년까지 선수 생활자에 한함)</span></div>
+          <div>① 개인전: 고등학교(졸업) 이상(대학, 실업선수) 과거 선수 경력자 – <b>특기자부 신설</b></div>
+          <div>② 단체전: 선수 출신은 1명에 한해 출전 가능하며, '중견'에만 참가 가능</div>
+        </div>
+
+        <!-- 참가 자격 연령 -->
+        <div class="yogan-title" style="margin-top:12px;">참가 자격 연령</div>
+        <table class="yogan-table">
+          <tbody>
+            <tr><td class="yogan-cat" rowspan="8" style="vertical-align:middle;">남자</td><td>청년부(청년부)</td><td>20세(2006) ~ 29세(1997)</td></tr>
+            <tr><td>청장부(청장부)</td><td>30세(1996) ~ 39세(1987)</td></tr>
+            <tr><td>장년부(장년부)</td><td>40세(1986) ~ 49세(1977)</td></tr>
+            <tr><td>중년부(중년부)</td><td>50세(1976) ~ 59세(1967)</td></tr>
+            <tr><td>노장부(노장부)</td><td>60세(1966) ~ 69세(1957)</td></tr>
+            <tr><td>노년부(노년부)</td><td>70세(1956) 이상</td></tr>
+            <tr><td><b>특기자부</b></td><td>45세(1981) 이하</td></tr>
+            <tr><td><b>특기자부</b></td><td>46세(1980) 이상</td></tr>
+            <tr><td class="yogan-cat" rowspan="4" style="vertical-align:middle;">여자</td><td>청년부</td><td>20세(2006) ~ 35세(1991)</td></tr>
+            <tr><td>장년부</td><td>36세(1990) ~ 45세(1981)</td></tr>
+            <tr><td>중년부</td><td>46세(1980) 이상</td></tr>
+            <tr><td><b>특기자 여자부</b></td><td>연령 제한없음</td></tr>
+          </tbody>
+        </table>
+
+        <div class="yogan-notice" style="border-left-color:var(--navy);">
+          <div>① 청년부(남/여): 고교 졸업 또는 동등 이상의 연령자</div>
+          <div>② 단체전: 해당 종목의 연령보다 낮은 연령대로만 참가 허용</div>
+          <div>③ 개인전: 종별에서 정한 연령대로만 참가 가능</div>
+          <div>④ 대학생(휴학생) 참가 불가 / 대학원생은 참가 가능</div>
+          <div>⑤ 특기자부(고교/대학/실업팀 과거 선수 경력자 해당)</div>
+          <div>· 개인전: 특기자부로 참가 가능. 일반인도 참가 가능 → 은퇴 후 연한 제한 없음</div>
+          <div>· 단체전: 1명만 '중견' 포지션에 한해 허용 → 2016년까지 선수 경력자에 한해서만 참가 가능</div>
+        </div>
+
+        <!-- 경기 일정 -->
+        <div class="yogan-title" style="margin-top:14px;">경기 일정</div>
+        <table class="yogan-table">
+          <thead>
+            <tr style="background:var(--bg);">
+              <th style="padding:8px 6px;font-size:12px;color:var(--text3);border:1px solid var(--border);">일자</th>
+              <th style="padding:8px 6px;font-size:12px;color:var(--text3);border:1px solid var(--border);">시간</th>
+              <th style="padding:8px 6px;font-size:12px;color:var(--text3);border:1px solid var(--border);">일정</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="yogan-cat" rowspan="2" style="vertical-align:middle;">7/11(토)</td><td>07:00~08:00</td><td>합동연무</td></tr>
+            <tr><td>09:00~</td><td>개인전 / 단체전</td></tr>
+            <tr><td class="yogan-cat" rowspan="3" style="vertical-align:middle;">7/12(일)</td><td>08:00~</td><td>단체전</td></tr>
+            <tr><td>10:00~</td><td>개회식</td></tr>
+            <tr><td>11:00~</td><td>단체전 / 폐회식</td></tr>
+          </tbody>
+        </table>
+        <div class="yogan-notice" style="border-left-color:var(--navy);">
+          <div>· 대진 추첨: 2026. 6. 6.(토) 대회 준비위원회에서 추첨</div>
+          <div>· 경기 일정은 사정에 따라 변경될 수 있으며, 세부 경기 일정은 한국사회인검도연맹 홈페이지에 공지하오니 반드시 확인 바랍니다.</div>
+        </div>
+
+        <!-- 4. 참가 신청 -->
+        <div class="yogan-section" style="margin-top:14px;">
+          <div class="yogan-title">4. 참가 신청</div>
+          <div class="field">
+            <div class="field-label">인터넷 접수</div>
+            <div class="field-val sm">홈페이지(www.kumdos.org)에서 선수 등록 후 신청</div>
+          </div>
+          <div class="field">
+            <div class="field-label">기간</div>
+            <div class="field-val sm">2026년 5월 1일(금) ~ 5월 29일(금) 24:00<br><span style="font-size:12px;color:var(--text3);">※ 반드시 기간 내 접수</span></div>
+          </div>
+          <div class="field">
+            <div class="field-label">참가비</div>
+            <div class="field-val sm">40,000원 (보험료 포함)<br><span style="font-size:12px;color:var(--text3);">입금자명은 반드시 대표자명으로, 팀명과 동일하게 입금 (입금 후 2일 뒤 홈페이지에서 확인 가능)</span></div>
+          </div>
+          <div class="field">
+            <div class="field-label">계좌</div>
+            <div class="field-val sm">KEB하나은행 224-890025-33204<br><span style="font-size:12px;color:var(--text3);">예금주: 한국사회인검도연맹</span></div>
+          </div>
+          <div class="field">
+            <div class="field-label">접수 확인</div>
+            <div class="field-val sm">홈페이지 → 대회참가 신청 → 확인 및 수정 가능 (접수 기간 동안)</div>
+          </div>
+          <div class="field" style="border-bottom:none;">
+            <div class="field-label">문의</div>
+            <div class="field-val sm">
+              재무이사 김주희 &nbsp;010-7175-5514<br>
+              정보이사 송중원 &nbsp;010-6353-9978<br>
+              경기이사 김상인 &nbsp;010-8810-2587 <span style="font-size:12px;color:var(--text3);">(경기 관련)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. 환불 규정 안내 -->
+        <div class="yogan-section" style="margin-top:14px;">
+          <div class="yogan-title">5. 환불 규정 안내</div>
+          <div class="field">
+            <div class="field-label">신청 기간</div>
+            <div class="field-val sm">2026년 5월 4일(월) ~ 6월 5일(금) 24:00까지<br><span style="font-size:12px;color:var(--text3);">신청 접수 마감일 이후에는 환불 불가</span></div>
+          </div>
+          <div class="field" style="border-bottom:none;">
+            <div class="field-label">유의 사항</div>
+            <div class="field-val sm">
+              환불 처리: 마감 후 7~10영업일 이내 순차 환불<br>
+              <span style="font-size:12px;color:var(--text3);">
+                (결제·은행 처리 일정에 따라 일부 지연될 수 있음)<br>
+                환불 시 이체·결제 수수료는 공제 후 환불<br>
+                환불 계좌 정보 오류로 인한 지연은 주최 측에서 책임지지 않음<br>
+                참가비 미납 시 대회 참가가 제한됨
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. 점심 식사 및 굿즈 예약 -->
+        <div class="yogan-section" style="margin-top:14px;">
+          <div class="yogan-title">6. 점심 식사 및 굿즈(판매) 예약</div>
+          <div class="field">
+            <div class="field-label">점심 식사</div>
+            <div class="field-val sm">경기장 내 식당 운영 (참가 접수 시 신청자에 한해 이용 가능)</div>
+          </div>
+          <div class="field">
+            <div class="field-label">굿즈</div>
+            <div class="field-val sm">특별 제작 티셔츠 홈페이지 신청 시 10% 할인<br><span style="font-size:12px;color:var(--text3);">카라형, 라운드형 현장 판매</span></div>
+          </div>
+          <div class="field">
+            <div class="field-label">주차권</div>
+            <div class="field-val sm">접수 시 신청 가능</div>
+          </div>
+          <div class="field" style="border-bottom:none;">
+            <div class="field-label">문의</div>
+            <div class="field-val sm">홍보이사 유수진 &nbsp;010-3056-5866</div>
+          </div>
+        </div>
+
+        <!-- 7. 주의 사항 -->
+        <div class="yogan-section" style="margin-top:14px;">
+          <div class="yogan-title">7. 주의 사항</div>
+          <div class="field">
+            <div class="field-label">우승기 반환</div>
+            <div class="field-val sm">전년도 우승팀·우승자는 대회 시작 전 반환</div>
+          </div>
+          <div class="field" style="border-bottom:none;">
+            <div class="field-label">실격 조항</div>
+            <div class="field-val sm">명패 문제, 신분증 미제시, 규칙 위반, 선수 부재, 부정 팀 구성 등</div>
+          </div>
+        </div>
+
+        <div class="yogan-notice">
+          <div class="yogan-notice-title">※ 실격 세부 기준</div>
+          <div>· 명패 문제: 소속·이름 불일치 / 명패 미부착 / 현장 임시 제작 착용</div>
+          <div>· 신분증(주민등록증, 운전면허증, 여권 등) 요구 시 미제시</div>
+          <div>· 대한검도회 경기규칙 위반 (죽도 규격 및 중량 등)</div>
+          <div>· 선수 부재: 진행요원 3회 이상 호명해도 부재 / 부전승 선고 후 뒤늦게 나타난 경우</div>
+          <div style="padding-left:10px;">※ 경기 진행 순서를 반드시 확인하고 미리 대기할 것</div>
+          <div>· 팀 구성 문제(타 소속 선수 급조): 해당 경기 몰수 → 향후 2년간 출전금지 → 대한검도회 징계 대상</div>
+        </div>
+
+        <div class="yogan-section" style="margin-top:10px;">
+          <div class="field" style="border-bottom:none;">
+            <div class="field-label">참가팀 유의</div>
+            <div class="field-val sm">
+              선수 등띠(홍·백) 규격 준비 (길이 70cm / 폭 5cm)<br>
+              원활한 경기 진행을 위해 경기규칙 숙지 필수<br>
+              개회식 참가팀에만 기념품 지급 (개인전 참가자는 확인 후 지급)<br>
+              경기장 질서 유지 및 검도 문화 정착 협조, 쓰레기 정리, 조용한 관람·응원<br>
+              체육관 내 음식물·음료 반입 금지, 전 구역 금연<br>
+              경기장 질서 유지를 위해 일부 출입 통제<br>
+              시상식 참가 시 도복·갑·갑상 착용 필수
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. 홍보자료 -->
+        <div class="yogan-section" style="margin-top:14px;">
+          <div class="yogan-title">8. 홍보자료</div>
+          <div class="field" style="border-bottom:none;">
+            <div class="field-val sm">참가 선수 중 특이사항(경력, 수상 등)은 신청 시 제출해 주시기 바랍니다.<br><span style="font-size:12px;color:var(--text3);">(TV·신문 홍보 활용)</span></div>
+          </div>
+        </div>
+
+        <!-- 9. 우승자 우승 소감문 제출 요청 -->
+        <div class="yogan-section" style="margin-top:14px;">
+          <div class="yogan-title">9. 우승자 우승 소감문 제출 요청</div>
+          <div class="field">
+            <div class="field-label">제출 대상</div>
+            <div class="field-val sm">개인전 및 단체전 우승자, 종합우승팀</div>
+          </div>
+          <div class="field">
+            <div class="field-label">내용</div>
+            <div class="field-val sm">우승까지의 과정, 대회를 준비하며 느낀 점, 기억에 남는 순간, 참가자들에게 전하고 싶은 이야기 등을 자유롭게 작성해 주시면 감사하겠습니다.</div>
+          </div>
+          <div class="field">
+            <div class="field-label">분량</div>
+            <div class="field-val sm">A4 1장 내외 (사진 1~2장)</div>
+          </div>
+          <div class="field">
+            <div class="field-label">제출 기한</div>
+            <div class="field-val sm">2026년 7월 31일(금)까지</div>
+          </div>
+          <div class="field" style="border-bottom:none;">
+            <div class="field-label">보내실 곳</div>
+            <div class="field-val sm">
+              goodysjin@naver.com<br>
+              <span style="font-size:12px;color:var(--text3);">문의: 홍보이사 유수진 010-3056-5866<br>보내주신 소감문은 대회 홍보 및 자료집 제작 등에 활용될 수 있습니다.</span>
+            </div>
+          </div>
+        </div>
 
       </div>
     </div>
@@ -1392,7 +1681,6 @@ body {
             <tr class="total-row"><td colspan="2">합계</td><td class="total">550</td><td>96+32</td><td>102+35</td><td>102+35</td><td>99+34</td><td>15</td></tr>
           </tbody>
         </table>
-        </div>
 
         <!-- 그룹 B: 한석봉 5~8경기장 -->
         <div class="sched-group-head">한석봉체육관 — 5~8경기장</div>
@@ -1417,7 +1705,6 @@ body {
             <tr class="total-row"><td colspan="2">합계</td><td class="total">562</td><td>105+30</td><td>105+31</td><td>108+30</td><td>108+30</td><td>15</td></tr>
           </tbody>
         </table>
-        </div>
 
         <!-- 그룹 C: 가평체육관 9~10경기장 -->
         <div class="sched-group-head">가평체육관 — 9~10경기장</div>
@@ -1469,7 +1756,6 @@ body {
             <tr class="total-row"><td colspan="2">합계</td><td>103</td><td class="total">101</td><td>23</td><td>24</td><td>24</td><td>24</td><td>6</td></tr>
           </tbody>
         </table>
-        </div>
 
         <!-- 그룹 B: 한석봉 5~8경기장 -->
         <div class="sched-group-head">한석봉체육관 — 5~8경기장</div>
@@ -1490,7 +1776,6 @@ body {
             <tr class="total-row"><td colspan="2">합계</td><td>107</td><td class="total">105</td><td>24</td><td>25</td><td>25</td><td>25</td><td>6</td></tr>
           </tbody>
         </table>
-        </div>
 
         <!-- 그룹 C: 가평 9~10경기장 -->
         <div class="sched-group-head">가평체육관 — 9~10경기장</div>
@@ -2032,6 +2317,8 @@ body {
 
   </section>
 
+</main>
+
 <!-- ════════ 범례 (하단 고정) ════════ -->
 <div class="legend">
   <div class="lg-item"><span class="lg-dot" style="background:#1a5e38;"></span>완료</div>
@@ -2103,205 +2390,88 @@ function toggleAcc(btn) {
   body.classList.toggle('open');
 }
 
-/* ── 공식 식순 체크리스트 ── */
-function toggleSlOrder(item) {
-  item.classList.toggle('done');
-  item.querySelector('.sl-box').textContent = item.classList.contains('done') ? '✓' : '';
-  updateOrderHead();
-}
-function updateOrderHead() {
-  const items  = document.querySelectorAll('#dinnerOrderList .sl-item');
-  const total  = items.length;
-  const done   = document.querySelectorAll('#dinnerOrderList .sl-item.done').length;
-  const box    = document.getElementById('ckOrderBox');
-  const status = document.getElementById('ckOrderStatus');
-  if (done === 0) {
-    box.style.background = 'var(--white)'; box.style.borderColor = 'var(--border)'; box.textContent = '';
-    status.style.background = '#ebebeb'; status.style.color = 'var(--text3)'; status.textContent = '예정';
-  } else if (done === total) {
-    box.style.background = 'var(--green)'; box.style.borderColor = 'var(--green)'; box.textContent = '✓';
-    status.style.background = '#d0eedd'; status.style.color = 'var(--green)'; status.textContent = '완료';
-  } else {
-    box.style.background = 'var(--gold)'; box.style.borderColor = 'var(--gold)'; box.textContent = '→';
-    status.style.background = '#faeab2'; status.style.color = 'var(--gold)'; status.textContent = `${done}/${total}`;
-  }
-}
-function toggleCardCheckOrder() {
-  const items   = document.querySelectorAll('#dinnerOrderList .sl-item');
-  const allDone = document.querySelectorAll('#dinnerOrderList .sl-item.done').length === items.length;
-  items.forEach(item => {
-    const box = item.querySelector('.sl-box');
-    if (allDone) { item.classList.remove('done'); box.textContent = ''; }
-    else         { item.classList.add('done');    box.textContent = '✓'; }
-  });
-  updateOrderHead();
-}
+/* ══════════════════════════════════════════════════
+   체크리스트 팩토리
+   — simple-list(.sl-item) 기반 체크리스트 공통 로직.
+     기존 toggleSl/toggleSl2/toggleSl3/toggleSlOrder +
+     각각의 updateXxxHead/toggleCardCheckX 5벌 중복을 통합.
+   ══════════════════════════════════════════════════ */
+function createChecklist({ listId, boxId, statusId, progressColor = 'var(--navy)' }) {
+  const getItems = () => document.querySelectorAll(`#${listId} .sl-item`);
+  const getDone  = () => document.querySelectorAll(`#${listId} .sl-item.done`);
 
+  function updateHead() {
+    const total  = getItems().length;
+    const done   = getDone().length;
+    const box    = document.getElementById(boxId);
+    const status = document.getElementById(statusId);
+    if (!box || !status) return;
 
-function toggleSl2(item) {
-  item.classList.toggle('done');
-  item.querySelector('.sl-box').textContent = item.classList.contains('done') ? '✓' : '';
-  updateDinnerHead();
-}
-function updateDinnerHead() {
-  const items  = document.querySelectorAll('#dinnerChecklist .sl-item');
-  const total  = items.length;
-  const done   = document.querySelectorAll('#dinnerChecklist .sl-item.done').length;
-  const box    = document.getElementById('ckDinnerBox');
-  const status = document.getElementById('ckDinnerStatus');
-  if (done === 0) {
-    box.style.background = 'var(--white)'; box.style.borderColor = 'var(--border)'; box.textContent = '';
-    status.style.background = '#ebebeb'; status.style.color = 'var(--text3)'; status.textContent = '예정';
-  } else if (done === total) {
-    box.style.background = 'var(--green)'; box.style.borderColor = 'var(--green)'; box.textContent = '✓';
-    status.style.background = '#d0eedd'; status.style.color = 'var(--green)'; status.textContent = '완료';
-  } else {
-    box.style.background = 'var(--navy)'; box.style.borderColor = 'var(--navy)'; box.textContent = '→';
-    status.style.background = '#d6e3f5'; status.style.color = 'var(--navy)'; status.textContent = `${done}/${total}`;
-  }
-}
-function toggleCardCheck2() {
-  const items   = document.querySelectorAll('#dinnerChecklist .sl-item');
-  const allDone = document.querySelectorAll('#dinnerChecklist .sl-item.done').length === items.length;
-  items.forEach(item => {
-    const box = item.querySelector('.sl-box');
-    if (allDone) { item.classList.remove('done'); box.textContent = ''; }
-    else         { item.classList.add('done');    box.textContent = '✓'; }
-  });
-  updateDinnerHead();
-}
-
-/* ── 단순 리스트 아이템 토글 ── */
-function toggleSl(item) {
-  item.classList.toggle('done');
-  const box = item.querySelector('.sl-box');
-  box.textContent = item.classList.contains('done') ? '✓' : '';
-  updateCardHead();
-}
-
-/* ── 카드 헤더 체크박스 상태 업데이트 ── */
-function updateCardHead() {
-  const items = document.querySelectorAll('#simpleChecklist .sl-item');
-  const total = items.length;
-  const done  = document.querySelectorAll('#simpleChecklist .sl-item.done').length;
-  const box    = document.getElementById('ckHeadBox');
-  const status = document.getElementById('ckHeadStatus');
-  if (done === 0) {
-    box.style.background = 'var(--white)';
-    box.style.borderColor = 'var(--border)';
-    box.textContent = '';
-    status.style.background = '#ebebeb';
-    status.style.color = 'var(--text3)';
-    status.textContent = '예정';
-  } else if (done === total) {
-    box.style.background = 'var(--green)';
-    box.style.borderColor = 'var(--green)';
-    box.textContent = '✓';
-    status.style.background = '#d0eedd';
-    status.style.color = 'var(--green)';
-    status.textContent = '완료';
-  } else {
-    box.style.background = 'var(--navy)';
-    box.style.borderColor = 'var(--navy)';
-    box.textContent = '→';
-    status.style.background = '#d6e3f5';
-    status.style.color = 'var(--navy)';
-    status.textContent = `${done}/${total}`;
-  }
-}
-
-/* ── 헤더 클릭 시 전체 토글 ── */
-function toggleCardCheck() {
-  const items = document.querySelectorAll('#simpleChecklist .sl-item');
-  const allDone = document.querySelectorAll('#simpleChecklist .sl-item.done').length === items.length;
-  items.forEach(item => {
-    const box = item.querySelector('.sl-box');
-    if (allDone) {
-      item.classList.remove('done');
-      box.textContent = '';
+    if (done === 0) {
+      box.style.background = 'var(--white)'; box.style.borderColor = 'var(--border)'; box.textContent = '';
+      status.style.background = '#ebebeb'; status.style.color = 'var(--text3)'; status.textContent = '예정';
+    } else if (done === total) {
+      box.style.background = 'var(--green)'; box.style.borderColor = 'var(--green)'; box.textContent = '✓';
+      status.style.background = '#d0eedd'; status.style.color = 'var(--green)'; status.textContent = '완료';
     } else {
-      item.classList.add('done');
-      box.textContent = '✓';
+      box.style.background = progressColor; box.style.borderColor = progressColor; box.textContent = '→';
+      status.style.background = '#d6e3f5'; status.style.color = progressColor; status.textContent = `${done}/${total}`;
     }
-  });
-  updateCardHead();
+  }
+
+  function toggleItem(item) {
+    item.classList.toggle('done');
+    item.querySelector('.sl-box').textContent = item.classList.contains('done') ? '✓' : '';
+    updateHead();
+  }
+
+  function toggleAll() {
+    const items   = getItems();
+    const allDone = getDone().length === items.length;
+    items.forEach(item => {
+      const box = item.querySelector('.sl-box');
+      if (allDone) { item.classList.remove('done'); box.textContent = ''; }
+      else         { item.classList.add('done');    box.textContent = '✓'; }
+    });
+    updateHead();
+  }
+
+  return { toggleItem, toggleAll, updateHead };
 }
+
+/* 체크리스트별 인스턴스 등록
+   (색상은 기존 하드코딩 동작을 그대로 보존:
+    공식 식순=골드, 만찬/개인전/개회식=네이비) */
+const CHECKLISTS = {
+  order:   createChecklist({ listId: 'dinnerOrderList',  boxId: 'ckOrderBox',   statusId: 'ckOrderStatus',   progressColor: 'var(--gold)' }),
+  dinner:  createChecklist({ listId: 'dinnerChecklist',   boxId: 'ckDinnerBox',  statusId: 'ckDinnerStatus',  progressColor: 'var(--navy)' }),
+  list:    createChecklist({ listId: 'simpleChecklist',   boxId: 'ckHeadBox',    statusId: 'ckHeadStatus',    progressColor: 'var(--navy)' }),
+  team:    createChecklist({ listId: 'teamChecklist',     boxId: 'ckTeamBox',    statusId: 'ckTeamStatus',    progressColor: 'var(--navy)' }),
+};
+
+/* 기존 HTML의 onclick="toggleSlX(this)" / "toggleCardCheckX()" 호출부와
+   호환되도록 동일한 이름의 얇은 래퍼만 유지 (마크업은 변경하지 않음) */
+const toggleSlOrder      = (item) => CHECKLISTS.order.toggleItem(item);
+const toggleCardCheckOrder = ()   => CHECKLISTS.order.toggleAll();
+
+const toggleSl2         = (item) => CHECKLISTS.dinner.toggleItem(item);
+const toggleCardCheck2  = ()     => CHECKLISTS.dinner.toggleAll();
+
+const toggleSl          = (item) => CHECKLISTS.list.toggleItem(item);
+const toggleCardCheck   = ()     => CHECKLISTS.list.toggleAll();
+
+const toggleSl3         = (item) => CHECKLISTS.team.toggleItem(item);
+const toggleCardCheck3  = ()     => CHECKLISTS.team.toggleAll();
+
+/* ── 4단계 체크(.ck-item) 토글 — 부서 상세 등 일부 구영역에서 사용 ── */
 function toggleCk(item) {
   const isDone = item.classList.contains('done');
-  item.classList.remove('todo','progress','check','done');
+  item.classList.remove('todo', 'progress', 'check', 'done');
   item.classList.add(isDone ? 'todo' : 'done');
   const box    = item.querySelector('.ck-box');
   const status = item.querySelector('.ck-status');
   box.textContent    = isDone ? '' : '✓';
   status.textContent = isDone ? '예정' : '완료';
-}
-
-/* ── 폐회식 체크리스트 ── */
-function toggleSl4(item) {
-  item.classList.toggle('done');
-  item.querySelector('.sl-box').textContent = item.classList.contains('done') ? '✓' : '';
-  updateClosingHead();
-}
-function updateClosingHead() {
-  const items  = document.querySelectorAll('#closingChecklist .sl-item');
-  const total  = items.length;
-  const done   = document.querySelectorAll('#closingChecklist .sl-item.done').length;
-  const box    = document.getElementById('ckClosingBox');
-  const status = document.getElementById('ckClosingStatus');
-  if (done === 0) {
-    box.style.background = 'var(--white)'; box.style.borderColor = 'var(--border)'; box.textContent = '';
-    status.style.background = '#ebebeb'; status.style.color = 'var(--text3)'; status.textContent = '예정';
-  } else if (done === total) {
-    box.style.background = 'var(--green)'; box.style.borderColor = 'var(--green)'; box.textContent = '✓';
-    status.style.background = '#d0eedd'; status.style.color = 'var(--green)'; status.textContent = '완료';
-  } else {
-    box.style.background = 'var(--navy)'; box.style.borderColor = 'var(--navy)'; box.textContent = '→';
-    status.style.background = '#d6e3f5'; status.style.color = 'var(--navy)'; status.textContent = `${done}/${total}`;
-  }
-}
-function toggleCardCheck4() {
-  const items   = document.querySelectorAll('#closingChecklist .sl-item');
-  const allDone = document.querySelectorAll('#closingChecklist .sl-item.done').length === items.length;
-  items.forEach(item => {
-    const box = item.querySelector('.sl-box');
-    if (allDone) { item.classList.remove('done'); box.textContent = ''; }
-    else         { item.classList.add('done');    box.textContent = '✓'; }
-  });
-  updateClosingHead();
-}
-
-
-function toggleSl3(item) {
-  item.classList.toggle('done');
-  item.querySelector('.sl-box').textContent = item.classList.contains('done') ? '✓' : '';
-  updateTeamHead();
-}
-function updateTeamHead() {
-  const items  = document.querySelectorAll('#teamChecklist .sl-item');
-  const total  = items.length;
-  const done   = document.querySelectorAll('#teamChecklist .sl-item.done').length;
-  const box    = document.getElementById('ckTeamBox');
-  const status = document.getElementById('ckTeamStatus');
-  if (done === 0) {
-    box.style.background = 'var(--white)'; box.style.borderColor = 'var(--border)'; box.textContent = '';
-    status.style.background = '#ebebeb'; status.style.color = 'var(--text3)'; status.textContent = '예정';
-  } else if (done === total) {
-    box.style.background = '#1a5e38'; box.style.borderColor = '#1a5e38'; box.textContent = '✓';
-    status.style.background = '#d0eedd'; status.style.color = '#1a5e38'; status.textContent = '완료';
-  } else {
-    box.style.background = '#1a5e38'; box.style.borderColor = '#1a5e38'; box.textContent = '→';
-    status.style.background = '#d6e3f5'; status.style.color = '#1B3F7A'; status.textContent = `${done}/${total}`;
-  }
-}
-function toggleCardCheck3() {
-  const items   = document.querySelectorAll('#teamChecklist .sl-item');
-  const allDone = document.querySelectorAll('#teamChecklist .sl-item.done').length === items.length;
-  items.forEach(item => {
-    const box = item.querySelector('.sl-box');
-    if (allDone) { item.classList.remove('done'); box.textContent = ''; }
-    else         { item.classList.add('done');    box.textContent = '✓'; }
-  });
-  updateTeamHead();
 }
 </script>
 </body>
