@@ -311,7 +311,10 @@ body {
 #ckDinnerHead .card-head-title,
 #ckTeamHead .card-head-title,
 #ckClosingHead .card-head-title,
-#ckDinnerOrderHead .card-head-title {
+#ckDinnerOrderHead .card-head-title,
+#ckOp1Head .card-head-title,
+#ckAwHead .card-head-title,
+#ckEndHead .card-head-title {
   font-size: 16px;
   font-weight: 800;
   color: #1B3F7A;
@@ -321,7 +324,10 @@ body {
 #ckDinnerHead,
 #ckTeamHead,
 #ckClosingHead,
-#ckDinnerOrderHead {
+#ckDinnerOrderHead,
+#ckOp1Head,
+#ckAwHead,
+#ckEndHead {
   background: #eef2f9;
   border-bottom: 1.5px solid #aabfdf;
 }
@@ -1133,6 +1139,7 @@ body {
           <div class="info-block-tag">진행요원 이동</div>
           <div class="info-block-title">41명 전원 차량 지원</div>
           <div class="info-block-meta">
+            이정행 이사 &nbsp;010-8003-4661<br>
             7월 12일 오전<br>
             - 21인승 차량으로 숙소 ↔ 경기장 왕복 이동<br>
             - 전원 동일 차량 이용 (1차 출발시간 : &nbsp; / &nbsp; 2차 출발시간 : &nbsp;)
@@ -2283,55 +2290,17 @@ body {
               <div class="sl-sub">음료 · 간식류 확인 / STAFF · 임원 이용</div>
             </div>
           </div>
+          <div class="sl-item" onclick="toggleSlOp1(this)">
+            <div class="sl-box"></div>
+            <div class="sl-text">
+              <div class="sl-main">전광판 홍보 문구 확인</div>
+            </div>
+          </div>
           <div class="sl-item" onclick="toggleSlOp1(this)" style="border-bottom:none;">
             <div class="sl-box"></div>
             <div class="sl-text">
-              <div class="sl-main">전광판 홍보 문구 확인</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-head" id="ckOp2Head" onclick="toggleCardCheckOp2()" style="cursor:pointer;">
-        <div id="ckOp2Box" style="
-          width:28px; height:28px; border-radius:7px; flex-shrink:0;
-          border:2.5px solid var(--border); background:var(--white);
-          display:flex; align-items:center; justify-content:center;
-          font-size:16px; font-weight:700; color:#fff; transition:all .15s;
-        "></div>
-        <div class="card-head-title">운영 준비 단계</div>
-        <span id="ckOp2Status" style="
-          font-size:13px; font-weight:700; padding:3px 10px;
-          border-radius:999px; background:#ebebeb; color:var(--text3);
-          white-space:nowrap;
-        ">예정</span>
-      </div>
-      <div class="card-body" style="padding:6px 0;">
-        <div class="simple-list" id="op2Checklist">
-          <div class="sl-item" onclick="toggleSlOp2(this)">
-            <div class="sl-box"></div>
-            <div class="sl-text">
-              <div class="sl-main">인쇄물 배포</div>
-            </div>
-          </div>
-          <div class="sl-item" onclick="toggleSlOp2(this)">
-            <div class="sl-box"></div>
-            <div class="sl-text">
-              <div class="sl-main">책자 배부 및 판매</div>
-            </div>
-          </div>
-          <div class="sl-item" onclick="toggleSlOp2(this)">
-            <div class="sl-box"></div>
-            <div class="sl-text">
-              <div class="sl-main">심판 휴게실 관리</div>
-            </div>
-          </div>
-          <div class="sl-item" onclick="toggleSlOp2(this)" style="border-bottom:none;">
-            <div class="sl-box"></div>
-            <div class="sl-text">
-              <div class="sl-main">전광판 홍보 문구 확인</div>
+              <div class="sl-main">대회 물품 운반 화물차량</div>
+              <div class="sl-sub">보관장소 ↔ 경기장</div>
             </div>
           </div>
         </div>
@@ -2610,7 +2579,6 @@ function toggleCk(item) {
     window[wrapperToggleAllName] = ()     => cl.toggleAll();
   };
   add('op1', 'op1Checklist', 'ckOp1Box', 'ckOp1Status', 'toggleSlOp1', 'toggleCardCheckOp1');
-  add('op2', 'op2Checklist', 'ckOp2Box', 'ckOp2Status', 'toggleSlOp2', 'toggleCardCheckOp2');
   add('aw',  'awChecklist',  'ckAwBox',  'ckAwStatus',  'toggleSlAw',  'toggleCardCheckAw');
   add('end', 'endChecklist', 'ckEndBox', 'ckEndStatus', 'toggleSlEnd', 'toggleCardCheckEnd');
 })();
