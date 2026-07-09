@@ -815,21 +815,24 @@ body {
   margin-bottom: 8px;
 }
 .info-block-title {
-  font-size: 15px; font-weight: 700; color: var(--text);
-  line-height: 1.4; margin-bottom: 4px;
+  font-size: 17px; font-weight: 800; color: var(--tc);
+  line-height: 1.4; margin-bottom: 5px;
+  letter-spacing: -.01em;
 }
 .info-block-meta {
-  font-size: 14px; color: var(--text2); line-height: 1.55;
+  font-size: 14px; color: var(--text2); line-height: 1.6;
 }
 .info-block-meta a { color: var(--text2); text-decoration: none; }
 .info-block-meta .sep { color: var(--text3); margin: 0 6px; }
 .info-sub-head {
-  font-size: 13px; font-weight: 800;
-  color: var(--text3);
-  text-transform: uppercase; letter-spacing: .06em;
-  margin: 14px 0 8px;
+  font-size: 14px; font-weight: 800;
+  color: var(--tc); background: var(--tcbg);
+  border-left: 4px solid var(--tc);
+  letter-spacing: .03em;
+  padding: 8px 14px;
+  margin: 20px -16px 12px;
 }
-.info-sub-head:first-child { margin-top: 4px; }
+.info-sub-head:first-child { margin-top: -1px; }
 .info-notes {
   font-size: 13px; color: var(--text2); line-height: 1.7;
   padding: 10px 14px;
@@ -1102,9 +1105,9 @@ body {
         <div class="info-sub-head">식사</div>
 
         <div class="info-block">
-          <div class="info-block-tag">점심식사 지정식당</div>
-          <div class="info-block-title">가평장원추어탕</div>
+          <div class="info-block-title">점심식사 지정식당</div>
           <div class="info-block-meta">
+            장소 : 가평장원추어탕<br>
             가평읍 광장로 5<br>
             ☎ 031-581-7272
           </div>
@@ -1124,9 +1127,29 @@ body {
           </div>
         </div>
 
+        <div class="info-block">
+          <div class="info-block-title">토요일 만찬</div>
+          <div class="info-block-meta">
+            (해외선수, 일부 연맹임원)<br>
+            2026. 7. 11(토) 18:00<br>
+            장소 : 육전국밥<br>
+            서울 송파구 오금로 111 (1층)
+          </div>
+        </div>
+
+        <div class="info-block">
+          <div class="info-block-title">일요일 만찬</div>
+          <div class="info-block-meta">
+            (해외선수 + 연맹임원)<br>
+            2026. 7. 12(일) 17:30<br>
+            장소 : 미스터닭갈비 (가평소재)<br>
+            경기 가평군 가평읍 북한강변로 1044-14
+          </div>
+        </div>
+
       </div>
     </div>
-    
+
     <!-- 차량 운행 안내 -->
     <div class="card">
       <button class="accordion-btn" onclick="toggleAcc(this)">
@@ -1142,7 +1165,7 @@ body {
             이정행 이사 &nbsp;010-8003-4661<br>
             7월 12일 오전<br>
             - 21인승 차량으로 숙소 ↔ 경기장 왕복 이동<br>
-            - 전원 동일 차량 이용 (1차 출발시간 : &nbsp; / &nbsp; 2차 출발시간 : &nbsp;)
+            - 전원 동일 차량 이용 (1차 출발시간 : 07:30 / 2차 출발시간 : 08:00 )
           </div>
         </div>
 
