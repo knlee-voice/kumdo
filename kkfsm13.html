@@ -118,29 +118,32 @@ body {
 
 .lc-body { flex: 1; min-width: 0; }
 .lc-title {
-  font-size: 15px; font-weight: 800; color: var(--text);
-  line-height: 1.35; letter-spacing: -.01em;
+  font-size: 16px; font-weight: 800; color: var(--text);
+  line-height: 1.4; letter-spacing: -.01em;
 }
 .lc-sub {
-  font-size: 12px; color: var(--text2); margin-top: 3px;
-  line-height: 1.45;
+  font-size: 13px; color: var(--text2); margin-top: 4px;
+  line-height: 1.5;
+  clear: both; /* 배지 float 아래로 확실히 내려오도록 */
 }
-.lc-badge {
-  display: inline-block;
-  font-size: 11px; font-weight: 700;
-  padding: 2px 8px; border-radius: 999px;
-  margin-top: 6px; letter-spacing: .02em;
-  background: var(--navybg); color: var(--navy);
-}
-.lc-badge.gold  { background: var(--goldbg);  color: var(--gold); }
-.lc-badge.red   { background: var(--redbg);   color: var(--red); }
-.lc-badge.green { background: var(--greenbg); color: var(--green); }
-.lc-badge.mute  { background: #ececea;        color: var(--text3); }
 
 .lc-arrow {
   font-size: 20px; color: var(--text3);
   flex-shrink: 0; margin-left: 4px;
 }
+
+/* 배지 — 제목 첫 줄 오른쪽에 배치 (float로 텍스트가 배지를 감싸도록) */
+.lc-badge {
+  float: right;
+  margin-left: 8px; margin-top: 2px;
+  font-size: 11px; font-weight: 700;
+  padding: 2px 8px; border-radius: 999px;
+  letter-spacing: .02em; white-space: nowrap;
+  background: var(--navybg); color: var(--navy);
+}
+.lc-badge.gold  { background: var(--goldbg);  color: var(--gold); }
+.lc-badge.red   { background: var(--redbg);   color: var(--red); }
+.lc-badge.mute  { background: #ececea;        color: var(--text3); }
 
 /* 비활성(준비중) 카드 */
 .link-card.disabled {
@@ -165,20 +168,8 @@ body {
   line-height: 1.7;
 }
 .footer .sig {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-family: 'Palatino Linotype','Book Antiqua',Georgia,serif;
-  font-style: italic;
-  color: var(--text3);
+  display: inline-flex; align-items: center; justify-content: center;
   margin-top: 4px;
-}
-.footer .sig b {
-  font-size: 14px; font-weight: 700;
-  background: linear-gradient(180deg,#2a5298 0%,#0f2447 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  letter-spacing: 1.5px;
-  margin-left: 4px;
 }
 
 /* ════════════════════════════════
@@ -208,9 +199,8 @@ body {
   <a href="http://www.kumdos.org/" class="link-card" target="_blank" rel="noopener noreferrer">
     <div class="lc-icon">🌐</div>
     <div class="lc-body">
-      <div class="lc-title">사회인검도연맹 소개</div>
+      <div class="lc-title"><span class="lc-badge">OFFICIAL</span>한국사회인검도연맹 소개</div>
       <div class="lc-sub">공식 홈페이지 · www.kumdos.org</div>
-      <span class="lc-badge">OFFICIAL</span>
     </div>
     <div class="lc-arrow">›</div>
   </a>
@@ -219,9 +209,8 @@ body {
   <a href="#" class="link-card gold" target="_blank" rel="noopener noreferrer">
     <div class="lc-icon">📱</div>
     <div class="lc-body">
-      <div class="lc-title">사회인검도연맹 소개</div>
+      <div class="lc-title"><span class="lc-badge gold">MOBILE</span>한국사회인검도연맹 소개</div>
       <div class="lc-sub">모바일 버전</div>
-      <span class="lc-badge gold">MOBILE</span>
     </div>
     <div class="lc-arrow">›</div>
   </a>
@@ -232,9 +221,8 @@ body {
   <a href="kkfsm13-championship39th.html" class="link-card red">
     <div class="lc-icon">🏆</div>
     <div class="lc-body">
-      <div class="lc-title">제39회 국제오픈 한국사회인검도대회</div>
+      <div class="lc-title"><span class="lc-badge red">종료</span>제39회 국제오픈 한국사회인검도대회</div>
       <div class="lc-sub">2026 · 가평 한석봉체육관</div>
-      <span class="lc-badge red">종료</span>
     </div>
     <div class="lc-arrow">›</div>
   </a>
@@ -243,15 +231,35 @@ body {
   <div class="link-card green disabled" aria-disabled="true">
     <div class="lc-icon">🏅</div>
     <div class="lc-body">
-      <div class="lc-title">제40회 국제오픈 한국사회인검도대회</div>
+      <div class="lc-title"><span class="lc-badge mute">준비중</span>제40회 국제오픈 한국사회인검도대회</div>
       <div class="lc-sub">2027 · 준비 중</div>
-      <span class="lc-badge mute">준비중</span>
     </div>
   </div>
 
   <div class="footer">
     <div>© 한국사회인검도연맹</div>
-    <div class="sig">제작 <b>NIM</b></div>
+    <div class="sig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 78 22" width="78" height="22">
+        <defs>
+          <linearGradient id="cg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#2a5298"/>
+            <stop offset="100%" stop-color="#0f2447"/>
+          </linearGradient>
+        </defs>
+        <text x="2" y="15"
+              font-family="'Palatino Linotype','Book Antiqua',Georgia,serif"
+              font-size="9" fill="#9a9a96" font-style="italic"
+              dominant-baseline="middle"
+              letter-spacing="0.5">제작</text>
+        <text x="26" y="15"
+              font-family="'Palatino Linotype','Book Antiqua',Georgia,serif"
+              font-size="14" font-weight="700" font-style="italic"
+              fill="url(#cg)" letter-spacing="1.5"
+              dominant-baseline="middle">NIM</text>
+        <path d="M26,19 Q42,21 62,18" fill="none" stroke="#F0C040" stroke-width="1.0"
+              stroke-linecap="round" opacity="1"/>
+      </svg>
+    </div>
   </div>
 
 </main>
